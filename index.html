@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JUHEE'S Todo Calendar</title>
+<style>
+  :root {
+    --text: #1d1d1f;
+    --text-secondary: rgba(29,29,31,0.56);
+    --text-tertiary: rgba(29,29,31,0.34);
+    --border: rgba(255,255,255,0.65);
+    --border-soft: rgba(60,60,80,0.06);
+    --glass: rgba(255,255,255,0.46);
+    --glass-strong: rgba(255,255,255,0.68);
+    --danger: #ff3b30;
+    --success: #30b158;
+    --accent: #0a84ff;
+    --accent2: #bf5af2;
+    --shadow-lg: 0 6px 20px rgba(60,70,140,0.13), inset 0 1px 0 rgba(255,255,255,0.9);
+    --shadow: 0 3px 12px rgba(60,70,140,0.08), inset 0 1px 0 rgba(255,255,255,0.85);
+    --radius-lg: 26px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #eef1f7;
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Ambient background */
+  .ambient {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.42;
+    will-change: transform;
+  }
+
+  .blob.b1 {
+    width: 620px; height: 620px;
+    background: radial-gradient(circle, #0a84ff, transparent 70%);
+    top: -220px; left: -160px;
+    animation: drift1 22s ease-in-out infinite alternate;
+  }
+  .blob.b2 {
+    width: 560px; height: 560px;
+    background: radial-gradient(circle, #bf5af2, transparent 70%);
+    top: 20%; right: -220px;
+    animation: drift2 26s ease-in-out infinite alternate;
+  }
+  .blob.b3 {
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, #ff375f, transparent 70%);
+    bottom: -220px; left: 18%;
+    opacity: 0.32;
+    animation: drift3 30s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift1 { from { transform: translate(0,0); } to { transform: translate(60px,50px); } }
+  @keyframes drift2 { from { transform: translate(0,0); } to { transform: translate(-50px,60px); } }
+  @keyframes drift3 { from { transform: translate(0,0); } to { transform: translate(40px,-40px); } }
+
+  /* Liquid-glass gradient rim */
+  .liquid { position: relative; }
+  .liquid::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.04) 40%, rgba(120,170,255,0.22) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 100px 24px 100px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 34px;
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+
+  .title-group h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(100deg, #1d1d1f 20%, #4b4b52 70%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    white-space: nowrap;
+  }
+
+  .title-group p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-top: 6px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--glass);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    padding: 6px;
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  .nav button {
+    border: none;
+    background: transparent;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease;
+  }
+
+  .nav button:hover { background: rgba(10,132,255,0.08); }
+
+  .nav .month-label {
+    font-weight: 600;
+    font-size: 15px;
+    min-width: 104px;
+    text-align: center;
+    letter-spacing: -0.01em;
+  }
+
+  .today-btn {
+    border: none;
+    background: linear-gradient(135deg, #0a84ff, #bf5af2);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    padding: 9px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1;
+    transition: filter .15s ease, transform .15s ease;
+  }
+  .today-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+  .nav .today-btn {
+    width: auto;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  /* Calendar */
+  .calendar {
+    background: var(--glass);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .weekdays div {
+    text-align: center;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    padding: 16px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .weekdays div:first-child { color: rgba(255,59,48,0.8); }
+  .weekdays div:last-child { color: rgba(10,132,255,0.9); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-auto-rows: 132px;
+    position: relative;
+  }
+
+  .bar-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .day-bar {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    transition: filter .15s ease, transform .15s ease;
+  }
+  .day-bar:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+  .cell {
+    min-width: 0;
+    border-right: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    padding: 9px 8px;
+    cursor: pointer;
+    transition: background .18s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cell:nth-child(7n) { border-right: none; }
+
+  .cell:hover { background: rgba(10,132,255,0.05); }
+
+  .cell.other-month { background: rgba(140,140,160,0.03); }
+  .cell.other-month .date-num { color: rgba(29,29,31,0.24); }
+
+  .date-num {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .cell.today .date-num {
+    background: linear-gradient(135deg, #0a84ff, #bf5af2);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 0 0 3px rgba(10,132,255,0.12);
+  }
+
+  .cell:nth-child(7n+1) .date-num { color: rgba(255,59,48,0.9); }
+  .cell:nth-child(7n) .date-num { color: rgba(10,132,255,0.95); }
+  .cell.today:nth-child(7n+1) .date-num,
+  .cell.today:nth-child(7n) .date-num { color: #fff; }
+
+  .date-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .holiday-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cell.holiday .date-num { color: rgba(255,59,48,0.9); }
+  .cell.today .date-num { color: #fff; }
+
+  .todo-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .pill {
+    font-size: 10.5px;
+    padding: 4px 7px;
+    border-radius: 7px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+    min-width: 0;
+    border: 1px solid transparent;
+  }
+
+  .pill span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .pill.done {
+    text-decoration: line-through;
+    opacity: 0.45;
+  }
+
+  .pill .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: currentColor;
+  }
+
+  .more-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    padding-left: 7px;
+    font-weight: 700;
+  }
+
+  /* Hover preview */
+  .hover-preview {
+    position: fixed;
+    width: 280px;
+    z-index: 60;
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-radius: var(--radius-md);
+    box-shadow: 0 20px 50px rgba(60,70,140,0.22), inset 0 1px 0 rgba(255,255,255,0.9);
+    padding: 14px;
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+    transition: opacity .16s ease, transform .16s cubic-bezier(.2,.9,.3,1.1);
+    pointer-events: none;
+  }
+
+  .hover-preview.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .hp-date {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .hp-list {
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .hp-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 6px;
+    border-top: 1px solid rgba(60,60,80,0.08);
+    cursor: pointer;
+    border-radius: 8px;
+    margin: 0 -6px;
+    width: calc(100% + 12px);
+    transition: background .12s ease;
+  }
+  .hp-item:first-of-type { border-top: none; }
+  .hp-item:hover { background: rgba(10,132,255,0.08); }
+
+  .hp-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .hp-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .hp-title.done { text-decoration: line-through; color: var(--text-tertiary); }
+
+  .hp-time {
+    font-size: 10.5px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .hp-hint {
+    font-size: 10.5px;
+    color: var(--text-tertiary);
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  /* Modal */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(40,40,60,0.28);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity .2s ease;
+    padding: 20px;
+  }
+
+  .overlay.open {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal {
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(36px) saturate(190%);
+    -webkit-backdrop-filter: blur(36px) saturate(190%);
+    width: 480px;
+    max-width: 100%;
+    max-height: 88vh;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.94) translateY(10px);
+    opacity: 0;
+    transition: transform .22s cubic-bezier(.2,.9,.3,1.15), opacity .2s ease;
+  }
+
+  .overlay.open .modal {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+
+  .modal-header {
+    padding: 22px 24px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .modal-header .sub {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    font-weight: 400;
+  }
+
+  .close-btn {
+    border: none;
+    background: rgba(120,120,140,0.10);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease;
+  }
+  .close-btn:hover { background: rgba(120,120,140,0.2); color: var(--text); }
+
+  .modal-body {
+    padding: 18px 24px 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 13px;
+    padding: 26px 0;
+  }
+
+  .todo-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 12px 12px 14px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 14px;
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid transparent;
+    transition: border-color .15s ease, background .15s ease;
+  }
+
+  .todo-item:hover { background: rgba(255,255,255,0.65); border-color: rgba(120,120,140,0.18); }
+
+  .todo-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(60,60,80,0.25);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.5);
+    transition: all .15s ease;
+    font-size: 11px;
+  }
+
+  .todo-check.checked {
+    background: var(--success);
+    border-color: var(--success);
+    color: #fff;
+  }
+
+  .todo-content { flex: 1; min-width: 0; }
+
+  .todo-top {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+  .todo-title {
+    font-size: 14px;
+    font-weight: 600;
+    word-break: break-word;
+    letter-spacing: -0.01em;
+  }
+
+  .todo-title.done {
+    text-decoration: line-through;
+    color: var(--text-tertiary);
+  }
+
+  .badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border: 1px solid transparent;
+  }
+
+  .badge.range {
+    background: rgba(10,132,255,0.13);
+    color: #0a6fd6;
+    border-color: rgba(10,132,255,0.3);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .todo-time {
+    font-size: 11.5px;
+    color: #0a84ff;
+    font-weight: 600;
+  }
+
+  .todo-memo {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin-top: 5px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.45;
+  }
+
+  .todo-actions {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    border: none;
+    background: transparent;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease, color .15s ease;
+  }
+  .icon-btn:hover { background: rgba(120,120,140,0.14); color: var(--text); }
+  .icon-btn.delete:hover { background: rgba(255,59,48,0.14); color: var(--danger); }
+
+  /* Add form */
+  .add-form {
+    border-top: 1px solid var(--border-soft);
+    padding-top: 18px;
+  }
+
+  .form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .mini-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  .field { margin-bottom: 12px; position: relative; }
+
+  input[type="text"], textarea, input[type="time"], input[type="date"] {
+    width: 100%;
+    border: 1px solid rgba(120,120,140,0.2);
+    background: rgba(255,255,255,0.55);
+    border-radius: 12px;
+    padding: 11px 13px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    color-scheme: light;
+  }
+
+  input[type="text"]::placeholder, textarea::placeholder { color: var(--text-tertiary); }
+
+  input[type="text"]:focus, textarea:focus, input[type="time"]:focus, input[type="date"]:focus {
+    border-color: rgba(10,132,255,0.6);
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 0 0 4px rgba(10,132,255,0.14);
+  }
+
+  textarea {
+    resize: none;
+    min-height: 58px;
+    line-height: 1.45;
+  }
+
+  .row-fields {
+    display: flex;
+    gap: 10px;
+  }
+  .row-fields .field { flex: 1; margin-bottom: 12px; }
+
+  .color-select {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    position: relative;
+  }
+
+  .color-swatch:hover { transform: translateY(-1px); }
+
+  .color-swatch.active {
+    border-color: rgba(255,255,255,0.9);
+    box-shadow: 0 0 0 2px currentColor;
+    transform: scale(1.08);
+  }
+
+  .color-swatch.active::after {
+    content: "✓";
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  }
+
+  .submit-btn {
+    width: 100%;
+    border: none;
+    background: linear-gradient(135deg, #0a84ff, #bf5af2);
+    color: #fff;
+    font-size: 14.5px;
+    font-weight: 700;
+    padding: 13px 0;
+    border-radius: 14px;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: filter .15s ease, transform .15s ease;
+    letter-spacing: -0.01em;
+  }
+  .submit-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+  .cancel-edit {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 0;
+    cursor: pointer;
+  }
+
+  .suggest-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.9);
+    border-radius: 14px;
+    box-shadow: 0 14px 36px rgba(60,70,140,0.18);
+    overflow: hidden;
+    z-index: 30;
+    display: none;
+  }
+  .suggest-list.show { display: block; }
+
+  .suggest-item {
+    padding: 10px 13px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .12s ease;
+  }
+  .suggest-item:hover, .suggest-item.active { background: rgba(10,132,255,0.1); }
+  .suggest-item .si-icon { color: var(--text-tertiary); font-size: 12px; flex-shrink: 0; }
+  .suggest-item .si-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-thumb { background: rgba(120,120,140,0.25); border-radius: 8px; }
+
+  /* Mascot: pixel-art Mars (scrolls with the page, anchored to its own spot) */
+  .mascot {
+    position: absolute;
+    top: 20px;
+    right: 32px;
+    z-index: 40;
+    cursor: pointer;
+    filter: drop-shadow(0 8px 14px rgba(120,60,30,0.28));
+    animation: mascotFloat 6s ease-in-out infinite;
+  }
+
+  .mascot svg {
+    display: block;
+    width: 72px;
+    height: 72px;
+    shape-rendering: crispEdges;
+  }
+
+  .mascot .mascot-ring {
+    animation: ringSpin 9s linear infinite;
+    transform-origin: 42px 42px;
+  }
+
+  .mascot .mascot-twinkle { animation: twinkle 2.4s ease-in-out infinite; }
+  .mascot .mascot-twinkle.delay { animation-delay: 1.1s; }
+
+  .mascot:hover { filter: drop-shadow(0 8px 14px rgba(120,60,30,0.28)) brightness(1.06); }
+  .mascot:active { transform: scale(0.94); }
+
+  .mascot-flash {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .mascot-flash-glow {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+      rgba(255,255,255,0.95) 0%,
+      rgba(255,255,255,0.55) 40%,
+      rgba(255,255,255,0) 72%);
+    filter: blur(1.5px);
+    transform: translate(-50%,-50%) scale(0.3);
+    opacity: 0;
+    animation: mascotGlow 0.55s cubic-bezier(.16,.8,.3,1) forwards;
+  }
+
+  @keyframes mascotGlow {
+    0% { opacity: 0; transform: translate(-50%,-50%) scale(0.25); }
+    18% { opacity: 1; transform: translate(-50%,-50%) scale(1.05); }
+    40% { opacity: 0.75; transform: translate(-50%,-50%) scale(1.15); }
+    100% { opacity: 0; transform: translate(-50%,-50%) scale(1.35); }
+  }
+
+  @keyframes mascotFloat {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-6px) rotate(3deg); }
+  }
+  @keyframes ringSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 0.25; }
+  }
+
+  @media (max-width: 640px) {
+    .mascot { top: 12px; right: 14px; }
+    .mascot svg { width: 54px; height: 54px; }
+  }
+
+  @media (max-width: 640px) {
+    .app { padding: 74px 14px 70px; }
+    .header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .grid { grid-auto-rows: 84px; }
+    .cell { padding: 6px 5px; }
+    .date-num { width: 20px; height: 20px; font-size: 11px; }
+    .pill { font-size: 9px; padding: 3px 5px; }
+    .hover-preview { display: none; }
+    .holiday-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+
+<div class="app">
+  <div class="mascot" id="mascotMount" aria-hidden="true"></div>
+
+  <div class="header">
+    <div class="title-group">
+      <h1>JUHEE'S TODO CALENDAR</h1>
+      <p>중요하지 않은 일에 대해 깊게 생각하는 것은 삐뚤어진 못을 망치질하는 것과 같습니다.</p>
+    </div>
+    <div class="nav liquid">
+      <button id="prevBtn">‹</button>
+      <div class="month-label" id="monthLabel"></div>
+      <button id="nextBtn">›</button>
+      <button class="today-btn" id="todayBtn">TODAY</button>
+    </div>
+  </div>
+
+  <div class="calendar liquid">
+    <div class="weekdays">
+      <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<div class="hover-preview liquid" id="hoverPreview"></div>
+
+<div class="overlay" id="overlay">
+  <div class="modal liquid">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalDate">9월 20일</h2>
+        <div class="sub" id="modalSub">일요일</div>
+      </div>
+      <button class="close-btn" id="closeBtn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="todo-list" id="todoList"></div>
+
+      <div class="add-form">
+        <label class="form-label" id="formLabel">새 할 일 추가</label>
+        <div class="field">
+          <input type="text" id="titleInput" placeholder="할 일 제목" maxlength="80" autocomplete="off">
+          <div class="suggest-list" id="suggestList"></div>
+        </div>
+        <div class="row-fields">
+          <div class="field">
+            <label class="mini-label">시간</label>
+            <input type="time" id="timeInput">
+          </div>
+          <div class="field">
+            <label class="mini-label">종료일 (여러 날 일정 시)</label>
+            <input type="date" id="endDateInput">
+          </div>
+        </div>
+        <div class="field">
+          <label class="mini-label">색상</label>
+          <div class="color-select" id="colorSelect"></div>
+        </div>
+        <div class="field">
+          <textarea id="memoInput" placeholder="메모 (선택)"></textarea>
+        </div>
+        <button class="submit-btn" id="submitBtn">추가하기</button>
+        <button class="cancel-edit" id="cancelEditBtn" style="display:none">수정 취소</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'todoCalendarData';
+  const WEEKDAY_NAMES = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+  const MAX_SHOWN_PILLS = 2;
+
+  // Korean public holidays (2025-2027), verified against official sources.
+  const HOLIDAYS = {
+    '2025-01-01': '신정',
+    '2025-01-28': '설날 연휴',
+    '2025-01-29': '설날',
+    '2025-01-30': '설날 연휴',
+    '2025-03-01': '삼일절',
+    '2025-03-03': '대체공휴일',
+    '2025-05-01': '근로자의 날',
+    '2025-05-05': '어린이날·부처님오신날',
+    '2025-05-06': '대체공휴일',
+    '2025-06-06': '현충일',
+    '2025-08-15': '광복절',
+    '2025-10-03': '개천절',
+    '2025-10-05': '추석 연휴',
+    '2025-10-06': '추석',
+    '2025-10-07': '추석 연휴',
+    '2025-10-08': '대체공휴일',
+    '2025-10-09': '한글날',
+    '2025-12-25': '성탄절',
+
+    '2026-01-01': '신정',
+    '2026-02-16': '설날 연휴',
+    '2026-02-17': '설날',
+    '2026-02-18': '설날 연휴',
+    '2026-03-01': '삼일절',
+    '2026-03-02': '대체공휴일',
+    '2026-05-01': '근로자의 날',
+    '2026-05-05': '어린이날',
+    '2026-05-24': '부처님오신날',
+    '2026-05-25': '대체공휴일',
+    '2026-06-06': '현충일',
+    '2026-07-17': '제헌절',
+    '2026-08-15': '광복절',
+    '2026-08-17': '대체공휴일',
+    '2026-09-24': '추석 연휴',
+    '2026-09-25': '추석',
+    '2026-09-26': '추석 연휴',
+    '2026-10-03': '개천절',
+    '2026-10-05': '대체공휴일',
+    '2026-10-09': '한글날',
+    '2026-12-25': '성탄절',
+
+    '2027-01-01': '신정',
+    '2027-02-06': '설날 연휴',
+    '2027-02-07': '설날',
+    '2027-02-08': '설날 연휴',
+    '2027-02-09': '대체공휴일',
+    '2027-03-01': '삼일절',
+    '2027-05-01': '근로자의 날',
+    '2027-05-05': '어린이날',
+    '2027-05-13': '부처님오신날',
+    '2027-06-06': '현충일',
+    '2027-07-17': '제헌절',
+    '2027-08-15': '광복절',
+    '2027-08-16': '대체공휴일',
+    '2027-09-14': '추석 연휴',
+    '2027-09-15': '추석',
+    '2027-09-16': '추석 연휴',
+    '2027-10-03': '개천절',
+    '2027-10-04': '대체공휴일',
+    '2027-10-09': '한글날',
+    '2027-10-11': '대체공휴일',
+    '2027-12-25': '성탄절',
+    '2027-12-27': '대체공휴일'
+  };
+
+  // Muted color tags for categorizing schedules (not urgency-based).
+  const COLOR_TAGS = {
+    red:    { label: '빨강', base: '#c97a70', text: '#a5483e' },
+    orange: { label: '주황', base: '#d19c62', text: '#a06a2c' },
+    yellow: { label: '노랑', base: '#cdb567', text: '#9c832f' },
+    green:  { label: '초록', base: '#79ac89', text: '#437954' },
+    blue:   { label: '파랑', base: '#749bc4', text: '#3f6a97' },
+    navy:   { label: '남색', base: '#6672ad', text: '#3a4480' },
+    purple: { label: '보라', base: '#9c86c4', text: '#6a4f99' },
+    pink:   { label: '핑크', base: '#cf90ae', text: '#a1557e' }
+  };
+  const COLOR_KEYS = Object.keys(COLOR_TAGS);
+  const DEFAULT_COLOR = 'blue';
+
+  let data = loadData();
+  let current = new Date();
+  current.setDate(1);
+  let selectedDateKey = null;
+  let editingId = null;
+  let editingOwnerKey = null;
+  let selectedColor = DEFAULT_COLOR;
+  let hideTimer = null;
+  let activeSuggestIndex = -1;
+
+  const grid = document.getElementById('grid');
+  const monthLabel = document.getElementById('monthLabel');
+  const overlay = document.getElementById('overlay');
+  const modalDate = document.getElementById('modalDate');
+  const modalSub = document.getElementById('modalSub');
+  const todoList = document.getElementById('todoList');
+  const titleInput = document.getElementById('titleInput');
+  const timeInput = document.getElementById('timeInput');
+  const endDateInput = document.getElementById('endDateInput');
+  const memoInput = document.getElementById('memoInput');
+  const colorSelect = document.getElementById('colorSelect');
+  const submitBtn = document.getElementById('submitBtn');
+  const formLabel = document.getElementById('formLabel');
+  const cancelEditBtn = document.getElementById('cancelEditBtn');
+  const hoverPreview = document.getElementById('hoverPreview');
+  const suggestList = document.getElementById('suggestList');
+
+  function loadData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveData() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function dateKey(y, m, d) {
+    return `${y}-${pad(m + 1)}-${pad(d)}`;
+  }
+
+  function todayKey() {
+    const t = new Date();
+    return dateKey(t.getFullYear(), t.getMonth(), t.getDate());
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  /* ---------- data helpers ---------- */
+
+  // The single source of truth for an item's color everywhere it appears
+  // (calendar pill, hover preview, modal badge/border, multi-day bar).
+  function tagColor(t) {
+    const key = COLOR_TAGS[t && t.color] ? t.color : DEFAULT_COLOR;
+    return COLOR_TAGS[key].base;
+  }
+
+  // All todos relevant to a given date: its own single-day items plus any
+  // multi-day items (stored under their start date) whose range covers it.
+  function getEffectiveTodos(key) {
+    const merged = [];
+    Object.keys(data).forEach(startKey => {
+      (data[startKey] || []).forEach(t => {
+        if (!t.endDate) {
+          if (startKey === key) merged.push(Object.assign({}, t, { _ownerKey: startKey, _range: false }));
+        } else if (key >= startKey && key <= t.endDate) {
+          merged.push(Object.assign({}, t, { _ownerKey: startKey, _range: true, _startKey: startKey }));
+        }
+      });
+    });
+    merged.sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      const at = a.time || (a._range ? '00:00' : '99:99');
+      const bt = b.time || (b._range ? '00:00' : '99:99');
+      return at.localeCompare(bt) || a.title.localeCompare(b.title);
+    });
+    return merged;
+  }
+
+  function getAllTitles() {
+    const seen = new Map();
+    Object.keys(data).forEach(k => {
+      (data[k] || []).forEach(t => {
+        const key = t.title.toLowerCase();
+        if (!seen.has(key)) seen.set(key, t.title);
+      });
+    });
+    return Array.from(seen.values());
+  }
+
+  /* ---------- multi-day bar layout ---------- */
+
+  function computeMultiDayLayout(cells) {
+    const keyToIndex = new Map(cells.map((c, i) => [c.key, i]));
+    const firstKey = cells[0].key, lastKey = cells[cells.length - 1].key;
+
+    const events = [];
+    Object.keys(data).forEach(startKey => {
+      (data[startKey] || []).forEach(t => {
+        if (t.endDate && t.endDate > startKey) {
+          if (t.endDate < firstKey || startKey > lastKey) return;
+          events.push({ id: t.id, title: t.title, startKey, endDate: t.endDate, done: t.done, color: t.color });
+        }
+      });
+    });
+    events.sort((a, b) => a.startKey.localeCompare(b.startKey) || b.endDate.localeCompare(a.endDate));
+
+    const rows = Math.ceil(cells.length / 7);
+    const rowLanes = Array.from({ length: rows }, () => []);
+    const dateLaneCount = {};
+    const segments = [];
+
+    events.forEach(ev => {
+      const startIdx = keyToIndex.has(ev.startKey) ? keyToIndex.get(ev.startKey) : 0;
+      const endIdx = keyToIndex.has(ev.endDate) ? keyToIndex.get(ev.endDate) : cells.length - 1;
+      if (endIdx < startIdx) return;
+      const rowStart = Math.floor(startIdx / 7), rowEnd = Math.floor(endIdx / 7);
+
+      let lane = 0;
+      for (;;) {
+        let free = true;
+        for (let r = rowStart; r <= rowEnd && free; r++) {
+          const segStart = r * 7, segEnd = r * 7 + 6;
+          const cS = Math.max(startIdx, segStart) - segStart;
+          const cE = Math.min(endIdx, segEnd) - segStart;
+          if (rowLanes[r].some(seg => seg.lane === lane && !(cE < seg.colStart || cS > seg.colEnd))) free = false;
+        }
+        if (free) break;
+        lane++;
+      }
+
+      for (let r = rowStart; r <= rowEnd; r++) {
+        const segStart = r * 7, segEnd = r * 7 + 6;
+        const colStartIdx = Math.max(startIdx, segStart);
+        const colEndIdx = Math.min(endIdx, segEnd);
+        const cS = colStartIdx - segStart, cE = colEndIdx - segStart;
+        rowLanes[r].push({ colStart: cS, colEnd: cE, lane });
+        segments.push({
+          row: r, colStart: cS, colEnd: cE, lane, event: ev,
+          isFirstSeg: colStartIdx === startIdx, isLastSeg: colEndIdx === endIdx
+        });
+        for (let ci = colStartIdx; ci <= colEndIdx; ci++) {
+          const dk = cells[ci].key;
+          dateLaneCount[dk] = Math.max(dateLaneCount[dk] || 0, lane + 1);
+        }
+      }
+    });
+
+    return { segments, dateLaneCount };
+  }
+
+  function barMetrics() {
+    const mobile = window.innerWidth <= 640;
+    return mobile ? { base: 24, h: 14, gap: 3 } : { base: 32, h: 18, gap: 4 };
+  }
+
+  function drawBars(segments) {
+    let layer = grid.querySelector('.bar-layer');
+    if (!layer) {
+      layer = document.createElement('div');
+      layer.className = 'bar-layer';
+      grid.appendChild(layer);
+    }
+    layer.innerHTML = '';
+    if (!segments.length) return;
+
+    const gridRect = grid.getBoundingClientRect();
+    if (!gridRect.width) return;
+    const cellW = gridRect.width / 7;
+    const firstCell = grid.querySelector('.cell');
+    const rowH = firstCell ? firstCell.getBoundingClientRect().height : 132;
+    const { base, h: barH, gap } = barMetrics();
+    const mobile = window.innerWidth <= 640;
+
+    segments.forEach(seg => {
+      const bar = document.createElement('div');
+      bar.className = 'day-bar';
+      const color = tagColor(seg.event);
+
+      bar.style.top = (seg.row * rowH + base + seg.lane * (barH + gap)) + 'px';
+      bar.style.left = (seg.colStart * cellW + (seg.isFirstSeg ? 6 : 0)) + 'px';
+      bar.style.width = ((seg.colEnd - seg.colStart + 1) * cellW - (seg.isFirstSeg ? 6 : 0) - (seg.isLastSeg ? 6 : 0)) + 'px';
+      bar.style.height = barH + 'px';
+      bar.style.lineHeight = barH + 'px';
+      bar.style.background = color + (seg.event.done ? '40' : 'd9');
+      bar.style.color = '#fff';
+      bar.style.fontSize = (mobile ? 9 : 10.5) + 'px';
+      bar.style.fontWeight = '700';
+      bar.style.padding = '0 8px';
+      bar.style.whiteSpace = 'nowrap';
+      bar.style.overflow = 'hidden';
+      bar.style.textOverflow = 'ellipsis';
+      bar.style.cursor = 'pointer';
+      bar.style.pointerEvents = 'auto';
+      bar.style.boxShadow = '0 2px 8px rgba(60,70,140,0.18)';
+      bar.style.textDecoration = seg.event.done ? 'line-through' : 'none';
+      bar.style.borderRadius = seg.isFirstSeg && seg.isLastSeg ? '999px'
+        : seg.isFirstSeg ? '999px 5px 5px 999px'
+        : seg.isLastSeg ? '5px 999px 999px 5px'
+        : '5px';
+      bar.textContent = seg.event.title;
+      bar.title = `${seg.event.title} (${seg.event.startKey} ~ ${seg.event.endDate})`;
+
+      bar.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hideHoverPreview();
+        const ownerKey = seg.event.startKey;
+        const item = (data[ownerKey] || []).find(x => x.id === seg.event.id);
+        if (!item) return;
+        openModal(ownerKey);
+        startEdit(Object.assign({}, item, { _ownerKey: ownerKey }));
+      });
+
+      layer.appendChild(bar);
+    });
+  }
+
+  /* ---------- calendar render ---------- */
+
+  function renderCalendar() {
+    const year = current.getFullYear();
+    const month = current.getMonth();
+    monthLabel.textContent = `${year}년 ${month + 1}월`;
+
+    grid.innerHTML = '';
+    hideHoverPreview();
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+    const tKey = todayKey();
+
+    const cells = [];
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const d = daysInPrevMonth - i;
+      cells.push({ d, key: dateKey(year, month - 1, d), other: true });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      cells.push({ d, key: dateKey(year, month, d), other: false });
+    }
+    const remainder = (7 - (cells.length % 7)) % 7;
+    for (let d = 1; d <= remainder; d++) {
+      cells.push({ d, key: dateKey(year, month + 1, d), other: true });
+    }
+
+    const { segments, dateLaneCount } = computeMultiDayLayout(cells);
+    const { h: barH, gap: barGap } = barMetrics();
+
+    cells.forEach(c => {
+      const holidayName = HOLIDAYS[c.key];
+      const cell = document.createElement('div');
+      cell.className = 'cell' + (c.other ? ' other-month' : '') + (c.key === tKey ? ' today' : '') + (holidayName ? ' holiday' : '');
+      cell.dataset.key = c.key;
+
+      const dateRow = document.createElement('div');
+      dateRow.className = 'date-row';
+
+      const num = document.createElement('div');
+      num.className = 'date-num';
+      num.textContent = c.d;
+      dateRow.appendChild(num);
+
+      if (holidayName) {
+        const hLabel = document.createElement('span');
+        hLabel.className = 'holiday-label';
+        hLabel.textContent = holidayName;
+        hLabel.title = holidayName;
+        dateRow.appendChild(hLabel);
+      }
+
+      cell.appendChild(dateRow);
+
+      const effective = getEffectiveTodos(c.key);
+      const singleDay = effective.filter(t => !t._range);
+
+      if (singleDay.length) {
+        const pillWrap = document.createElement('div');
+        pillWrap.className = 'todo-pills';
+        const laneCount = dateLaneCount[c.key] || 0;
+        if (laneCount) pillWrap.style.marginTop = (laneCount * (barH + barGap)) + 'px';
+
+        const shown = singleDay.slice(0, MAX_SHOWN_PILLS);
+        shown.forEach(t => {
+          const color = tagColor(t);
+          const pill = document.createElement('div');
+          pill.className = 'pill' + (t.done ? ' done' : '');
+          pill.style.background = color + '24';
+          pill.style.borderColor = color + '4d';
+          pill.style.color = color;
+          pill.innerHTML = `<span class="dot"></span><span>${escapeHtml(t.title)}</span>`;
+          pillWrap.appendChild(pill);
+        });
+        cell.appendChild(pillWrap);
+
+        if (singleDay.length > MAX_SHOWN_PILLS) {
+          const more = document.createElement('div');
+          more.className = 'more-label';
+          more.textContent = `+${singleDay.length - MAX_SHOWN_PILLS}개 더보기`;
+          cell.appendChild(more);
+        }
+      }
+
+      cell.addEventListener('dblclick', () => openModal(c.key));
+      cell.addEventListener('mouseenter', () => { cancelHide(); showHoverPreview(cell, c.key); });
+      cell.addEventListener('mouseleave', scheduleHide);
+      grid.appendChild(cell);
+    });
+
+    drawBars(segments);
+  }
+
+  /* ---------- hover preview (persistent + clickable) ---------- */
+
+  function scheduleHide() {
+    cancelHide();
+    hideTimer = setTimeout(hideHoverPreview, 650);
+  }
+
+  function cancelHide() {
+    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+  }
+
+  function showHoverPreview(cell, key) {
+    const todos = getEffectiveTodos(key);
+    if (!todos.length) { hideHoverPreview(); return; }
+    if (overlay.classList.contains('open')) return;
+
+    const [y, m, d] = key.split('-').map(Number);
+
+    hoverPreview.innerHTML = '';
+
+    const dateEl = document.createElement('div');
+    dateEl.className = 'hp-date';
+    dateEl.textContent = `${m}월 ${d}일 · ${todos.length}개`;
+    hoverPreview.appendChild(dateEl);
+
+    const listEl = document.createElement('div');
+    listEl.className = 'hp-list';
+
+    todos.forEach(t => {
+      const color = tagColor(t);
+      const item = document.createElement('div');
+      item.className = 'hp-item';
+
+      const dot = document.createElement('span');
+      dot.className = 'hp-dot';
+      dot.style.background = color;
+
+      const titleEl = document.createElement('span');
+      titleEl.className = 'hp-title' + (t.done ? ' done' : '');
+      titleEl.textContent = t.title;
+
+      item.appendChild(dot);
+      item.appendChild(titleEl);
+
+      if (t._range) {
+        const rangeEl = document.createElement('span');
+        rangeEl.className = 'hp-time';
+        rangeEl.textContent = `${t._startKey.slice(5)}~${t.endDate.slice(5)}`;
+        item.appendChild(rangeEl);
+      } else if (t.time) {
+        const timeEl = document.createElement('span');
+        timeEl.className = 'hp-time';
+        timeEl.textContent = t.time;
+        item.appendChild(timeEl);
+      }
+
+      item.addEventListener('click', () => {
+        hideHoverPreview();
+        openModal(t._ownerKey);
+        startEdit(t);
+      });
+
+      listEl.appendChild(item);
+    });
+
+    hoverPreview.appendChild(listEl);
+
+    const hint = document.createElement('div');
+    hint.className = 'hp-hint';
+    hint.textContent = '클릭하면 상세 수정으로 이동';
+    hoverPreview.appendChild(hint);
+
+    const rect = cell.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const pWidth = 280;
+    const estHeight = Math.min(60 + todos.length * 30, 360);
+
+    let left = rect.left + rect.width / 2 - pWidth / 2;
+    left = Math.max(12, Math.min(left, vw - pWidth - 12));
+
+    let top = rect.bottom + 8;
+    if (top + estHeight > vh - 12) {
+      top = rect.top - estHeight - 8;
+    }
+    top = Math.max(12, top);
+
+    hoverPreview.style.left = left + 'px';
+    hoverPreview.style.top = top + 'px';
+    hoverPreview.classList.add('show');
+  }
+
+  function hideHoverPreview() {
+    hoverPreview.classList.remove('show');
+  }
+
+  hoverPreview.addEventListener('mouseenter', cancelHide);
+  hoverPreview.addEventListener('mouseleave', scheduleHide);
+
+  window.addEventListener('scroll', hideHoverPreview, true);
+  window.addEventListener('resize', () => { hideHoverPreview(); renderCalendar(); });
+
+  /* ---------- modal ---------- */
+
+  function openModal(key) {
+    hideHoverPreview();
+    selectedDateKey = key;
+    resetForm();
+    const [y, m, d] = key.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    modalDate.textContent = `${m}월 ${d}일`;
+    modalSub.textContent = WEEKDAY_NAMES[dateObj.getDay()];
+    renderTodoList();
+    overlay.classList.add('open');
+    setTimeout(() => titleInput.focus(), 100);
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    selectedDateKey = null;
+    resetForm();
+  }
+
+  function renderTodoList() {
+    const todos = getEffectiveTodos(selectedDateKey);
+    todoList.innerHTML = '';
+
+    if (!todos.length) {
+      todoList.innerHTML = '<div class="empty-state">등록된 할 일이 없습니다</div>';
+      return;
+    }
+
+    todos.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'todo-item';
+      item.style.borderLeftColor = tagColor(t);
+
+      const check = document.createElement('div');
+      check.className = 'todo-check' + (t.done ? ' checked' : '');
+      check.textContent = t.done ? '✓' : '';
+      check.addEventListener('click', () => toggleDone(t.id, t._ownerKey));
+
+      const content = document.createElement('div');
+      content.className = 'todo-content';
+
+      const top = document.createElement('div');
+      top.className = 'todo-top';
+      const titleEl = document.createElement('span');
+      titleEl.className = 'todo-title' + (t.done ? ' done' : '');
+      titleEl.textContent = t.title;
+      top.appendChild(titleEl);
+
+      const colorKey = COLOR_TAGS[t.color] ? t.color : DEFAULT_COLOR;
+      const tag = COLOR_TAGS[colorKey];
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = tag.label;
+      badge.style.background = tag.base + '26';
+      badge.style.color = tag.text;
+      badge.style.borderColor = tag.base + '55';
+      top.appendChild(badge);
+
+      if (t._range) {
+        const rangeBadge = document.createElement('span');
+        rangeBadge.className = 'badge range';
+        rangeBadge.textContent = `${t._startKey} → ${t.endDate}`;
+        top.appendChild(rangeBadge);
+      } else if (t.time) {
+        const timeEl = document.createElement('span');
+        timeEl.className = 'todo-time';
+        timeEl.textContent = t.time;
+        top.appendChild(timeEl);
+      }
+
+      content.appendChild(top);
+
+      if (t.memo) {
+        const memoEl = document.createElement('div');
+        memoEl.className = 'todo-memo';
+        memoEl.textContent = t.memo;
+        content.appendChild(memoEl);
+      }
+
+      const actions = document.createElement('div');
+      actions.className = 'todo-actions';
+      const editBtn = document.createElement('button');
+      editBtn.className = 'icon-btn';
+      editBtn.textContent = '✎';
+      editBtn.title = '수정';
+      editBtn.addEventListener('click', () => startEdit(t));
+      const delBtn = document.createElement('button');
+      delBtn.className = 'icon-btn delete';
+      delBtn.textContent = '🗑';
+      delBtn.title = '삭제';
+      delBtn.addEventListener('click', () => deleteTodo(t.id, t._ownerKey));
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
+      item.appendChild(check);
+      item.appendChild(content);
+      item.appendChild(actions);
+      todoList.appendChild(item);
+    });
+  }
+
+  function toggleDone(id, ownerKey) {
+    const todos = data[ownerKey] || [];
+    const t = todos.find(x => x.id === id);
+    if (t) { t.done = !t.done; saveData(); renderTodoList(); renderCalendar(); }
+  }
+
+  function deleteTodo(id, ownerKey) {
+    data[ownerKey] = (data[ownerKey] || []).filter(x => x.id !== id);
+    if (!data[ownerKey].length) delete data[ownerKey];
+    saveData();
+    renderTodoList();
+    renderCalendar();
+  }
+
+  function startEdit(t) {
+    editingId = t.id;
+    editingOwnerKey = t._ownerKey;
+    titleInput.value = t.title;
+    timeInput.value = t.time || '';
+    endDateInput.value = t.endDate || '';
+    memoInput.value = t.memo || '';
+    setColor(t.color);
+    formLabel.textContent = '할 일 수정';
+    submitBtn.textContent = '수정 완료';
+    cancelEditBtn.style.display = 'block';
+    hideSuggestions();
+    titleInput.focus();
+  }
+
+  function resetForm() {
+    editingId = null;
+    editingOwnerKey = null;
+    titleInput.value = '';
+    timeInput.value = '';
+    endDateInput.value = '';
+    memoInput.value = '';
+    setColor(DEFAULT_COLOR);
+    formLabel.textContent = '새 할 일 추가';
+    submitBtn.textContent = '추가하기';
+    cancelEditBtn.style.display = 'none';
+    hideSuggestions();
+  }
+
+  function buildColorSwatches() {
+    COLOR_KEYS.forEach(key => {
+      const sw = document.createElement('div');
+      sw.className = 'color-swatch';
+      sw.dataset.c = key;
+      sw.style.background = COLOR_TAGS[key].base;
+      sw.style.color = COLOR_TAGS[key].base;
+      sw.title = COLOR_TAGS[key].label;
+      colorSelect.appendChild(sw);
+    });
+  }
+
+  function setColor(c) {
+    if (!COLOR_TAGS[c]) c = DEFAULT_COLOR;
+    selectedColor = c;
+    [...colorSelect.children].forEach(el => {
+      el.classList.toggle('active', el.dataset.c === c);
+    });
+  }
+
+  function submitTodo(overrideTitle) {
+    const title = (overrideTitle !== undefined ? overrideTitle : titleInput.value).trim();
+    if (!title) { titleInput.focus(); return; }
+
+    let endDate = endDateInput.value;
+    if (endDate && endDate <= selectedDateKey) endDate = '';
+
+    if (editingId) {
+      const arr = data[editingOwnerKey] || [];
+      const t = arr.find(x => x.id === editingId);
+      if (t) {
+        t.title = title;
+        t.time = timeInput.value;
+        t.memo = memoInput.value.trim();
+        t.color = selectedColor;
+        if (endDate) t.endDate = endDate; else delete t.endDate;
+      }
+    } else {
+      if (!data[selectedDateKey]) data[selectedDateKey] = [];
+      const newTodo = {
+        id: Date.now() + Math.random().toString(36).slice(2, 7),
+        title,
+        time: timeInput.value,
+        memo: memoInput.value.trim(),
+        color: selectedColor,
+        done: false
+      };
+      if (endDate) newTodo.endDate = endDate;
+      data[selectedDateKey].push(newTodo);
+    }
+
+    saveData();
+    resetForm();
+    renderTodoList();
+    renderCalendar();
+  }
+
+  /* ---------- title autocomplete ---------- */
+
+  function updateSuggestions() {
+    const val = titleInput.value.trim().toLowerCase();
+    activeSuggestIndex = -1;
+    if (!val) { hideSuggestions(); return; }
+
+    const matches = getAllTitles()
+      .filter(t => t.toLowerCase().includes(val))
+      .slice(0, 6);
+
+    if (!matches.length) { hideSuggestions(); return; }
+
+    suggestList.innerHTML = '';
+    matches.forEach(m => {
+      const item = document.createElement('div');
+      item.className = 'suggest-item';
+      item.innerHTML = `<span class="si-icon">↻</span><span class="si-text"></span>`;
+      item.querySelector('.si-text').textContent = m;
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        hideSuggestions();
+        submitTodo(m);
+      });
+      suggestList.appendChild(item);
+    });
+    suggestList.classList.add('show');
+  }
+
+  function hideSuggestions() {
+    suggestList.classList.remove('show');
+    suggestList.innerHTML = '';
+    activeSuggestIndex = -1;
+  }
+
+  titleInput.addEventListener('input', updateSuggestions);
+  titleInput.addEventListener('blur', () => setTimeout(hideSuggestions, 150));
+  titleInput.addEventListener('focus', updateSuggestions);
+
+  titleInput.addEventListener('keydown', (e) => {
+    const items = [...suggestList.children];
+    if (suggestList.classList.contains('show') && items.length) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeSuggestIndex = Math.min(activeSuggestIndex + 1, items.length - 1);
+        items.forEach((el, i) => el.classList.toggle('active', i === activeSuggestIndex));
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeSuggestIndex = Math.max(activeSuggestIndex - 1, 0);
+        items.forEach((el, i) => el.classList.toggle('active', i === activeSuggestIndex));
+        return;
+      }
+      if (e.key === 'Enter' && activeSuggestIndex >= 0) {
+        e.preventDefault();
+        const text = items[activeSuggestIndex].querySelector('.si-text').textContent;
+        hideSuggestions();
+        submitTodo(text);
+        return;
+      }
+      if (e.key === 'Escape') { hideSuggestions(); return; }
+    }
+    if (e.key === 'Enter') submitTodo();
+  });
+
+  /* ---------- events ---------- */
+
+  buildColorSwatches();
+  colorSelect.addEventListener('click', (e) => {
+    const sw = e.target.closest('.color-swatch');
+    if (sw) setColor(sw.dataset.c);
+  });
+
+  submitBtn.addEventListener('click', () => submitTodo());
+  cancelEditBtn.addEventListener('click', resetForm);
+
+  document.getElementById('closeBtn').addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+  });
+
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    current.setMonth(current.getMonth() - 1);
+    renderCalendar();
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    current.setMonth(current.getMonth() + 1);
+    renderCalendar();
+  });
+  document.getElementById('todayBtn').addEventListener('click', () => {
+    current = new Date();
+    current.setDate(1);
+    renderCalendar();
+  });
+
+  /* ---------- mascot: pixel-art Mars ---------- */
+
+  (function initMascot() {
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const mount = document.getElementById('mascotMount');
+    const GRID = 14, CELL = 4, OX = 14, OY = 10;
+    const CX = 6.5, CY = 6.5, R = 6.3;
+    const CANVAS = 96;
+    const PLANET_CX = OX + CX * CELL, PLANET_CY = OY + CY * CELL;
+
+    const MARS = {
+      light: '#e58a4f',
+      base: '#c1440e',
+      mid: '#9c3610',
+      dark: '#7a2b0c',
+      deep: '#4a1505',
+      shadowRim: '#5a1c06',
+      ice: '#eef3f6'
+    };
+
+    function hash(x, y) { return (x * 928371 + y * 689287 + 1013) % 97; }
+
+    function rect(parent, x, y, w, h, fill, cls) {
+      const r = document.createElementNS(svgNS, 'rect');
+      r.setAttribute('x', x); r.setAttribute('y', y);
+      r.setAttribute('width', w); r.setAttribute('height', h);
+      r.setAttribute('fill', fill);
+      if (cls) r.setAttribute('class', cls);
+      parent.appendChild(r);
+      return r;
+    }
+
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${CANVAS} ${CANVAS}`);
+
+    // orbit ring (blocky dashed ellipse), drawn first so the planet occludes its far side
+    const ringGroup = document.createElementNS(svgNS, 'g');
+    ringGroup.setAttribute('class', 'mascot-ring');
+    const rx = 32, ry = 12, dashCount = 16;
+    for (let i = 0; i < dashCount; i++) {
+      const angle = (i / dashCount) * Math.PI * 2;
+      const ex = PLANET_CX + rx * Math.cos(angle) - 1.5;
+      const ey = PLANET_CY + ry * Math.sin(angle) - 1.5;
+      rect(ringGroup, ex, ey, 3, 3, '#8fb8ff');
+    }
+    svg.appendChild(ringGroup);
+
+    // planet body: 4-tone shading, polar ice caps, and hand-placed craters
+    // (deliberately irregular positions, not a hash scatter, so the face
+    // doesn't fall into a symmetric "clock dial" pattern)
+    const planet = document.createElementNS(svgNS, 'g');
+    const craterSingles = [[4,4],[9,5],[3,7],[9,9],[5,10],[10,8],[4,9]];
+    const craterBlobs = [[[3,5],[4,5]], [[8,7],[9,7]], [[6,3],[6,4]]];
+    const craterDeep = [[7,8],[5,5]];
+    const isIn = (list, gx, gy) => list.some(([cx, cy]) => cx === gx && cy === gy);
+    const isInBlob = (gx, gy) => craterBlobs.some(b => isIn(b, gx, gy));
+
+    for (let gy = 0; gy < GRID; gy++) {
+      for (let gx = 0; gx < GRID; gx++) {
+        const dx = gx - CX, dy = gy - CY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > R) continue;
+
+        const nearRim = dist > R - 1.8;
+        const upperLeftRim = nearRim && dx < -0.4 && dy < -0.4;
+        const lowerRightRim = nearRim && dx > 0.5 && dy > 0.5;
+        const topCap = dy < -(R - 2.6) && Math.abs(dx) <= 2.6;
+        const bottomCap = dy > (R - 2.0) && Math.abs(dx) <= 1.4;
+        const h = hash(gx, gy);
+
+        let fill;
+        if (topCap && h % 3 !== 0) fill = MARS.ice;
+        else if (bottomCap && h % 2 === 0) fill = MARS.ice;
+        else if (upperLeftRim) fill = MARS.light;
+        else if (lowerRightRim) fill = MARS.shadowRim;
+        else if (isIn(craterDeep, gx, gy)) fill = MARS.deep;
+        else if (isIn(craterSingles, gx, gy) || isInBlob(gx, gy)) fill = MARS.dark;
+        else if (!nearRim && h % 43 === 0) fill = MARS.dark;
+        else fill = dy > 0 ? MARS.mid : MARS.base;
+
+        rect(planet, OX + gx * CELL, OY + gy * CELL, CELL, CELL, fill);
+      }
+    }
+    svg.appendChild(planet);
+
+    // small moon
+    const moonPixels = [[1, 0], [0, 1], [1, 1], [2, 1], [1, 2]];
+    moonPixels.forEach(([px, py]) => {
+      const c = (px === 1 && py === 1) ? '#9a9ca6' : '#c9cbd4';
+      rect(svg, 74 + px * 4, 68 + py * 4, 4, 4, c);
+    });
+
+    // twinkling stars
+    rect(svg, 78, 6, 3, 3, '#ffffff', 'mascot-twinkle');
+    rect(svg, 4, 78, 3, 3, '#ffd60a', 'mascot-twinkle delay');
+    rect(svg, 90, 90, 2, 2, '#ffffff', 'mascot-twinkle');
+
+    mount.appendChild(svg);
+
+    // click: a soft, elegant flash of light that glints near Mars and
+    // fades quickly (smooth gradients, not pixel blocks — deliberately a
+    // different register from the blocky planet art).
+    function spawnFlash() {
+      const mascotSvg = mount.querySelector('svg');
+      const baseSize = (mascotSvg && mascotSvg.getBoundingClientRect().width) || 72;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'mascot-flash';
+
+      const glow = document.createElement('div');
+      glow.className = 'mascot-flash-glow';
+      const glowSize = Math.round(baseSize * 1.6);
+      glow.style.width = glowSize + 'px';
+      glow.style.height = glowSize + 'px';
+
+      wrap.appendChild(glow);
+      mount.insertBefore(wrap, mount.firstChild);
+      glow.addEventListener('animationend', () => wrap.remove());
+    }
+
+    mount.addEventListener('click', spawnFlash);
+  })();
+
+  renderCalendar();
+})();
+</script>
+
+</body>
+</html>
