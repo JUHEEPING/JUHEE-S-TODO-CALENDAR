@@ -1141,6 +1141,73 @@
     .color-select { gap: 10px; }
   }
 
+
+  /* ---- auth bar (minimal) ---- */
+  .auth-bar {
+    top: 10px; right: 10px; gap: 6px; padding: 4px 4px 4px 11px;
+    background: rgba(255,255,255,0.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 4px 14px rgba(60,70,140,0.1);
+    font-size: 12px; font-weight: 600; letter-spacing: -0.02em; color: rgba(29,29,31,0.7);
+  }
+  .auth-bar:has(.login) { padding: 3px; }
+  .auth-status { display: inline-flex; align-items: center; gap: 6px; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #ff9f0a; flex-shrink: 0; }
+  .sync-dot[data-s="ok"] { background: #30d158; box-shadow: 0 0 0 3px rgba(48,209,88,0.18); }
+  .sync-dot[data-s="err"] { background: #ff453a; box-shadow: 0 0 0 3px rgba(255,69,58,0.18); }
+  .auth-bar button { font-size: 12px; font-weight: 600; letter-spacing: -0.02em; }
+  .auth-bar .login { background: #1d1d1f; color: #fff; padding: 6px 13px; }
+  .auth-bar .logout { background: transparent; color: rgba(29,29,31,0.5); padding: 5px 9px; }
+  .auth-bar .logout:active, .auth-bar .login:active { transform: scale(0.94); }
+
+  /* ---- holiday chip + popup effects ---- */
+  .hp-holiday {
+    display: inline-flex; align-items: center; gap: 6px; margin: -4px 0 10px;
+    font-size: 11.5px; font-weight: 700; color: #d92d20;
+    background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.2);
+    padding: 3px 10px 3px 8px; border-radius: 999px;
+  }
+  .hp-holiday i { width: 6px; height: 6px; border-radius: 50%; background: #ff3b30; }
+  .hover-preview { overflow: hidden; }
+  .hover-preview::before {
+    content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit;
+    background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.8) 50%, transparent 65%);
+    transform: translateX(-120%);
+  }
+  .hover-preview.show::before { animation: hpSweep .85s ease-out .06s; }
+  @keyframes hpSweep { to { transform: translateX(120%); } }
+  .hover-preview.show .hp-item, .hover-preview.show .hp-holiday, .hover-preview.show .hp-actions, .hover-preview.show .hp-date {
+    animation: hpIn .4s cubic-bezier(.2,.9,.3,1.2) backwards;
+    animation-delay: calc(var(--i, 0) * 50ms + 70ms);
+  }
+  @keyframes hpIn { from { opacity: 0; transform: translateY(9px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+  /* ---- sound button ---- */
+  #soundBtn { color: rgba(29,29,31,0.55); font-size: 0; }
+  #soundBtn svg { display: block; }
+
+  /* ---- month selector: minimal (phones) ---- */
+  .month-label .yr { color: inherit; }
+  @media (max-width: 640px) {
+    .auth-bar { top: calc(env(safe-area-inset-top) + 20px); right: 62px; }
+    .nav { background: none; border: none; box-shadow: none; padding: 0; gap: 8px; backdrop-filter: none; -webkit-backdrop-filter: none; }
+    .nav.liquid::after { display: none; }
+    .nav .month-label { order: 0; flex: 1; min-width: 0; text-align: left; line-height: 1; }
+    .month-label .yr { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-tertiary); letter-spacing: 0; margin-bottom: 3px; }
+    .month-label .mo { font-size: 30px; font-weight: 800; letter-spacing: -0.045em; }
+    #prevBtn { order: 1; } #nextBtn { order: 2; } .nav .today-btn { order: 3; } #soundBtn { order: 4; }
+    .nav #prevBtn, .nav #nextBtn, .nav #soundBtn {
+      width: 38px; height: 38px; border-radius: 50%; color: var(--text);
+      background: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.95);
+      box-shadow: 0 2px 8px rgba(60,70,140,0.08);
+    }
+    .nav #prevBtn, .nav #nextBtn { font-size: 20px; padding-bottom: 2px; }
+    .nav #soundBtn { color: rgba(29,29,31,0.5); }
+    .nav .today-btn {
+      height: 38px; padding: 0 15px; border-radius: 999px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.02em;
+      background: rgba(10,132,255,0.1); color: var(--accent);
+    }
+    .nav .today-btn:hover { filter: none; transform: none; }
+  }
 </style>
 </head>
 <body>
@@ -1299,14 +1366,14 @@
 
   // Muted color tags for categorizing schedules (not urgency-based).
   const COLOR_TAGS = {
-    red:    { label: '빨강', base: '#c97a70', text: '#a5483e' },
-    orange: { label: '주황', base: '#d19c62', text: '#a06a2c' },
-    yellow: { label: '노랑', base: '#cdb567', text: '#9c832f' },
-    green:  { label: '초록', base: '#79ac89', text: '#437954' },
-    blue:   { label: '파랑', base: '#749bc4', text: '#3f6a97' },
-    navy:   { label: '남색', base: '#6672ad', text: '#3a4480' },
-    purple: { label: '보라', base: '#9c86c4', text: '#6a4f99' },
-    pink:   { label: '핑크', base: '#cf90ae', text: '#a1557e' }
+    red:    { label: '빨강', base: '#ff3b30', text: '#c9261c' },
+    orange: { label: '주황', base: '#ff9500', text: '#b86a00' },
+    yellow: { label: '노랑', base: '#ffcc00', text: '#8f6f00' },
+    green:  { label: '초록', base: '#34c759', text: '#1f8a3f' },
+    blue:   { label: '파랑', base: '#0a84ff', text: '#0a64c8' },
+    navy:   { label: '남색', base: '#5856d6', text: '#3b3aa8' },
+    purple: { label: '보라', base: '#af52de', text: '#8a35b8' },
+    pink:   { label: '핑크', base: '#ff5c8a', text: '#c2335a' }
   };
   const COLOR_KEYS = Object.keys(COLOR_TAGS);
   const DEFAULT_COLOR = 'blue';
@@ -1382,9 +1449,21 @@
     return bar;
   }
 
+  function makeStatus() {
+    const wrap = document.createElement('span');
+    wrap.className = 'auth-status';
+    const dot = document.createElement('span'); dot.className = 'sync-dot';
+    const long = document.createElement('span'); long.className = 'auth-long';
+    const short = document.createElement('span'); short.className = 'auth-short';
+    wrap.append(dot, long, short);
+    return { wrap, set(state, l, sh) { dot.dataset.s = state; long.textContent = l; short.textContent = sh; } };
+  }
+
   async function initCloud() {
     const bar = makeAuthBar();
-    bar.textContent = '☁️ 연결 중…';
+    const st = makeStatus();
+    st.set('wait', '연결 중…', '연결 중');
+    bar.append(st.wrap);
     try {
       const [{ initializeApp }, auth, fs] = await Promise.all([
         import(FB + 'firebase-app.js'),
@@ -1403,23 +1482,19 @@
         if (!user) {
           const btn = document.createElement('button');
           btn.className = 'login';
-          btn.innerHTML = '<span class="auth-long">Google로 로그인하고 동기화</span><span class="auth-short">로그인</span>';
+          btn.textContent = '로그인';
+          btn.title = 'Google 계정으로 로그인하면 모든 기기에서 동기화돼요';
           btn.onclick = () => auth.signInWithPopup(a, new auth.GoogleAuthProvider())
             .catch(e => alert('로그인 실패: ' + e.message));
           bar.appendChild(btn);
           return;
         }
-        const label = document.createElement('span');
-        const status = document.createElement('span');
-        status.className = 'auth-long';
-        status.textContent = ' 연결 중…';
-        label.append('☁️', status);
-        label.title = user.displayName || user.email;
+        st.set('wait', '연결 중…', '연결 중');
         const out = document.createElement('button');
         out.textContent = '로그아웃';
         out.className = 'logout';
         out.onclick = () => auth.signOut(a);
-        bar.append(label, out);
+        bar.append(st.wrap, out);
 
         const ref = fs.doc(db, 'users', user.uid);
         let first = true;
@@ -1433,18 +1508,19 @@
               renderCalendar();
             }
           }
-          status.textContent = ' 동기화됨 · ' + (user.displayName || user.email);
-          label.firstChild.textContent = '✅';
+          st.set('ok', '동기화됨 · ' + (user.displayName || user.email), '동기화됨');
           if (first) {
             first = false;
             cloudApi = fs;
             cloudDoc = ref;
             if (!snap.exists()) cloudSave(); // first login: upload this device's data
           }
-        }, e => { label.textContent = '⚠️ 동기화 오류 (권한/설정 확인)'; console.warn(e); });
+        }, e => { st.set('err', '동기화 오류 (권한/설정 확인)', '오류'); console.warn(e); });
       });
     } catch (e) {
-      bar.textContent = '⚠️ 클라우드 연결 실패 (로컬 저장만 사용)';
+      bar.textContent = '';
+      st.set('err', '클라우드 연결 실패 (로컬 저장만 사용)', '오프라인');
+      bar.append(st.wrap);
       console.warn('Firebase init failed', e);
     }
   }
@@ -1461,46 +1537,45 @@
       if (ctx.state === 'suspended') ctx.resume();
       return ctx;
     }
-    // bright, airy glass "tink" (clear & crisp keyboard-tap feel)
-    function tink(freq, o) {
+    // soft bell: sine partials with a long, gentle decay
+    function bell(freq, o) {
       if (!on) return;
       o = o || {};
       try {
         const c = ac(); if (!c) return;
-        const t = c.currentTime + (o.delay || 0), vol = o.vol || 0.2, dur = o.dur || 0.16;
-        const master = c.createGain(); master.gain.value = vol;
-        const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 900;
-        master.connect(hp); hp.connect(c.destination);
-        [[1, 1, 1], [2.01, 0.5, 0.6], [3.02, 0.22, 0.4]].forEach(([r, g, d]) => {
+        const t = c.currentTime + (o.delay || 0), vol = o.vol || 0.16, dur = o.dur || 0.7;
+        const master = c.createGain(); master.gain.value = vol; master.connect(c.destination);
+        [[1, 1, 1], [2, 0.32, 0.6], [2.76, 0.16, 0.42], [4.07, 0.06, 0.25]].forEach(([r, g, d]) => {
           const osc = c.createOscillator(); osc.type = 'sine'; osc.frequency.value = freq * r;
           const e = c.createGain();
           e.gain.setValueAtTime(0.0001, t);
-          e.gain.exponentialRampToValueAtTime(g, t + 0.002);
+          e.gain.exponentialRampToValueAtTime(g, t + 0.004);
           e.gain.exponentialRampToValueAtTime(0.0001, t + dur * d);
           osc.connect(e); e.connect(master);
           osc.start(t); osc.stop(t + dur + 0.05);
         });
       } catch (e) {}
     }
-    const SCALE = [2093, 2349, 2637, 2794, 3136, 3520, 3951, 4186];
+    const SCALE = [1047, 1175, 1319, 1568, 1760, 2093, 2349, 2637];
     return {
       get on() { return on; },
       toggle() {
         on = !on;
         try { localStorage.setItem('todoSound', on ? 'on' : 'off'); } catch (e) {}
-        if (on) tink(3136);
+        if (on) bell(1760);
         return on;
       },
-      click() { tink(3136, { dur: 0.13 }); },
-      color(i) { tink(SCALE[i % SCALE.length], { dur: 0.22 }); },
-      save() { tink(2637, { dur: 0.2 }); tink(3520, { delay: 0.08, dur: 0.25 }); tink(4186, { delay: 0.16, dur: 0.4, vol: 0.16 }); },
-      next() { tink(2794, { dur: 0.14 }); tink(3520, { delay: 0.05, dur: 0.18, vol: 0.16 }); },
-      prev() { tink(3520, { dur: 0.14 }); tink(2794, { delay: 0.05, dur: 0.18, vol: 0.16 }); },
-      drop() { tink(2349, { dur: 0.16 }); tink(3136, { delay: 0.07, dur: 0.2, vol: 0.16 }); }
+      click() { bell(1760, { dur: 0.55, vol: 0.13 }); },
+      color(i) { bell(SCALE[i % SCALE.length], { dur: 0.65 }); },
+      save() { bell(1976, { dur: 0.9, vol: 0.15 }); },
+      next() { bell(1568, { dur: 0.55 }); },
+      prev() { bell(1319, { dur: 0.55 }); },
+      drop() { bell(1397, { dur: 0.6 }); }
     };
   })();
   const soundBtn = document.getElementById('soundBtn');
-  const syncSoundBtn = () => { soundBtn.textContent = snd.on ? '🔔' : '🔕'; };
+  const BELL_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/>';
+  const syncSoundBtn = () => { soundBtn.innerHTML = BELL_SVG + (snd.on ? '' : '<path d="M3 3l18 18"/>') + '</svg>'; };
   syncSoundBtn();
   soundBtn.addEventListener('click', () => { snd.toggle(); syncSoundBtn(); });
 
@@ -1949,7 +2024,7 @@
   function renderCalendar() {
     const year = current.getFullYear();
     const month = current.getMonth();
-    monthLabel.textContent = `${year}년 ${month + 1}월`;
+    monthLabel.innerHTML = `<span class="yr">${year}년</span> <span class="mo">${month + 1}월</span>`;
 
     grid.innerHTML = '';
     hideHoverPreview();
@@ -2066,7 +2141,8 @@
   function showHoverPreview(cell, key) {
     const todos = getEffectiveTodos(key);
     const touch = isTouch();
-    if (clip || (!todos.length && !touch)) { hideHoverPreview(); return; }
+    const hol = HOLIDAYS[key];
+    if (clip || (!todos.length && !touch && !hol)) { hideHoverPreview(); return; }
     if (overlay.classList.contains('open')) return;
 
     const [y, m, d] = key.split('-').map(Number);
@@ -2078,15 +2154,24 @@
     dateEl.textContent = todos.length
       ? `${m}월 ${d}일 · ${todos.length}개`
       : `${m}월 ${d}일 · 등록된 일정 없음`;
+    if (hol) dateEl.style.color = '#d92d20';
     hoverPreview.appendChild(dateEl);
+    if (hol) {
+      const h = document.createElement('div');
+      h.className = 'hp-holiday';
+      h.innerHTML = '<i></i>';
+      h.append(`공휴일 · ${hol}`);
+      hoverPreview.appendChild(h);
+    }
 
     const listEl = document.createElement('div');
     listEl.className = 'hp-list';
 
-    todos.forEach(t => {
+    todos.forEach((t, idx) => {
       const color = tagColor(t);
       const item = document.createElement('div');
       item.className = 'hp-item';
+      item.style.setProperty('--i', idx);
 
       const dot = document.createElement('span');
       dot.className = 'hp-dot';
@@ -2220,7 +2305,7 @@
     const [y, m, d] = key.split('-').map(Number);
     const dateObj = new Date(y, m - 1, d);
     modalDate.textContent = `${m}월 ${d}일`;
-    modalSub.textContent = WEEKDAY_NAMES[dateObj.getDay()];
+    modalSub.textContent = WEEKDAY_NAMES[dateObj.getDay()] + (HOLIDAYS[key] ? ` · ${HOLIDAYS[key]}` : '');
     renderTodoList();
     overlay.classList.add('open');
     snd.click();
