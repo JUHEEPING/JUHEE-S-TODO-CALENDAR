@@ -1285,9 +1285,11 @@
           return;
         }
         const label = document.createElement('span');
-        label.innerHTML = '☁️<span class="auth-long"> 동기화 중 · </span>';
-        label.append(document.createTextNode(''));
-        label.querySelector('.auth-long').after(Object.assign(document.createElement('span'), { className: 'auth-long', textContent: user.displayName || user.email }));
+        const status = document.createElement('span');
+        status.className = 'auth-long';
+        status.textContent = ' 연결 중…';
+        label.append('☁️', status);
+        label.title = user.displayName || user.email;
         const out = document.createElement('button');
         out.textContent = '로그아웃';
         out.className = 'logout';
@@ -1306,13 +1308,15 @@
               renderCalendar();
             }
           }
+          status.textContent = ' 동기화됨 · ' + (user.displayName || user.email);
+          label.firstChild.textContent = '✅';
           if (first) {
             first = false;
             cloudApi = fs;
             cloudDoc = ref;
             if (!snap.exists()) cloudSave(); // first login: upload this device's data
           }
-        }, e => { label.textContent = '⚠️ 동기화 오류'; console.warn(e); });
+        }, e => { label.textContent = '⚠️ 동기화 오류 (권한/설정 확인)'; console.warn(e); });
       });
     } catch (e) {
       bar.textContent = '⚠️ 클라우드 연결 실패 (로컬 저장만 사용)';
