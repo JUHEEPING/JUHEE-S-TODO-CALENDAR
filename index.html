@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>JUHEE'S Todo Calendar</title>
 <style>
   :root {
@@ -927,13 +927,10 @@
     background: rgba(10,132,255,0.10); color: var(--accent);
   }
   .hp-btn.primary { background: linear-gradient(135deg, #0a84ff, #bf5af2); color: #fff; }
-  .hover-preview.sheet {
-    left: 12px !important; right: 12px; top: auto !important;
-    bottom: calc(env(safe-area-inset-bottom) + 12px);
-    width: auto; transform-origin: 50% 100%;
-  }
   .hp-list { overflow-x: hidden; }
-  .hover-preview.sheet .hp-list { max-height: 38vh; }
+  .hover-preview.sheet {
+    left: 12px !important; right: 12px; width: auto; transform-origin: 50% 0;
+  }
 
   /* ---- drag & drop ---- */
   .pill { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; cursor: grab; }
@@ -1019,6 +1016,109 @@
     .auth-long { display: none; }
     .auth-short { display: inline; }
   }
+
+  /* ---- glass colour chips ---- */
+  .color-swatch {
+    background: linear-gradient(145deg, var(--c1), var(--c2));
+    border: 1px solid rgba(255,255,255,0.8);
+    box-shadow: inset 0 2px 3px rgba(255,255,255,0.85), inset 0 -3px 6px rgba(0,0,0,0.07), 0 3px 9px var(--c1);
+    overflow: hidden;
+    transition: transform .18s cubic-bezier(.2,.9,.3,1.3), box-shadow .15s ease;
+  }
+  .color-swatch::before {
+    content: ""; position: absolute; top: 3px; left: 5px; width: 12px; height: 7px;
+    border-radius: 50%; background: rgba(255,255,255,0.75); filter: blur(0.6px); transform: rotate(-25deg);
+  }
+  .color-swatch:active { transform: scale(0.88); }
+  .color-swatch.active {
+    border-color: rgba(255,255,255,0.95);
+    outline: 2px solid var(--c2); outline-offset: 2px;
+    box-shadow: inset 0 2px 3px rgba(255,255,255,0.85), 0 4px 12px var(--c1);
+    transform: scale(1.06);
+  }
+  .color-swatch.active::after { text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+
+  .pill { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+
+  /* ---- form layout (no overlap) ---- */
+  .row-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  .row-fields .field { min-width: 0; margin-bottom: 12px; }
+  input[type="text"], textarea, input[type="time"], input[type="date"], .date-btn {
+    min-width: 0; max-width: 100%; display: block;
+    -webkit-appearance: none; appearance: none;
+  }
+  input[type="time"] { min-height: 44px; text-align: left; }
+  .date-btn {
+    width: 100%; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    border: 1px solid rgba(120,120,140,0.2); background: rgba(255,255,255,0.55);
+    border-radius: 12px; padding: 0 12px; font-size: 14px; font-family: inherit; color: var(--text);
+    cursor: pointer; text-align: left; transition: border-color .15s ease, background .15s ease, transform .12s ease;
+  }
+  #endDateInput { display: none !important; }
+  .date-btn:active { transform: scale(0.98); }
+  .date-btn.open { border-color: rgba(10,132,255,0.6); background: rgba(255,255,255,0.85); box-shadow: 0 0 0 4px rgba(10,132,255,0.14); }
+  .date-btn .dt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .date-btn .dt.empty { color: var(--text-tertiary); }
+  .date-btn .dt.red { color: #ff3b30; font-weight: 600; }
+  .date-btn .dt.blue { color: #0a84ff; font-weight: 600; }
+  .date-btn .x { color: var(--text-tertiary); font-size: 12px; padding: 4px; flex-shrink: 0; }
+
+  .mini-cal {
+    display: none; margin-bottom: 14px; padding: 10px; border-radius: 16px;
+    background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.85);
+    box-shadow: 0 8px 24px rgba(60,70,140,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  .mini-cal.open { display: block; animation: miniIn .22s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes miniIn { from { opacity: 0; transform: translateY(-6px) scale(0.96); } to { opacity: 1; transform: none; } }
+  .mc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .mc-head b { font-size: 13.5px; letter-spacing: -0.01em; }
+  .mc-head button {
+    border: none; background: rgba(120,120,140,0.1); width: 30px; height: 30px; border-radius: 10px;
+    cursor: pointer; font-size: 15px; color: var(--text-secondary);
+  }
+  .mc-head button:active { transform: scale(0.88); }
+  .mc-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+  .mc-wd { text-align: center; font-size: 10.5px; font-weight: 600; padding: 4px 0; color: var(--text-tertiary); }
+  .mc-wd:first-child { color: rgba(255,59,48,0.8); }
+  .mc-wd:last-child { color: rgba(10,132,255,0.9); }
+  .mc-day {
+    border: none; background: transparent; aspect-ratio: 1; border-radius: 50%;
+    font-size: 13px; font-family: inherit; color: var(--text); cursor: pointer; padding: 0;
+    transition: background .12s ease, transform .12s ease;
+  }
+  .mc-day:active { transform: scale(0.86); }
+  .mc-day.red { color: #ff3b30; }
+  .mc-day.blue { color: #0a84ff; }
+  .mc-day.out { opacity: 0.35; }
+  .mc-day.dis { opacity: 0.25; pointer-events: none; }
+  .mc-day.range { background: rgba(10,132,255,0.12); border-radius: 8px; }
+  .mc-day.start { background: rgba(120,120,140,0.2); font-weight: 700; }
+  .mc-day.sel {
+    background: linear-gradient(135deg, #0a84ff, #bf5af2); color: #fff; font-weight: 700;
+    box-shadow: 0 3px 10px rgba(10,132,255,0.35);
+  }
+  .mc-note { font-size: 10.5px; color: var(--text-tertiary); text-align: center; margin-top: 8px; }
+
+  .cell.sel { box-shadow: inset 0 0 0 1.5px rgba(10,132,255,0.45); background: rgba(10,132,255,0.07); }
+
+  @media (max-width: 640px) {
+    input[type="text"], textarea, input[type="time"], input[type="date"], .date-btn { font-size: 16px; }
+    .row-fields { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .calendar { flex: none; width: 100%; aspect-ratio: 1 / 1.05; }
+    .cell { padding: 4px 3px 3px; gap: 2px; border-radius: 0; }
+    .date-row { gap: 2px; }
+    .date-num { width: 19px; height: 19px; font-size: 11px; }
+    .holiday-label { display: block; font-size: 8px; font-weight: 600; color: rgba(255,59,48,0.78); letter-spacing: -0.04em; }
+    .pill { font-size: 9px; padding: 1px 3px; line-height: 13px; border-radius: 5px; }
+    .more-label { font-size: 8.5px; line-height: 1; padding-left: 2px; }
+    .title-group h1 { font-size: 15.5px; letter-spacing: -0.03em; }
+    .header { margin-bottom: 12px; }
+    .nav { box-shadow: var(--shadow-lg); }
+    .modal { border-radius: 24px; }
+    .modal-body { padding: 14px 16px 20px; }
+    .modal-header { padding: 18px 18px 12px; }
+    .color-select { gap: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -1038,6 +1138,7 @@
       <p>중요하지 않은 일에 대해 깊게 생각하는 것은 삐뚤어진 못을 망치질하는 것과 같습니다.</p>
     </div>
     <div class="nav liquid">
+      <button id="soundBtn" title="효과음" aria-label="효과음">🔔</button>
       <button id="prevBtn">‹</button>
       <div class="month-label" id="monthLabel"></div>
       <button id="nextBtn">›</button>
@@ -1082,9 +1183,11 @@
           </div>
           <div class="field">
             <label class="mini-label">종료일 (여러 날 일정 시)</label>
-            <input type="date" id="endDateInput">
+            <button type="button" class="date-btn" id="endDateBtn"><span class="dt empty" id="endDateText">선택 안 함</span><span class="x" id="endDateClear" style="display:none">✕</span></button>
+            <input type="date" id="endDateInput" hidden>
           </div>
         </div>
+        <div class="mini-cal" id="miniCal"></div>
         <div class="field">
           <label class="mini-label">색상</label>
           <div class="color-select" id="colorSelect"></div>
@@ -1326,6 +1429,141 @@
 
   function pad(n) { return String(n).padStart(2, '0'); }
 
+  /* ---------- glass-tap sound (Web Audio; iOS silent switch mutes it) ---------- */
+  const snd = (() => {
+    let ctx = null;
+    let on = true;
+    try { on = localStorage.getItem('todoSound') !== 'off'; } catch (e) {}
+    function ac() {
+      if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); }
+      if (ctx.state === 'suspended') ctx.resume();
+      return ctx;
+    }
+    function glass(freq, o) {
+      if (!on) return;
+      o = o || {};
+      try {
+        const c = ac(); if (!c) return;
+        const vol = o.vol || 0.16, dur = o.dur || 0.5, t = c.currentTime + (o.delay || 0);
+        const master = c.createGain(); master.gain.value = vol; master.connect(c.destination);
+        [[1, 1], [2.76, 0.42], [5.4, 0.18], [8.93, 0.07]].forEach(([r, g], i) => {
+          const osc = c.createOscillator(); osc.type = 'sine'; osc.frequency.value = freq * r;
+          const e = c.createGain();
+          e.gain.setValueAtTime(0.0001, t);
+          e.gain.exponentialRampToValueAtTime(g, t + 0.003);
+          e.gain.exponentialRampToValueAtTime(0.0001, t + dur / (1 + i * 0.8));
+          osc.connect(e); e.connect(master);
+          osc.start(t); osc.stop(t + dur + 0.05);
+        });
+      } catch (e) {}
+    }
+    const SCALE = [1319, 1480, 1568, 1760, 1976, 2093, 2349, 2637];
+    return {
+      get on() { return on; },
+      toggle() {
+        on = !on;
+        try { localStorage.setItem('todoSound', on ? 'on' : 'off'); } catch (e) {}
+        if (on) glass(2093, { dur: 0.5 });
+        return on;
+      },
+      click() { glass(1760, { dur: 0.28, vol: 0.13 }); },
+      color(i) { glass(SCALE[i % SCALE.length], { dur: 0.45, vol: 0.15 }); },
+      save() { glass(1568, { dur: 0.6 }); glass(2349, { delay: 0.09, dur: 0.9, vol: 0.15 }); glass(3136, { delay: 0.18, dur: 1.1, vol: 0.09 }); },
+      next() { glass(1175, { dur: 0.4 }); glass(1760, { delay: 0.06, dur: 0.5, vol: 0.14 }); },
+      prev() { glass(1760, { dur: 0.4 }); glass(1175, { delay: 0.06, dur: 0.5, vol: 0.14 }); },
+      drop() { glass(1397, { dur: 0.35 }); glass(1047, { delay: 0.05, dur: 0.45, vol: 0.14 }); }
+    };
+  })();
+  const soundBtn = document.getElementById('soundBtn');
+  const syncSoundBtn = () => { soundBtn.textContent = snd.on ? '🔔' : '🔕'; };
+  syncSoundBtn();
+  soundBtn.addEventListener('click', () => { snd.toggle(); syncSoundBtn(); });
+
+  function tagText(t) { return COLOR_TAGS[t && t.color] ? COLOR_TAGS[t.color].text : COLOR_TAGS[DEFAULT_COLOR].text; }
+
+  /* ---------- end-date mini calendar (Sun/holiday red, Sat blue) ---------- */
+  const endDateBtn = document.getElementById('endDateBtn');
+  const endDateText = document.getElementById('endDateText');
+  const endDateClear = document.getElementById('endDateClear');
+  const miniCal = document.getElementById('miniCal');
+  let miniOpen = false, miniY = 0, miniM = 0;
+  const KW = ['일', '월', '화', '수', '목', '금', '토'];
+
+  function keyParts(key) { const [y, m, d] = key.split('-').map(Number); return { y, m, d, w: new Date(y, m - 1, d).getDay() }; }
+  function dayTone(key) {
+    const { w } = keyParts(key);
+    if (HOLIDAYS[key] || w === 0) return 'red';
+    return w === 6 ? 'blue' : '';
+  }
+  function syncEndDateUI() {
+    const v = endDateInput.value;
+    if (v) {
+      const { m, d, w } = keyParts(v);
+      endDateText.textContent = `${m}월 ${d}일 (${KW[w]})` + (HOLIDAYS[v] ? ` · ${HOLIDAYS[v]}` : '');
+      endDateText.className = 'dt ' + dayTone(v);
+    } else {
+      endDateText.textContent = '선택 안 함';
+      endDateText.className = 'dt empty';
+    }
+    endDateClear.style.display = v ? '' : 'none';
+    if (miniOpen) renderMiniCal();
+  }
+  function closeMini() {
+    miniOpen = false;
+    miniCal.classList.remove('open');
+    endDateBtn.classList.remove('open');
+  }
+  function renderMiniCal() {
+    const startKey = selectedDateKey || todayKey();
+    const endKey = endDateInput.value;
+    const first = new Date(miniY, miniM, 1).getDay();
+    const dim = new Date(miniY, miniM + 1, 0).getDate();
+    let html = `<div class="mc-head"><button type="button" data-n="-1">‹</button><b>${miniY}년 ${miniM + 1}월</b><button type="button" data-n="1">›</button></div><div class="mc-grid">`;
+    KW.forEach(w => { html += `<div class="mc-wd">${w}</div>`; });
+    for (let i = 0; i < first; i++) html += '<div></div>';
+    for (let d = 1; d <= dim; d++) {
+      const key = dateKey(miniY, miniM, d);
+      const cls = ['mc-day', dayTone(key)];
+      if (key <= startKey) cls.push(key === startKey ? 'start' : 'dis');
+      if (endKey && key > startKey && key < endKey) cls.push('range');
+      if (key === endKey) cls.push('sel');
+      const title = HOLIDAYS[key] ? ` title="${HOLIDAYS[key]}"` : '';
+      html += `<button type="button" class="${cls.join(' ')}" data-k="${key}"${title}>${d}</button>`;
+    }
+    html += '</div><div class="mc-note">시작일 이후 날짜를 선택하세요</div>';
+    miniCal.innerHTML = html;
+  }
+  endDateBtn.addEventListener('click', e => {
+    if (e.target.closest('#endDateClear')) {
+      endDateInput.value = ''; syncEndDateUI(); snd.click(); return;
+    }
+    if (miniOpen) { closeMini(); return; }
+    const base = keyParts(endDateInput.value || selectedDateKey || todayKey());
+    miniY = base.y; miniM = base.m - 1;
+    miniOpen = true;
+    miniCal.classList.add('open');
+    endDateBtn.classList.add('open');
+    renderMiniCal();
+    snd.click();
+  });
+  miniCal.addEventListener('click', e => {
+    const nav = e.target.closest('[data-n]');
+    if (nav) {
+      const n = Number(nav.dataset.n);
+      const dt = new Date(miniY, miniM + n, 1);
+      miniY = dt.getFullYear(); miniM = dt.getMonth();
+      renderMiniCal(); n > 0 ? snd.next() : snd.prev();
+      return;
+    }
+    const day = e.target.closest('[data-k]');
+    if (day) {
+      endDateInput.value = day.dataset.k === endDateInput.value ? '' : day.dataset.k;
+      snd.click();
+      closeMini();
+      syncEndDateUI();
+    }
+  });
+
   const isTouch = () => window.matchMedia('(hover: none)').matches;
   const isPhone = () => window.innerWidth <= 640;
 
@@ -1397,6 +1635,7 @@
     const el = grid.querySelector(`.cell[data-key="${key}"]`);
     if (el) el.classList.add('pasted');
     const [, m, d] = key.split('-').map(Number);
+    snd.drop();
     toast(`${m}월 ${d}일에 붙여넣었어요`);
   }
 
@@ -1414,6 +1653,7 @@
     const el = grid.querySelector(`.cell[data-key="${toKey}"]`);
     if (el) el.classList.add('pasted');
     const [, m, d] = toKey.split('-').map(Number);
+    snd.drop();
     toast(`${m}월 ${d}일로 옮겼어요`);
   }
 
@@ -1641,8 +1881,12 @@
       bar.style.left = (seg.colStart * cellW + (seg.isFirstSeg ? 6 : 0)) + 'px';
       bar.style.width = ((seg.colEnd - seg.colStart + 1) * cellW - (seg.isFirstSeg ? 6 : 0) - (seg.isLastSeg ? 6 : 0)) + 'px';
       bar.style.height = barH + 'px';
-      bar.style.lineHeight = barH + 'px';
-      bar.style.background = color + (seg.event.done ? '40' : 'd9');
+      bar.style.boxSizing = 'border-box';
+      bar.style.lineHeight = (barH - 2) + 'px';
+      bar.style.background = seg.event.done ? color + '40' : `linear-gradient(165deg, rgba(255,255,255,0.5) 0%, ${color}b8 45%, ${color}dd 100%)`;
+      bar.style.border = '1px solid rgba(255,255,255,0.65)';
+      bar.style.textShadow = '0 1px 2px rgba(0,0,0,0.22)';
+      bar.style.backdropFilter = 'blur(6px)';
       bar.style.color = '#fff';
       bar.style.fontSize = (mobile ? 9 : 10.5) + 'px';
       bar.style.fontWeight = '700';
@@ -1652,7 +1896,7 @@
       bar.style.textOverflow = 'ellipsis';
       bar.style.cursor = 'pointer';
       bar.style.pointerEvents = 'auto';
-      bar.style.boxShadow = '0 2px 8px rgba(60,70,140,0.18)';
+      bar.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.8), 0 3px 8px ${color}40`;
       bar.style.textDecoration = seg.event.done ? 'line-through' : 'none';
       bar.style.borderRadius = seg.isFirstSeg && seg.isLastSeg ? '999px'
         : seg.isFirstSeg ? '999px 5px 5px 999px'
@@ -1745,9 +1989,10 @@
           const color = tagColor(t);
           const pill = document.createElement('div');
           pill.className = 'pill' + (t.done ? ' done' : '');
-          pill.style.background = color + '24';
-          pill.style.borderColor = color + '4d';
-          pill.style.color = color;
+          pill.style.background = `linear-gradient(165deg, rgba(255,255,255,0.78) 0%, ${color}38 55%, ${color}5c 100%)`;
+          pill.style.border = '1px solid rgba(255,255,255,0.8)';
+          pill.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 2px ${color}30, 0 2px 6px ${color}2e`;
+          pill.style.color = tagText(t);
           pill.innerHTML = `<span class="dot"></span><span>${escapeHtml(shortLabel(t.title))}</span>`;
           attachDrag(pill, t);
           pillWrap.appendChild(pill);
@@ -1757,7 +2002,7 @@
         if (singleDay.length > MAX_SHOWN_PILLS) {
           const more = document.createElement('div');
           more.className = 'more-label';
-          more.textContent = `+${singleDay.length - MAX_SHOWN_PILLS}개 더보기`;
+          more.textContent = isPhone() ? `+${singleDay.length - MAX_SHOWN_PILLS}` : `+${singleDay.length - MAX_SHOWN_PILLS}개 더보기`;
           cell.appendChild(more);
         }
       }
@@ -1766,6 +2011,7 @@
       cell.addEventListener('click', () => {
         if (suppressClick) return;
         if (clip) { pasteTo(c.key); return; }
+        snd.click();
         if (isTouch()) showHoverPreview(cell, c.key);
       });
       cell.addEventListener('mouseenter', () => { if (isTouch() || clip) return; cancelHide(); showHoverPreview(cell, c.key); });
@@ -1852,6 +2098,7 @@
       item.appendChild(copyBtn);
 
       item.addEventListener('click', () => {
+        snd.click();
         hideHoverPreview();
         openModal(t._ownerKey);
         startEdit(t);
@@ -1880,6 +2127,8 @@
 
     const sheet = touch && isPhone();
     hoverPreview.classList.toggle('sheet', sheet);
+    grid.querySelectorAll('.cell.sel').forEach(el => el.classList.remove('sel'));
+    cell.classList.add('sel');
 
     if (!sheet) {
       const rect = cell.getBoundingClientRect();
@@ -1899,12 +2148,28 @@
 
       hoverPreview.style.left = left + 'px';
       hoverPreview.style.top = top + 'px';
+      hoverPreview.style.bottom = 'auto';
+      listEl.style.maxHeight = '';
+    } else {
+      // phone: sit below the calendar so it never covers the dates
+      const calBottom = document.querySelector('.calendar').getBoundingClientRect().bottom;
+      const avail = window.innerHeight - calBottom - 22;
+      if (avail >= 170) {
+        hoverPreview.style.top = Math.round(calBottom + 10) + 'px';
+        hoverPreview.style.bottom = 'auto';
+        listEl.style.maxHeight = Math.max(60, avail - 108) + 'px';
+      } else {
+        hoverPreview.style.top = 'auto';
+        hoverPreview.style.bottom = 'calc(env(safe-area-inset-bottom) + 12px)';
+        listEl.style.maxHeight = '30vh';
+      }
     }
     hoverPreview.classList.add('show');
   }
 
   function hideHoverPreview() {
     hoverPreview.classList.remove('show');
+    grid.querySelectorAll('.cell.sel').forEach(el => el.classList.remove('sel'));
   }
 
   hoverPreview.addEventListener('mouseenter', cancelHide);
@@ -1928,10 +2193,13 @@
     modalSub.textContent = WEEKDAY_NAMES[dateObj.getDay()];
     renderTodoList();
     overlay.classList.add('open');
-    setTimeout(() => titleInput.focus(), 100);
+    snd.click();
+    if (!isTouch()) setTimeout(() => titleInput.focus(), 100);
   }
 
   function closeModal() {
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    window.scrollTo(0, 0);
     overlay.classList.remove('open');
     selectedDateKey = null;
     resetForm();
@@ -2028,7 +2296,7 @@
   function toggleDone(id, ownerKey) {
     const todos = data[ownerKey] || [];
     const t = todos.find(x => x.id === id);
-    if (t) { t.done = !t.done; saveData(); renderTodoList(); renderCalendar(); }
+    if (t) { t.done = !t.done; snd.click(); saveData(); renderTodoList(); renderCalendar(); }
   }
 
   function deleteTodo(id, ownerKey) {
@@ -2045,6 +2313,7 @@
     titleInput.value = t.title;
     timeInput.value = t.time || '';
     endDateInput.value = t.endDate || '';
+    closeMini(); syncEndDateUI();
     memoInput.value = t.memo || '';
     setColor(t.color);
     formLabel.textContent = '할 일 수정';
@@ -2060,6 +2329,7 @@
     titleInput.value = '';
     timeInput.value = '';
     endDateInput.value = '';
+    closeMini(); syncEndDateUI();
     memoInput.value = '';
     setColor(DEFAULT_COLOR);
     formLabel.textContent = '새 할 일 추가';
@@ -2073,8 +2343,8 @@
       const sw = document.createElement('div');
       sw.className = 'color-swatch';
       sw.dataset.c = key;
-      sw.style.background = COLOR_TAGS[key].base;
-      sw.style.color = COLOR_TAGS[key].base;
+      sw.style.setProperty('--c1', COLOR_TAGS[key].base + '99');
+      sw.style.setProperty('--c2', COLOR_TAGS[key].base + 'f0');
       sw.title = COLOR_TAGS[key].label;
       colorSelect.appendChild(sw);
     });
@@ -2120,9 +2390,12 @@
     }
 
     saveData();
+    snd.save();
     resetForm();
     renderTodoList();
     renderCalendar();
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    window.scrollTo(0, 0);
   }
 
   /* ---------- title autocomplete ---------- */
@@ -2196,7 +2469,7 @@
   buildColorSwatches();
   colorSelect.addEventListener('click', (e) => {
     const sw = e.target.closest('.color-swatch');
-    if (sw) setColor(sw.dataset.c);
+    if (sw) { setColor(sw.dataset.c); snd.color(COLOR_KEYS.indexOf(sw.dataset.c)); }
   });
 
   submitBtn.addEventListener('click', () => submitTodo());
@@ -2212,15 +2485,18 @@
 
   document.getElementById('prevBtn').addEventListener('click', () => {
     current.setMonth(current.getMonth() - 1);
+    snd.prev();
     renderCalendar();
   });
   document.getElementById('nextBtn').addEventListener('click', () => {
     current.setMonth(current.getMonth() + 1);
+    snd.next();
     renderCalendar();
   });
   document.getElementById('todayBtn').addEventListener('click', () => {
     current = new Date();
     current.setDate(1);
+    snd.click();
     renderCalendar();
   });
 
