@@ -1038,7 +1038,21 @@
   }
   .color-swatch.active::after { text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 
-  .pill { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .pill, .day-bar.ice { backdrop-filter: blur(8px) saturate(1.5); -webkit-backdrop-filter: blur(8px) saturate(1.5); }
+  .pill { position: relative; border-radius: 7px; }
+  .day-bar.ice { position: absolute; overflow: hidden; isolation: isolate; }
+  .day-bar.ice::after { z-index: -1; }
+  .pill::after, .day-bar.ice::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    background: linear-gradient(115deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.28) 32%, rgba(255,255,255,0) 52%);
+  }
+  .pill span { position: relative; z-index: 1; }
+  .color-swatch { border-radius: 11px; background: linear-gradient(135deg, rgba(255,255,255,0.7), var(--c1)); border: 1px solid var(--c1); }
+  .color-swatch::before {
+    top: 0; left: 0; width: 100%; height: 100%; border-radius: inherit; filter: none; transform: none;
+    background: linear-gradient(115deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.2) 38%, rgba(255,255,255,0) 55%);
+  }
+  .color-swatch.active::after { color: #fff; }
 
   /* ---- form layout (no overlap) ---- */
   .row-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
@@ -1102,9 +1116,16 @@
   .cell.sel { box-shadow: inset 0 0 0 1.5px rgba(10,132,255,0.45); background: rgba(10,132,255,0.07); }
 
   @media (max-width: 640px) {
+    body { background: #f6f8fc; }
+    .blob { opacity: 0.2; filter: blur(90px); }
+    .blob.b1 { width: 380px; height: 380px; top: -160px; left: -120px; }
+    .blob.b2 { width: 300px; height: 300px; opacity: 0.12; }
+    .blob.b3 { display: none; }
+    .weekdays div { padding: 7px 0; }
+    .more-label.inrow { margin-left: auto; padding: 0 2px 0 0; font-size: 9px; line-height: 1; flex-shrink: 0; }
     input[type="text"], textarea, input[type="time"], input[type="date"], .date-btn { font-size: 16px; }
     .row-fields { grid-template-columns: minmax(0, 1fr); gap: 0; }
-    .calendar { flex: none; width: 100%; aspect-ratio: 1 / 1.05; }
+    .calendar { flex: none; width: 100%; aspect-ratio: 1 / 1; }
     .cell { padding: 4px 3px 3px; gap: 2px; border-radius: 0; }
     .date-row { gap: 2px; }
     .date-num { width: 19px; height: 19px; font-size: 11px; }
@@ -1440,52 +1461,42 @@
       if (ctx.state === 'suspended') ctx.resume();
       return ctx;
     }
-    // iPhone keyboard "tick": a tiny filtered noise burst + soft low thump
-    let noise = null;
-    function tick(freq, o) {
+    // bright, airy glass "tink" (clear & crisp keyboard-tap feel)
+    function tink(freq, o) {
       if (!on) return;
       o = o || {};
       try {
         const c = ac(); if (!c) return;
-        const t = c.currentTime + (o.delay || 0), vol = o.vol || 0.5;
-        if (!noise) {
-          noise = c.createBuffer(1, Math.floor(c.sampleRate * 0.05), c.sampleRate);
-          const d = noise.getChannelData(0);
-          for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-        }
-        const src = c.createBufferSource(); src.buffer = noise;
-        const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 1.4;
-        const g = c.createGain();
-        g.gain.setValueAtTime(vol, t);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.032);
-        src.connect(bp); bp.connect(g); g.connect(c.destination);
-        src.start(t); src.stop(t + 0.05);
-        // body of the key
-        const osc = c.createOscillator(); osc.type = 'sine';
-        osc.frequency.setValueAtTime(o.body || 190, t);
-        osc.frequency.exponentialRampToValueAtTime(90, t + 0.03);
-        const og = c.createGain();
-        og.gain.setValueAtTime(vol * 0.55, t);
-        og.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
-        osc.connect(og); og.connect(c.destination);
-        osc.start(t); osc.stop(t + 0.06);
+        const t = c.currentTime + (o.delay || 0), vol = o.vol || 0.2, dur = o.dur || 0.16;
+        const master = c.createGain(); master.gain.value = vol;
+        const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 900;
+        master.connect(hp); hp.connect(c.destination);
+        [[1, 1, 1], [2.01, 0.5, 0.6], [3.02, 0.22, 0.4]].forEach(([r, g, d]) => {
+          const osc = c.createOscillator(); osc.type = 'sine'; osc.frequency.value = freq * r;
+          const e = c.createGain();
+          e.gain.setValueAtTime(0.0001, t);
+          e.gain.exponentialRampToValueAtTime(g, t + 0.002);
+          e.gain.exponentialRampToValueAtTime(0.0001, t + dur * d);
+          osc.connect(e); e.connect(master);
+          osc.start(t); osc.stop(t + dur + 0.05);
+        });
       } catch (e) {}
     }
-    const SCALE = [2300, 2500, 2700, 2900, 3100, 3300, 3500, 3700];
+    const SCALE = [2093, 2349, 2637, 2794, 3136, 3520, 3951, 4186];
     return {
       get on() { return on; },
       toggle() {
         on = !on;
         try { localStorage.setItem('todoSound', on ? 'on' : 'off'); } catch (e) {}
-        if (on) tick(3000);
+        if (on) tink(3136);
         return on;
       },
-      click() { tick(3000); },
-      color(i) { tick(SCALE[i % SCALE.length], { body: 170 + i * 12 }); },
-      save() { tick(2600); tick(3300, { delay: 0.07 }); tick(1800, { delay: 0.16, body: 140, vol: 0.6 }); },
-      next() { tick(3400, { body: 220 }); },
-      prev() { tick(2400, { body: 150 }); },
-      drop() { tick(2800); tick(2200, { delay: 0.06, body: 150 }); }
+      click() { tink(3136, { dur: 0.13 }); },
+      color(i) { tink(SCALE[i % SCALE.length], { dur: 0.22 }); },
+      save() { tink(2637, { dur: 0.2 }); tink(3520, { delay: 0.08, dur: 0.25 }); tink(4186, { delay: 0.16, dur: 0.4, vol: 0.16 }); },
+      next() { tink(2794, { dur: 0.14 }); tink(3520, { delay: 0.05, dur: 0.18, vol: 0.16 }); },
+      prev() { tink(3520, { dur: 0.14 }); tink(2794, { delay: 0.05, dur: 0.18, vol: 0.16 }); },
+      drop() { tink(2349, { dur: 0.16 }); tink(3136, { delay: 0.07, dur: 0.2, vol: 0.16 }); }
     };
   })();
   const soundBtn = document.getElementById('soundBtn');
@@ -1897,11 +1908,10 @@
       bar.style.height = barH + 'px';
       bar.style.boxSizing = 'border-box';
       bar.style.lineHeight = (barH - 2) + 'px';
-      bar.style.background = seg.event.done ? color + '40' : `linear-gradient(165deg, rgba(255,255,255,0.5) 0%, ${color}b8 45%, ${color}dd 100%)`;
-      bar.style.border = '1px solid rgba(255,255,255,0.65)';
-      bar.style.textShadow = '0 1px 2px rgba(0,0,0,0.22)';
+      bar.style.background = seg.event.done ? color + '26' : `linear-gradient(135deg, ${color}40 0%, ${color}70 100%)`;
+      bar.style.border = `1px solid ${color}80`;
       bar.style.backdropFilter = 'blur(6px)';
-      bar.style.color = '#fff';
+      bar.style.color = (COLOR_TAGS[seg.event.color] || COLOR_TAGS[DEFAULT_COLOR]).text;
       bar.style.fontSize = (mobile ? 9 : 10.5) + 'px';
       bar.style.fontWeight = '700';
       bar.style.padding = '0 8px';
@@ -1910,7 +1920,8 @@
       bar.style.textOverflow = 'ellipsis';
       bar.style.cursor = 'pointer';
       bar.style.pointerEvents = 'auto';
-      bar.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.8), 0 3px 8px ${color}40`;
+      bar.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.9), inset 1px 0 0 rgba(255,255,255,0.5), 0 1px 3px ${color}30`;
+      bar.classList.add('ice');
       bar.style.textDecoration = seg.event.done ? 'line-through' : 'none';
       bar.style.borderRadius = seg.isFirstSeg && seg.isLastSeg ? '999px'
         : seg.isFirstSeg ? '999px 5px 5px 999px'
@@ -2003,9 +2014,9 @@
           const color = tagColor(t);
           const pill = document.createElement('div');
           pill.className = 'pill' + (t.done ? ' done' : '');
-          pill.style.background = `linear-gradient(165deg, rgba(255,255,255,0.78) 0%, ${color}38 55%, ${color}5c 100%)`;
-          pill.style.border = '1px solid rgba(255,255,255,0.8)';
-          pill.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 2px ${color}30, 0 2px 6px ${color}2e`;
+          pill.style.background = `linear-gradient(135deg, ${color}1a 0%, ${color}33 100%)`;
+          pill.style.border = `1px solid ${color}59`;
+          pill.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.95), inset 1px 0 0 rgba(255,255,255,0.6), 0 1px 2px ${color}26`;
           pill.style.color = tagText(t);
           pill.innerHTML = `<span class="dot"></span><span>${escapeHtml(shortLabel(t.title))}</span>`;
           attachDrag(pill, t);
@@ -2013,7 +2024,12 @@
         });
         cell.appendChild(pillWrap);
 
-        if (singleDay.length > MAX_SHOWN_PILLS) {
+        if (singleDay.length > MAX_SHOWN_PILLS && isPhone()) {
+          const more = document.createElement('span');
+          more.className = 'more-label inrow';
+          more.textContent = `+${singleDay.length - MAX_SHOWN_PILLS}`;
+          dateRow.appendChild(more);
+        } else if (singleDay.length > MAX_SHOWN_PILLS) {
           const more = document.createElement('div');
           more.className = 'more-label';
           more.textContent = isPhone() ? `+${singleDay.length - MAX_SHOWN_PILLS}` : `+${singleDay.length - MAX_SHOWN_PILLS}개 더보기`;
