@@ -984,9 +984,9 @@
 
   /* ---- iPhone / small screens: fit on one screen ---- */
   @media (max-width: 640px) {
-    html, body { height: 100dvh; overflow: hidden; }
+    html, body { height: auto; min-height: 100dvh; }
     .app {
-      height: 100dvh; display: flex; flex-direction: column;
+      min-height: 100dvh; display: flex; flex-direction: column;
       padding: calc(env(safe-area-inset-top) + 10px) 10px calc(env(safe-area-inset-bottom) + 10px);
     }
     .mascot { top: calc(env(safe-area-inset-top) + 4px); right: 10px; }
@@ -1118,6 +1118,60 @@
     .modal-body { padding: 14px 16px 20px; }
     .modal-header { padding: 18px 18px 12px; }
     .color-select { gap: 10px; }
+  }
+
+  /* ====== refined look ====== */
+  body { background: #f2f4fa; letter-spacing: -0.01em; }
+  .title-group h1 { font-weight: 800; letter-spacing: -0.035em; }
+  .nav {
+    background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.9);
+    box-shadow: 0 8px 28px rgba(70,80,150,0.1), inset 0 1px 0 #fff;
+  }
+  .nav .month-label { font-weight: 700; font-size: 16px; letter-spacing: -0.03em; }
+  .nav button { border-radius: 14px; }
+  .nav button:active { transform: scale(0.9); }
+
+  .calendar {
+    background: rgba(255,255,255,0.56); border: 1px solid rgba(255,255,255,0.9);
+    border-radius: 30px; padding: 4px 8px 8px;
+    box-shadow: 0 24px 60px rgba(70,80,150,0.13), inset 0 1px 0 #fff;
+  }
+  .weekdays { border-bottom: none; }
+  .weekdays div { padding: 14px 0 8px; font-size: 10.5px; letter-spacing: 0.14em; font-weight: 700; color: rgba(29,29,31,0.3); }
+  .weekdays div:first-child { color: rgba(255,59,48,0.65); }
+  .weekdays div:last-child { color: rgba(10,132,255,0.7); }
+
+  .cell { border: none; isolation: isolate; background: transparent !important; }
+  .cell::before {
+    content: ""; position: absolute; inset: 2px; z-index: -1; border-radius: 18px;
+    border: 1px solid transparent; background: rgba(255,255,255,0.0);
+    transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .cell:hover::before { background: rgba(255,255,255,0.75); box-shadow: 0 8px 22px rgba(70,80,150,0.1); }
+  .cell.other-month .date-num { color: rgba(29,29,31,0.2); }
+  .cell.today::before { background: linear-gradient(150deg, rgba(10,132,255,0.12), rgba(191,90,242,0.12)); border-color: rgba(10,132,255,0.28); }
+  .cell.sel { box-shadow: none; }
+  .cell.sel::before { background: rgba(10,132,255,0.1); border-color: rgba(10,132,255,0.45); }
+  .cell.drop-target { box-shadow: none; }
+  .cell.drop-target::before { background: rgba(10,132,255,0.16); border-color: rgba(10,132,255,0.6); }
+  .cell.pasted::before { background: rgba(10,132,255,0.2); }
+  .date-num { font-size: 13px; font-weight: 600; letter-spacing: -0.02em; }
+  .cell.today .date-num { box-shadow: 0 4px 12px rgba(10,132,255,0.35); }
+
+  .pill { border-radius: 9px; font-weight: 600; letter-spacing: -0.02em; }
+  .day-bar { letter-spacing: -0.02em; }
+
+  .modal, .hover-preview { border: 1px solid rgba(255,255,255,0.85); }
+  .modal { border-radius: 30px; box-shadow: 0 30px 80px rgba(60,70,140,0.25), inset 0 1px 0 #fff; }
+  .submit-btn { border-radius: 16px; box-shadow: 0 10px 24px rgba(10,132,255,0.28); }
+  .todo-item { border-radius: 16px; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 2px 10px rgba(70,80,150,0.06); }
+
+  @media (max-width: 640px) {
+    .calendar { padding: 2px 4px 6px; border-radius: 26px; }
+    .weekdays div { padding: 10px 0 6px; }
+    .cell { padding: 5px 2px 3px; }
+    .cell::before { inset: 1.5px; border-radius: 13px; }
+    .date-num { font-size: 12px; }
   }
 </style>
 </head>
@@ -1439,39 +1493,53 @@
       if (ctx.state === 'suspended') ctx.resume();
       return ctx;
     }
-    function glass(freq, o) {
+    // water droplet: short sine "bloop" whose pitch sweeps up (or down) quickly
+    function drop(freq, o) {
       if (!on) return;
       o = o || {};
       try {
         const c = ac(); if (!c) return;
-        const vol = o.vol || 0.16, dur = o.dur || 0.5, t = c.currentTime + (o.delay || 0);
-        const master = c.createGain(); master.gain.value = vol; master.connect(c.destination);
-        [[1, 1], [2.76, 0.42], [5.4, 0.18], [8.93, 0.07]].forEach(([r, g], i) => {
-          const osc = c.createOscillator(); osc.type = 'sine'; osc.frequency.value = freq * r;
-          const e = c.createGain();
-          e.gain.setValueAtTime(0.0001, t);
-          e.gain.exponentialRampToValueAtTime(g, t + 0.003);
-          e.gain.exponentialRampToValueAtTime(0.0001, t + dur / (1 + i * 0.8));
-          osc.connect(e); e.connect(master);
-          osc.start(t); osc.stop(t + dur + 0.05);
-        });
+        const t = c.currentTime + (o.delay || 0);
+        const vol = o.vol || 0.22, dur = o.dur || 0.22;
+        const from = o.down ? freq * 1.9 : freq, to = o.down ? freq : freq * 1.9;
+        const osc = c.createOscillator(); osc.type = 'sine';
+        osc.frequency.setValueAtTime(from, t);
+        osc.frequency.exponentialRampToValueAtTime(to, t + 0.07);
+        const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3200;
+        const g = c.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        osc.connect(lp); lp.connect(g); g.connect(c.destination);
+        osc.start(t); osc.stop(t + dur + 0.05);
+        if (o.ripple !== false) { // faint echo ripple
+          const r = c.createOscillator(); r.type = 'sine';
+          r.frequency.setValueAtTime(from * 1.5, t + 0.09);
+          r.frequency.exponentialRampToValueAtTime(to * 1.5, t + 0.15);
+          const rg = c.createGain();
+          rg.gain.setValueAtTime(0.0001, t + 0.09);
+          rg.gain.exponentialRampToValueAtTime(vol * 0.28, t + 0.1);
+          rg.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+          r.connect(lp); lp.connect(rg); rg.connect(c.destination);
+          r.start(t + 0.09); r.stop(t + 0.36);
+        }
       } catch (e) {}
     }
-    const SCALE = [1319, 1480, 1568, 1760, 1976, 2093, 2349, 2637];
+    const SCALE = [392, 440, 494, 587, 659, 740, 784, 880];
     return {
       get on() { return on; },
       toggle() {
         on = !on;
         try { localStorage.setItem('todoSound', on ? 'on' : 'off'); } catch (e) {}
-        if (on) glass(2093, { dur: 0.5 });
+        if (on) drop(600);
         return on;
       },
-      click() { glass(1760, { dur: 0.28, vol: 0.13 }); },
-      color(i) { glass(SCALE[i % SCALE.length], { dur: 0.45, vol: 0.15 }); },
-      save() { glass(1568, { dur: 0.6 }); glass(2349, { delay: 0.09, dur: 0.9, vol: 0.15 }); glass(3136, { delay: 0.18, dur: 1.1, vol: 0.09 }); },
-      next() { glass(1175, { dur: 0.4 }); glass(1760, { delay: 0.06, dur: 0.5, vol: 0.14 }); },
-      prev() { glass(1760, { dur: 0.4 }); glass(1175, { delay: 0.06, dur: 0.5, vol: 0.14 }); },
-      drop() { glass(1397, { dur: 0.35 }); glass(1047, { delay: 0.05, dur: 0.45, vol: 0.14 }); }
+      click() { drop(520, { vol: 0.2, dur: 0.18, ripple: false }); },
+      color(i) { drop(SCALE[i % SCALE.length], { vol: 0.22 }); },
+      save() { drop(494, { dur: 0.26 }); drop(659, { delay: 0.12, dur: 0.26 }); drop(880, { delay: 0.24, dur: 0.4, vol: 0.2 }); },
+      next() { drop(420, { dur: 0.2 }); drop(560, { delay: 0.08, dur: 0.22, vol: 0.16 }); },
+      prev() { drop(560, { dur: 0.2, down: true }); drop(420, { delay: 0.08, dur: 0.22, vol: 0.16, down: true }); },
+      drop() { drop(440, { dur: 0.2 }); drop(330, { delay: 0.1, dur: 0.3, vol: 0.18 }); }
     };
   })();
   const soundBtn = document.getElementById('soundBtn');
@@ -2197,9 +2265,13 @@
     if (!isTouch()) setTimeout(() => titleInput.focus(), 100);
   }
 
+  function resetScroll() { window.scrollTo(0, 0); setTimeout(() => window.scrollTo(0, 0), 250); }
+  window.addEventListener('pageshow', resetScroll);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { if (!overlay.classList.contains('open')) resetScroll(); });
+
   function closeModal() {
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    window.scrollTo(0, 0);
+    resetScroll();
     overlay.classList.remove('open');
     selectedDateKey = null;
     resetForm();
@@ -2395,7 +2467,7 @@
     renderTodoList();
     renderCalendar();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    window.scrollTo(0, 0);
+    resetScroll();
   }
 
   /* ---------- title autocomplete ---------- */
