@@ -1611,6 +1611,16 @@
     .nav #prevBtn, .nav #nextBtn { width: 32px; height: 32px; }
     .nav .today-btn { height: 32px; }
   }
+
+  /* ====== v22: phone header exact sizes ====== */
+  @media (max-width: 640px) {
+    .theme-btn { width: 30px; height: 30px; }
+    .auth-bar { height: 30px; }
+    .auth-bar .login { height: 30px; }
+    .nav #prevBtn, .nav #nextBtn { width: 30px; height: 30px; }
+    .nav .today-btn { width: 62px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; }
+    .header { gap: 11.5px; }
+  }
 </style>
 </head>
 <body>
@@ -2983,7 +2993,7 @@
     } else {
       // phone: dock at the very bottom of the screen
       hoverPreview.style.top = 'auto';
-      hoverPreview.style.bottom = 'calc(env(safe-area-inset-bottom) + 12px)';
+      hoverPreview.style.bottom = '12px';
       listEl.style.maxHeight = '36vh';
     }
     hoverPreview.classList.add('show');
