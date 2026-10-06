@@ -1634,7 +1634,7 @@
 
   /* ====== v24: memo half-width + hourly time donut (phones) ====== */
   :root { --h0: 200; --h1: 335; --tcs: 82%; --tcl: 72%; }
-  html.dark { --h0: 14; --h1: 44; --tcs: 96%; --tcl: 58%; }
+  html.dark { --h0: 20; --h1: 30; --tcs: 100%; --tcl: 54%; }
   .bottom-row { display: none; }
   @media (max-width: 640px) {
     .bottom-row { display: flex; gap: 10px; flex: 1; min-height: 0; margin-top: 10px; transition: opacity .25s ease; }
@@ -1673,6 +1673,16 @@
   @keyframes tcSpin { to { transform: rotate(360deg); } }
   @keyframes tcBreath { from { opacity: 0.22; } to { opacity: 0.45; } }
   @keyframes tcNow { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+
+  /* ====== v25: donut only (no card frame) ====== */
+  @media (max-width: 640px) {
+    .time-card, html.dark .time-card {
+      background: none !important; border: none !important; box-shadow: none !important;
+      backdrop-filter: none !important; -webkit-backdrop-filter: none !important; padding: 0;
+    }
+    .tc-ring { max-width: 142px; }
+    .tc-center span { letter-spacing: 0.02em; }
+  }
 </style>
 </head>
 <body>
@@ -1733,7 +1743,7 @@
     <div class="tc-ring">
       <div class="tc-glow"></div>
       <svg class="tc-svg" id="tcSvg" viewBox="0 0 100 100" aria-hidden="true"></svg>
-      <div class="tc-center"><b id="tcMain">--</b><span>left</span></div>
+      <div class="tc-center"><b id="tcMain">--</b><span>make it count</span></div>
     </div>
   </div>
   </div>
