@@ -1311,7 +1311,6 @@
     box-shadow: 0 8px 24px rgba(60,70,140,0.12); will-change: transform;
     animation: noteIn .9s ease backwards; transition: box-shadow .2s ease, scale .2s ease;
   }
-  .float-note.held { cursor: grabbing; scale: 1.06; box-shadow: 0 16px 36px rgba(60,70,140,0.24); }
   @keyframes noteIn { from { opacity: 0; } to { opacity: 1; } }
 
   /* desktop: fit the screen, no page scroll */
@@ -1323,6 +1322,13 @@
     .calendar { flex: 1; min-height: 0; display: flex; flex-direction: column; }
     .grid { flex: 1; min-height: 0; grid-auto-rows: auto; grid-template-rows: repeat(var(--weeks, 6), minmax(0, 1fr)); }
     .memo-card { display: none !important; }
+    .calendar {
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(18px) saturate(170%); -webkit-backdrop-filter: blur(18px) saturate(170%);
+    }
+    .cell.other-month { background: rgba(140,140,160,0.02); }
+    .blob { opacity: 0.5; }
+    .blob.b3 { opacity: 0.38; }
   }
 
   /* phones */
@@ -1349,7 +1355,7 @@
     filter: drop-shadow(0 6px 18px rgba(60,70,140,0.1));
     color: rgba(29,29,31,0.8); transition: filter .2s ease;
   }
-  .float-note.held { scale: none; filter: drop-shadow(0 10px 24px rgba(60,70,140,0.22)); }
+  .float-note.held { scale: none; }
   .note-text { white-space: pre-line; word-break: keep-all; text-align: center; }
   .note-ship { display: block; transform: rotate(-12deg); animation: shipBob 3.2s ease-in-out infinite; filter: drop-shadow(0 1px 1px rgba(60,70,140,0.25)); }
   .ship-flame { animation: flameFlicker .5s steps(2) infinite; }
