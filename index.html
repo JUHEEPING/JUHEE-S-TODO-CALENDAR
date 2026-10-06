@@ -1696,6 +1696,8 @@
   }
   .hover-preview.above::before { top: auto; bottom: -18px; }
   .hover-preview.sheet::before { display: none; }
+
+  .hp-shield { position: fixed; z-index: 59; display: none; background: transparent; }
 </style>
 </head>
 <body>
@@ -1930,6 +1932,10 @@
   const formLabel = document.getElementById('formLabel');
   const cancelEditBtn = document.getElementById('cancelEditBtn');
   const hoverPreview = document.getElementById('hoverPreview');
+  // invisible zone sitting where the popup will end up, so the pointer is protected on its way there
+  const hpShield = document.createElement('div');
+  hpShield.className = 'hp-shield';
+  document.body.appendChild(hpShield);
   const suggestList = document.getElementById('suggestList');
 
   function loadData() {
@@ -2973,7 +2979,7 @@
   // true when the pointer went somewhere that is neither the calendar nor the popup
   function leftToOutside(e) {
     const to = e && e.relatedTarget;
-    return !(to && to.closest && to.closest('.calendar, .hover-preview'));
+    return !(to && to.closest && to.closest('.calendar, .hover-preview, .hp-shield'));
   }
 
   function scheduleHide(ms) {
@@ -3119,8 +3125,16 @@
         hoverPreview.style.top = Math.max(12, rect.bottom + 3) + 'px';
         hoverPreview.style.bottom = 'auto';
       }
+      {
+        const ph = hoverPreview.offsetHeight, pw = hoverPreview.offsetWidth;
+        const finalTop = above ? vh - Math.max(12, vh - rect.top + 3) - ph : Math.max(12, rect.bottom + 3);
+        const sTop = above ? finalTop : rect.bottom;
+        const sBottom = above ? rect.top : finalTop + ph;
+        hpShield.style.cssText = `display:block;left:${left}px;top:${sTop}px;width:${pw}px;height:${Math.max(0, sBottom - sTop)}px`;
+      }
       listEl.style.maxHeight = '';
     } else {
+      hpShield.style.display = 'none';
       // phone: dock at the very bottom of the screen
       hoverPreview.style.top = 'auto';
       hoverPreview.style.bottom = '12px';
@@ -3131,6 +3145,7 @@
   }
 
   function hideHoverPreview() {
+    hpShield.style.display = 'none';
     hoverKey = null;
     document.body.classList.remove('popup-open');
     hoverPreview.classList.remove('show');
@@ -3154,6 +3169,8 @@
   }, { capture: true, passive: false }));
 
   hoverPreview.addEventListener('mouseenter', () => { cancelHide(); clearTimeout(switchTimer); });
+  hpShield.addEventListener('mouseenter', () => { cancelHide(); clearTimeout(switchTimer); });
+  hpShield.addEventListener('mouseleave', e => { if (!isTouch()) scheduleHide(leftToOutside(e) ? 100 : 1500); });
   hoverPreview.addEventListener('mouseleave', e => { if (!isTouch()) scheduleHide(leftToOutside(e) ? 100 : 1500); });
   document.addEventListener('pointerdown', e => {
     if (isTouch() && !e.target.closest('.hover-preview, .cell, .overlay')) hideHoverPreview();
