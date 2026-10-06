@@ -1923,16 +1923,12 @@
         if (p && p.then) p.then(done).catch(() => {});
       }
     } catch (e) {}
-    const unlock = () => { if (ctx && ctx.state === 'suspended') ctx.resume(); };
-    ['pointerdown', 'touchstart', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { capture: true, passive: true }));
+    // iOS only lets audio start on touchend/click, so unlock on those too (and re-unlock if iOS interrupts)
+    const unlock = () => { if (ctx && ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} } };
+    ['pointerdown', 'touchstart', 'touchend', 'pointerup', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { capture: true, passive: true }));
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) unlock(); });
 
-    // fromDown: played on press (instant). A later click handler call for the same tap is skipped.
-    function play(rate, vol, fromDown) {
-      if (!on || !buf || !ctx) return;
-      const now = performance.now();
-      if (fromDown) { downAt = now; consumed = false; }
-      else if (!consumed && now - downAt < 800) { consumed = true; return; }
-      if (ctx.state === 'suspended') ctx.resume();
+    function fire(rate, vol) {
       const src = ctx.createBufferSource();
       src.buffer = buf;
       src.playbackRate.value = rate;
@@ -1940,6 +1936,21 @@
       g.gain.value = vol;
       src.connect(g); g.connect(ctx.destination);
       src.start(0);
+    }
+    // fromDown: played on press (instant). A later click-handler call for the same tap is skipped,
+    // unless the audio wasn't running yet on press (then the click-time call plays it).
+    function play(rate, vol, fromDown) {
+      if (!on || !buf || !ctx) return;
+      const now = performance.now();
+      if (ctx.state !== 'running') {
+        unlock();
+        if (fromDown) { consumed = true; return; }
+        ctx.resume().then(() => fire(rate, vol)).catch(() => {});
+        return;
+      }
+      if (fromDown) { downAt = now; consumed = false; }
+      else if (!consumed && now - downAt < 800) { consumed = true; return; }
+      fire(rate, vol);
     }
     return {
       get on() { return on; },
