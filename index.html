@@ -1686,6 +1686,16 @@
     .tc-ring { max-width: 142px; }
     .tc-center span { letter-spacing: 0.02em; }
   }
+
+  /* ====== v26: instant press frame, sticky hover popup ====== */
+  .cell.sel { transition: none; }
+  .hover-preview { overflow: visible; }
+  .hover-preview::before {
+    display: block; content: ""; position: absolute; left: 0; right: 0; top: -18px; height: 18px;
+    background: transparent; transform: none; animation: none; z-index: 0;
+  }
+  .hover-preview.above::before { top: auto; bottom: -18px; }
+  .hover-preview.sheet::before { display: none; }
 </style>
 </head>
 <body>
@@ -1902,7 +1912,7 @@
   let editingId = null;
   let editingOwnerKey = null;
   let selectedColor = DEFAULT_COLOR;
-  let hideTimer = null;
+  let hideTimer = null, switchTimer = null, hoverKey = null;
   let activeSuggestIndex = -1;
 
   const grid = document.getElementById('grid');
@@ -2933,8 +2943,27 @@
         snd.click();
         if (isTouch()) showHoverPreview(cell, c.key);
       });
-      cell.addEventListener('mouseenter', () => { if (isTouch() || clip) return; cancelHide(); showHoverPreview(cell, c.key); });
-      cell.addEventListener('mouseleave', () => { if (!isTouch()) scheduleHide(); });
+      // frame appears the instant a finger touches the day (no waiting for release)
+      cell.addEventListener('pointerdown', e => {
+        if (e.pointerType === 'mouse' || clip) return;
+        grid.querySelectorAll('.cell.sel').forEach(el => { if (el !== cell) el.classList.remove('sel'); });
+        cell.classList.add('sel');
+      });
+      const dropSel = () => setTimeout(() => { if (!hoverPreview.classList.contains('show')) cell.classList.remove('sel'); }, 400);
+      cell.addEventListener('pointercancel', () => cell.classList.remove('sel'));
+      cell.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') dropSel(); });
+      // desktop: moving across a neighbouring day on the way to the popup must not swap it out
+      cell.addEventListener('mouseenter', () => {
+        if (isTouch() || clip) return;
+        cancelHide();
+        if (hoverPreview.classList.contains('show') && hoverKey && hoverKey !== c.key) {
+          clearTimeout(switchTimer);
+          switchTimer = setTimeout(() => showHoverPreview(cell, c.key), 380);
+        } else {
+          showHoverPreview(cell, c.key);
+        }
+      });
+      cell.addEventListener('mouseleave', () => { clearTimeout(switchTimer); if (!isTouch()) scheduleHide(); });
       grid.appendChild(cell);
     });
 
@@ -2945,7 +2974,7 @@
 
   function scheduleHide() {
     cancelHide();
-    hideTimer = setTimeout(hideHoverPreview, 650);
+    hideTimer = setTimeout(hideHoverPreview, 1500);
   }
 
   function cancelHide() {
@@ -2959,6 +2988,7 @@
     if (clip || (!todos.length && !touch && !hol)) { hideHoverPreview(); return; }
     if (overlay.classList.contains('open')) return;
 
+    hoverKey = key;
     const [y, m, d] = key.split('-').map(Number);
 
     hoverPreview.innerHTML = '';
@@ -3069,15 +3099,16 @@
       let left = rect.left + rect.width / 2 - pWidth / 2;
       left = Math.max(12, Math.min(left, vw - pWidth - 12));
 
-      let top = rect.bottom + 8;
-      if (top + estHeight > vh - 12) {
-        top = rect.top - estHeight - 8;
-      }
-      top = Math.max(12, top);
-
+      const above = rect.bottom + 3 + estHeight > vh - 12;
+      hoverPreview.classList.toggle('above', above);
       hoverPreview.style.left = left + 'px';
-      hoverPreview.style.top = top + 'px';
-      hoverPreview.style.bottom = 'auto';
+      if (above) {
+        hoverPreview.style.top = 'auto';
+        hoverPreview.style.bottom = Math.max(12, vh - rect.top + 3) + 'px';
+      } else {
+        hoverPreview.style.top = Math.max(12, rect.bottom + 3) + 'px';
+        hoverPreview.style.bottom = 'auto';
+      }
       listEl.style.maxHeight = '';
     } else {
       // phone: dock at the very bottom of the screen
@@ -3090,6 +3121,7 @@
   }
 
   function hideHoverPreview() {
+    hoverKey = null;
     document.body.classList.remove('popup-open');
     hoverPreview.classList.remove('show');
     grid.querySelectorAll('.cell.sel').forEach(el => el.classList.remove('sel'));
@@ -3111,7 +3143,7 @@
     if (ev === 'click') { swallowTap = false; clearTimeout(swallowTimer); }
   }, { capture: true, passive: false }));
 
-  hoverPreview.addEventListener('mouseenter', cancelHide);
+  hoverPreview.addEventListener('mouseenter', () => { cancelHide(); clearTimeout(switchTimer); });
   hoverPreview.addEventListener('mouseleave', () => { if (!isTouch()) scheduleHide(); });
   document.addEventListener('pointerdown', e => {
     if (isTouch() && !e.target.closest('.hover-preview, .cell, .overlay')) hideHoverPreview();
