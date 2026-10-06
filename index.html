@@ -1208,6 +1208,74 @@
     }
     .nav .today-btn:hover { filter: none; transform: none; }
   }
+
+  /* ====== v7 overrides ====== */
+  /* uniform event chips: same height/shape as multi-day bars, no highlight */
+  .pill::after, .day-bar.ice::after { display: none !important; }
+  .pill, .day-bar.ice { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .pill {
+    height: 18px; padding: 0 9px; line-height: 1; border-radius: 999px; justify-content: flex-start;
+    font-size: 10.5px; font-weight: 700; box-shadow: none;
+  }
+  .pill .dot { display: none; }
+  .todo-pills { gap: 4px; }
+  .color-swatch { background: var(--c1); border: 1.5px solid var(--c2); box-shadow: none; border-radius: 11px; }
+  .color-swatch::before { display: none; }
+  .color-swatch.active { background: var(--c2); border-color: var(--c2); outline: 2px solid var(--c1); outline-offset: 2px; box-shadow: none; }
+
+  /* popup: rises from below, items cascade, no light sweep */
+  .hover-preview::before { display: none; }
+  .hover-preview.show::before { animation: none; }
+  .hover-preview { transform: translateY(38px) scale(0.96); transition: opacity .2s ease, transform .4s cubic-bezier(.18,.95,.3,1.18); }
+  .hover-preview:not(.show) { transform: translateY(26px) scale(0.95); transition: opacity .14s ease-in, transform .18s cubic-bezier(.5,0,.9,.6); }
+  .hover-preview.show { transform: translateY(0) scale(1); transition: opacity .22s ease, transform .42s cubic-bezier(.18,.95,.3,1.18); }
+  .hp-list { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+
+  /* header: title row + bell */
+  .title-row { display: flex; align-items: center; gap: 10px; }
+  .sound-btn {
+    flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; padding: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: rgba(29,29,31,0.5);
+    background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.95);
+    box-shadow: 0 2px 8px rgba(60,70,140,0.08); transition: transform .15s ease;
+  }
+  .sound-btn:active { transform: scale(0.88); }
+  .sound-btn svg { width: 16px; height: 16px; display: block; }
+
+  .memo-card { display: none; }
+  .memo-state { opacity: 0; transition: opacity .3s ease; color: #30b158; letter-spacing: 0; font-weight: 600; }
+  .memo-state.show { opacity: 1; }
+
+  @media (max-width: 640px) {
+    :root { --m-radius: 24px; }
+    .pill { height: 14px; padding: 0 5px; font-size: 9px; }
+    .todo-pills { gap: 3px; }
+    .calendar { border-radius: var(--m-radius); }
+    .title-group { padding-right: 0; }
+    .title-group h1 { font-size: 15.5px; }
+    .title-group p {
+      display: block; white-space: normal; font-size: 11.5px; line-height: 1.45; margin-top: 5px; padding-right: 56px;
+    }
+    .header { gap: 12px; margin-bottom: 14px; }
+    .month-label .yr { display: inline; font-size: inherit; margin: 0; color: var(--text-tertiary); font-weight: 700; }
+    .month-label .mo { font-size: inherit; }
+    .nav .month-label { font-size: 25px; font-weight: 800; letter-spacing: -0.045em; white-space: nowrap; }
+    .auth-bar { right: 62px; padding: 9px; }
+    .auth-bar:has(.login) { padding: 3px; }
+    .auth-bar .logout, .auth-short { display: none !important; }
+    .memo-card {
+      display: flex; flex-direction: column; flex: 1; min-height: 120px; margin-top: 14px; padding: 14px 18px 12px;
+      border-radius: var(--m-radius); background: var(--glass);
+      backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.9); box-shadow: var(--shadow-lg);
+    }
+    .memo-head { display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; color: var(--text-tertiary); }
+    #memoPad {
+      flex: 1; min-height: 0; width: 100%; border: none; border-radius: 0; background: transparent; box-shadow: none;
+      resize: none; outline: none; font-size: 16px; line-height: 1.6; padding: 8px 0 0; color: var(--text);
+    }
+    #memoPad:focus { background: transparent; box-shadow: none; border: none; }
+  }
 </style>
 </head>
 <body>
@@ -1223,11 +1291,10 @@
 
   <div class="header">
     <div class="title-group">
-      <h1>JUHEE'S TODO CALENDAR</h1>
+      <div class="title-row"><h1>JUHEE'S TODO CALENDAR</h1><button id="soundBtn" class="sound-btn" title="효과음" aria-label="효과음"></button></div>
       <p>중요하지 않은 일에 대해 깊게 생각하는 것은 삐뚤어진 못을 망치질하는 것과 같습니다.</p>
     </div>
     <div class="nav liquid">
-      <button id="soundBtn" title="효과음" aria-label="효과음">🔔</button>
       <button id="prevBtn">‹</button>
       <div class="month-label" id="monthLabel"></div>
       <button id="nextBtn">›</button>
@@ -1240,6 +1307,11 @@
       <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
     </div>
     <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="memo-card" id="memoCard">
+    <div class="memo-head"><span>MEMO</span><span class="memo-state" id="memoState">저장됨</span></div>
+    <textarea id="memoPad" placeholder="떠오르는 할 일을 바로 적어두세요" spellcheck="false"></textarea>
   </div>
 </div>
 
@@ -1437,7 +1509,7 @@
     cloudTimer = setTimeout(() => {
       const json = JSON.stringify(data);
       lastCloudJson = json;
-      cloudApi.setDoc(cloudDoc, { data: json, updatedAt: Date.now() })
+      cloudApi.setDoc(cloudDoc, { data: json, memo: memoText, updatedAt: Date.now() })
         .catch(e => console.warn('Firestore save failed', e));
     }, 400);
   }
@@ -1508,12 +1580,17 @@
               renderCalendar();
             }
           }
+          const d = snap.exists() ? snap.data() : {};
+          if (typeof d.memo === 'string' && d.memo !== memoText && document.activeElement !== memoPad) {
+            memoText = d.memo; memoPad.value = memoText;
+            try { localStorage.setItem(MEMO_KEY, memoText); } catch (e) {}
+          }
           st.set('ok', '동기화됨 · ' + (user.displayName || user.email), '동기화됨');
           if (first) {
             first = false;
             cloudApi = fs;
             cloudDoc = ref;
-            if (!snap.exists()) cloudSave(); // first login: upload this device's data
+            if (!snap.exists() || (typeof d.memo !== 'string' && memoText)) cloudSave(); // first login: upload this device's data
           }
         }, e => { st.set('err', '동기화 오류 (권한/설정 확인)', '오류'); console.warn(e); });
       });
@@ -1537,40 +1614,54 @@
       if (ctx.state === 'suspended') ctx.resume();
       return ctx;
     }
-    // soft bell: sine partials with a long, gentle decay
-    function bell(freq, o) {
+    // iPhone passcode keypad: very short, low, slightly dull "thock"
+    let noiseBuf = null;
+    function thock(freq, o) {
       if (!on) return;
       o = o || {};
       try {
         const c = ac(); if (!c) return;
-        const t = c.currentTime + (o.delay || 0), vol = o.vol || 0.16, dur = o.dur || 0.7;
-        const master = c.createGain(); master.gain.value = vol; master.connect(c.destination);
-        [[1, 1, 1], [2, 0.32, 0.6], [2.76, 0.16, 0.42], [4.07, 0.06, 0.25]].forEach(([r, g, d]) => {
-          const osc = c.createOscillator(); osc.type = 'sine'; osc.frequency.value = freq * r;
-          const e = c.createGain();
-          e.gain.setValueAtTime(0.0001, t);
-          e.gain.exponentialRampToValueAtTime(g, t + 0.004);
-          e.gain.exponentialRampToValueAtTime(0.0001, t + dur * d);
-          osc.connect(e); e.connect(master);
-          osc.start(t); osc.stop(t + dur + 0.05);
-        });
+        const t = c.currentTime + (o.delay || 0), vol = o.vol || 0.55, dur = o.dur || 0.055;
+        const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400;
+        lp.connect(c.destination);
+        const osc = c.createOscillator(); osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.55, t + dur);
+        const g = c.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(vol, t + 0.004);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        osc.connect(g); g.connect(lp);
+        osc.start(t); osc.stop(t + dur + 0.03);
+        // soft contact texture
+        if (!noiseBuf) {
+          noiseBuf = c.createBuffer(1, Math.floor(c.sampleRate * 0.03), c.sampleRate);
+          const d = noiseBuf.getChannelData(0);
+          for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+        }
+        const src = c.createBufferSource(); src.buffer = noiseBuf;
+        const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 700; bp.Q.value = 0.9;
+        const ng = c.createGain();
+        ng.gain.setValueAtTime(vol * 0.5, t);
+        ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.02);
+        src.connect(bp); bp.connect(ng); ng.connect(lp);
+        src.start(t); src.stop(t + 0.03);
       } catch (e) {}
     }
-    const SCALE = [1047, 1175, 1319, 1568, 1760, 2093, 2349, 2637];
     return {
       get on() { return on; },
       toggle() {
         on = !on;
         try { localStorage.setItem('todoSound', on ? 'on' : 'off'); } catch (e) {}
-        if (on) bell(1760);
+        if (on) thock(260);
         return on;
       },
-      click() { bell(1760, { dur: 0.55, vol: 0.13 }); },
-      color(i) { bell(SCALE[i % SCALE.length], { dur: 0.65 }); },
-      save() { bell(1976, { dur: 0.9, vol: 0.15 }); },
-      next() { bell(1568, { dur: 0.55 }); },
-      prev() { bell(1319, { dur: 0.55 }); },
-      drop() { bell(1397, { dur: 0.6 }); }
+      click() { thock(260); },
+      color(i) { thock(215 + i * 16); },
+      save() { thock(230, { dur: 0.07 }); },
+      next() { thock(300); },
+      prev() { thock(215); },
+      drop() { thock(240, { dur: 0.065 }); }
     };
   })();
   const soundBtn = document.getElementById('soundBtn');
@@ -1663,6 +1754,30 @@
       syncEndDateUI();
     }
   });
+
+  /* ---------- quick memo (autosaves on blur / pause / leaving) ---------- */
+  const MEMO_KEY = 'todoCalendarMemo';
+  const memoPad = document.getElementById('memoPad');
+  const memoState = document.getElementById('memoState');
+  let memoText = '', memoTimer = null, memoFlash = null;
+  try { memoText = localStorage.getItem(MEMO_KEY) || ''; } catch (e) {}
+  memoPad.value = memoText;
+  function saveMemo() {
+    clearTimeout(memoTimer);
+    if (memoPad.value === memoText) return;
+    memoText = memoPad.value;
+    try { localStorage.setItem(MEMO_KEY, memoText); } catch (e) {}
+    cloudSave();
+    memoState.classList.add('show');
+    clearTimeout(memoFlash);
+    memoFlash = setTimeout(() => memoState.classList.remove('show'), 1200);
+  }
+  memoPad.addEventListener('input', () => { clearTimeout(memoTimer); memoTimer = setTimeout(saveMemo, 800); });
+  memoPad.addEventListener('blur', saveMemo);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveMemo(); });
+  window.addEventListener('pagehide', saveMemo);
+  // tap anywhere outside the memo to finish & save
+  document.addEventListener('pointerdown', e => { if (document.activeElement === memoPad && e.target !== memoPad) memoPad.blur(); });
 
   const isTouch = () => window.matchMedia('(hover: none)').matches;
   const isPhone = () => window.innerWidth <= 640;
@@ -1983,8 +2098,8 @@
       bar.style.height = barH + 'px';
       bar.style.boxSizing = 'border-box';
       bar.style.lineHeight = (barH - 2) + 'px';
-      bar.style.background = seg.event.done ? color + '26' : `linear-gradient(135deg, ${color}40 0%, ${color}70 100%)`;
-      bar.style.border = `1px solid ${color}80`;
+      bar.style.background = seg.event.done ? color + '1f' : color + '33';
+      bar.style.border = `1px solid ${color}`;
       bar.style.backdropFilter = 'blur(6px)';
       bar.style.color = (COLOR_TAGS[seg.event.color] || COLOR_TAGS[DEFAULT_COLOR]).text;
       bar.style.fontSize = (mobile ? 9 : 10.5) + 'px';
@@ -1995,7 +2110,7 @@
       bar.style.textOverflow = 'ellipsis';
       bar.style.cursor = 'pointer';
       bar.style.pointerEvents = 'auto';
-      bar.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.9), inset 1px 0 0 rgba(255,255,255,0.5), 0 1px 3px ${color}30`;
+      bar.style.boxShadow = 'none';
       bar.classList.add('ice');
       bar.style.textDecoration = seg.event.done ? 'line-through' : 'none';
       bar.style.borderRadius = seg.isFirstSeg && seg.isLastSeg ? '999px'
@@ -2081,6 +2196,7 @@
       if (singleDay.length) {
         const pillWrap = document.createElement('div');
         pillWrap.className = 'todo-pills';
+        pillWrap.style.gap = barGap + 'px';
         const laneCount = dateLaneCount[c.key] || 0;
         if (laneCount) pillWrap.style.marginTop = (laneCount * (barH + barGap)) + 'px';
 
@@ -2089,9 +2205,9 @@
           const color = tagColor(t);
           const pill = document.createElement('div');
           pill.className = 'pill' + (t.done ? ' done' : '');
-          pill.style.background = `linear-gradient(135deg, ${color}1a 0%, ${color}33 100%)`;
-          pill.style.border = `1px solid ${color}59`;
-          pill.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.95), inset 1px 0 0 rgba(255,255,255,0.6), 0 1px 2px ${color}26`;
+          pill.style.height = barH + 'px';
+          pill.style.background = t.done ? color + '1f' : color + '33';
+          pill.style.border = `1px solid ${color}`;
           pill.style.color = tagText(t);
           pill.innerHTML = `<span class="dot"></span><span>${escapeHtml(shortLabel(t.title))}</span>`;
           attachDrag(pill, t);
@@ -2293,7 +2409,7 @@
     if (isTouch() && !e.target.closest('.hover-preview, .cell, .overlay')) hideHoverPreview();
   });
 
-  window.addEventListener('scroll', hideHoverPreview, true);
+  window.addEventListener('scroll', e => { if (hoverPreview.contains(e.target)) return; hideHoverPreview(); }, true);
   window.addEventListener('resize', () => { hideHoverPreview(); renderCalendar(); });
 
   /* ---------- modal ---------- */
