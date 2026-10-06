@@ -1516,24 +1516,24 @@
   .constellations { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .8s ease; animation: constTwinkle 9s ease-in-out infinite alternate; }
   @keyframes constTwinkle { from { opacity: var(--cmin, 0.55); } to { opacity: 1; } }
   html.dark .constellations { opacity: 1; }
-  html.dark body { background: #0a1230; }
+  html.dark body { background: #000000; }
   html.dark .blob { opacity: 0.7; filter: blur(95px); }
   html.dark .blob.b1 { background: radial-gradient(circle, #3b63ff 0%, #2a3fc4 38%, transparent 70%); }
   html.dark .blob.b2 { background: radial-gradient(circle, #9b4dff 0%, #5d2bd1 40%, transparent 70%); opacity: 0.62; }
   html.dark .blob.b3 { background: radial-gradient(circle, #ff6a2f 0%, #c93a14 40%, transparent 70%); opacity: 0.55; }
-  html.dark .calendar, html.dark .memo-card { background: rgba(12,22,58,0.74) !important; border-color: rgba(255,255,255,0.09) !important; }
-  html.dark .nav { background: rgba(12,22,58,0.42); }
-  html.dark .hover-preview { background: rgba(12,20,52,0.9); }
-  html.dark .modal { background: rgba(12,20,52,0.92); }
-  html.dark .confirm-card { background: rgba(14,22,56,0.95); }
-  html.dark .suggest-list { background: rgba(14,22,56,0.97); }
-  html.dark .theme-btn .sync-dot { border-color: #0a1230; }
+  html.dark .calendar, html.dark .memo-card { background: rgba(6,8,16,0.74) !important; border-color: rgba(255,255,255,0.09) !important; }
+  html.dark .nav { background: rgba(6,8,16,0.42); }
+  html.dark .hover-preview { background: rgba(8,10,20,0.9); }
+  html.dark .modal { background: rgba(8,10,20,0.92); }
+  html.dark .confirm-card { background: rgba(10,12,24,0.95); }
+  html.dark .suggest-list { background: rgba(10,12,24,0.97); }
+  html.dark .theme-btn .sync-dot { border-color: #000000; }
   html.dark .float-note {
     background: radial-gradient(closest-side, rgba(150,160,220,0.34) 0%, rgba(150,160,220,0.22) 45%, rgba(150,160,220,0.08) 72%, rgba(150,160,220,0) 100%);
     filter: drop-shadow(0 0 16px rgba(170,180,255,0.18));
   }
   @media (max-width: 640px) {
-    html.dark body.memo-editing .memo-card { background: rgba(10,18,48,0.97) !important; }
+    html.dark body.memo-editing .memo-card { background: rgba(4,6,14,0.97) !important; }
   }
 
   /* ====== PC: lighter type for events and floating notes ====== */
@@ -1620,6 +1620,16 @@
     .nav #prevBtn, .nav #nextBtn { width: 30px; height: 30px; }
     .nav .today-btn { width: 62px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; }
     .header { gap: 11.5px; }
+  }
+
+  /* ====== v23: phone spacing ====== */
+  @media (max-width: 640px) {
+    .header { margin-bottom: 11.5px; }
+    .cell { aspect-ratio: 1 / 1.18; }
+    .memo-card { margin-top: 10px; transition: opacity .25s ease; }
+    .app { padding-bottom: 12px; }
+    .hover-preview.sheet { left: 10px !important; right: 10px; }
+    body.popup-open .memo-card { opacity: 0; pointer-events: none; }
   }
 </style>
 </head>
@@ -2996,10 +3006,12 @@
       hoverPreview.style.bottom = '12px';
       listEl.style.maxHeight = '36vh';
     }
+    document.body.classList.toggle('popup-open', sheet);
     hoverPreview.classList.add('show');
   }
 
   function hideHoverPreview() {
+    document.body.classList.remove('popup-open');
     hoverPreview.classList.remove('show');
     grid.querySelectorAll('.cell.sel').forEach(el => el.classList.remove('sel'));
   }
