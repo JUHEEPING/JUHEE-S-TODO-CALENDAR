@@ -1592,6 +1592,16 @@
     .more-label.inrow { font-size: 8.5px; }
     html.dark .nav, html.dark .nav:hover { background: none !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
   }
+
+  /* ====== v20: aligned chip text, calmer phone header ====== */
+  @media (max-width: 640px) {
+    .pill { justify-content: flex-start; text-align: left; gap: 0; padding: 0 2px; }
+    .nav { gap: 6px; }
+    .nav #prevBtn, .nav #nextBtn { width: 32px; height: 32px; font-size: 17px; }
+    .nav .today-btn { height: 32px; padding: 0 12px; font-size: 11.5px; }
+    .nav .month-label { font-size: 21px; }
+    .header { gap: 8px; margin-bottom: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -2682,7 +2692,7 @@
       bar.style.color = tagText(seg.event);
       bar.style.fontSize = (mobile ? 7.2 : 10.5) + 'px';
       bar.style.fontWeight = mobile ? '400' : '700';
-      bar.style.padding = '0 8px';
+      bar.style.padding = mobile ? '0 2px' : '0 8px';
       bar.style.whiteSpace = 'nowrap';
       bar.style.overflow = 'hidden';
       bar.style.textOverflow = 'ellipsis';
