@@ -2952,20 +2952,15 @@
       const dropSel = () => setTimeout(() => { if (!hoverPreview.classList.contains('show')) cell.classList.remove('sel'); }, 400);
       cell.addEventListener('pointercancel', () => cell.classList.remove('sel'));
       cell.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') dropSel(); });
-      // desktop: moving across a neighbouring day on the way to the popup must not swap it out
+      // desktop: hovering a day shows its popup right away (also when coming from another day)
       cell.addEventListener('mouseenter', () => {
         if (isTouch() || clip) return;
         cancelHide();
-        if (hoverPreview.classList.contains('show') && hoverKey && hoverKey !== c.key) {
-          clearTimeout(switchTimer);
-          switchTimer = setTimeout(() => showHoverPreview(cell, c.key), 380);
-        } else {
-          showHoverPreview(cell, c.key);
-        }
+        showHoverPreview(cell, c.key);
       });
       cell.addEventListener('mouseleave', e => {
         clearTimeout(switchTimer);
-        if (!isTouch()) scheduleHide(leftToOutside(e) ? 160 : 1500);
+        if (!isTouch()) scheduleHide(leftToOutside(e) ? 100 : 1500);
       });
       grid.appendChild(cell);
     });
@@ -2997,6 +2992,12 @@
     if (clip || (!todos.length && !touch && !hol)) { hideHoverPreview(); return; }
     if (overlay.classList.contains('open')) return;
 
+    if (hoverPreview.classList.contains('show') && hoverKey && hoverKey !== key) {
+      hoverPreview.style.transition = 'none';
+      hoverPreview.classList.remove('show');
+      void hoverPreview.offsetWidth;
+      hoverPreview.style.transition = '';
+    }
     hoverKey = key;
     const [y, m, d] = key.split('-').map(Number);
 
@@ -3153,7 +3154,7 @@
   }, { capture: true, passive: false }));
 
   hoverPreview.addEventListener('mouseenter', () => { cancelHide(); clearTimeout(switchTimer); });
-  hoverPreview.addEventListener('mouseleave', e => { if (!isTouch()) scheduleHide(leftToOutside(e) ? 160 : 1500); });
+  hoverPreview.addEventListener('mouseleave', e => { if (!isTouch()) scheduleHide(leftToOutside(e) ? 100 : 1500); });
   document.addEventListener('pointerdown', e => {
     if (isTouch() && !e.target.closest('.hover-preview, .cell, .overlay')) hideHoverPreview();
   });
