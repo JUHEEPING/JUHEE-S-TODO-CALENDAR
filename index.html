@@ -1357,7 +1357,7 @@
   }
   .float-note.held { scale: none; }
   .note-text { white-space: pre-line; word-break: keep-all; text-align: center; }
-  .note-ship { display: block; transform: rotate(-6deg); animation: shipBob 3.2s ease-in-out infinite; filter: drop-shadow(0 1px 1px rgba(60,70,140,0.25)); }
+  .note-ship { display: block; transform: none; animation: shipBob 3.2s ease-in-out infinite; filter: drop-shadow(0 1px 1px rgba(60,70,140,0.25)); }
   .ufo-light { animation: ufoBlink 1.2s steps(2) infinite; }
   .ufo-beam { opacity: 0.55; animation: beamPulse 2.4s ease-in-out infinite; }
   @keyframes ufoBlink { 0% { fill: #ffd44d; } 100% { fill: #ff8fb1; } }
@@ -1377,6 +1377,17 @@
     }
     .auth-bar:not(:has(.login)) {
       background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); box-shadow: none;
+    }
+  }
+
+  .memo-right { display: flex; align-items: center; gap: 10px; }
+  .memo-done { display: none; border: none; background: rgba(10,132,255,0.12); color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 0; padding: 5px 12px; border-radius: 999px; font-family: inherit; }
+  @media (max-width: 640px) {
+    body.memo-editing .memo-done { display: inline-block; }
+    body.memo-editing .memo-card {
+      position: fixed; left: 10px; right: 10px; margin: 0; z-index: 120;
+      top: calc(var(--vvt, 0px) + 10px); height: calc(var(--vvh, 100dvh) - 20px); min-height: 0;
+      background: rgba(255,255,255,0.92) !important;
     }
   }
 </style>
@@ -1413,7 +1424,7 @@
   </div>
 
   <div class="memo-card" id="memoCard">
-    <div class="memo-head"><span>MEMO</span><span class="memo-state" id="memoState">저장됨</span></div>
+    <div class="memo-head"><span>MEMO</span><span class="memo-right"><span class="memo-state" id="memoState">저장됨</span><button class="memo-done" id="memoDone" type="button">완료</button></span></div>
     <textarea id="memoPad" placeholder="떠오르는 할 일을 바로 적어두세요" spellcheck="false"></textarea>
   </div>
 </div>
@@ -1880,6 +1891,23 @@
   }
   memoPad.addEventListener('input', () => { clearTimeout(memoTimer); memoTimer = setTimeout(saveMemo, 800); });
   memoPad.addEventListener('blur', saveMemo);
+  // while typing on a phone, lift the memo card into the visible area above the keyboard
+  const vv = window.visualViewport;
+  function syncVV() {
+    if (!vv) return;
+    const st = document.documentElement.style;
+    st.setProperty('--vvh', vv.height + 'px');
+    st.setProperty('--vvt', vv.offsetTop + 'px');
+  }
+  if (vv) { vv.addEventListener('resize', syncVV); vv.addEventListener('scroll', syncVV); }
+  syncVV();
+  memoPad.addEventListener('focus', () => {
+    if (!isPhone()) return;
+    document.body.classList.add('memo-editing');
+    syncVV(); setTimeout(syncVV, 150); setTimeout(syncVV, 400);
+  });
+  memoPad.addEventListener('blur', () => { document.body.classList.remove('memo-editing'); resetScroll(); });
+  document.getElementById('memoDone').addEventListener('click', () => memoPad.blur());
   document.addEventListener('visibilitychange', () => { if (document.hidden) saveMemo(); });
   window.addEventListener('pagehide', saveMemo);
   // tap anywhere outside the memo to finish & save
@@ -1910,26 +1938,67 @@
     return lines.join('\n');
   }
 
-  // tiny pixel-art UFO (same crisp style as the Mars icon)
-  const SHIP_MAP = [
-    '....DHDDD....',
-    '...DHDDDDD...',
-    '.WWWWWWWWWWW.',
-    'WWWLWWLWWLWWW',
-    '.SSSSSSSSSSS.',
-    '.....BBB.....',
-    '....BBBBB....',
-    '...BBBBBBB...'
+  // tiny pixel-art icons chosen from the memo's meaning (keyword match)
+  const ICON_COL = { K: '#4b5068', S: '#c9cfe2', W: '#ffffff', R: '#ff5f6d', B: '#5aa2ff', C: '#8fd6ff',
+                     G: '#3ecb7a', Y: '#ffcf3d', O: '#ff9f43', P: '#ff9ec7', N: '#b27a44' };
+  const ICONS = {
+    dumbbell: ['..K.....K..', '.KRK...KRK.', 'KRRKKKKKRRK', 'KRRKKKKKRRK', '.KRK...KRK.', '..K.....K..'],
+    shower: ['...KKK...', '..KSSSK..', '.KSSSSSK.', 'KKKKKKKKK', '.........', '.C..C..C.', '..C..C...', '.C..C..C.', '..C...C..'],
+    tv: ['...K...K...', '....K.K....', '.....K.....', 'KKKKKKKKKKK', 'KCCCCCCCCCK', 'KCCWCCCCCCK', 'KCCWWCCCCCK', 'KCCWCCCCCCK', 'KCCCCCCCCCK', 'KKKKKKKKKKK', '.K.......K.'],
+    flower: ['...PPP...', '..PPPPP..', '..PPYPP..', '..PPPPP..', '...PPP...', '....G....', '..GG.GG..', '...GGG...', '....G....', '..NNNNN..', '...NNN...'],
+    broom: ['.......NN', '......NN.', '.....NN..', '....NN...', '...KKK...', '..YYYYY..', '.YYYYYYY.', '.Y.Y.Y.Y.'],
+    shirt: ['..KK.KK..', '.KBBKBBK.', 'KKBBBBBKK', '.KBBBBBK.', '.KBBBBBK.', '.KBBBBBK.', '.KKKKKKK.'],
+    trash: ['..KKK..', 'KKKKKKK', '.KSSSK.', '.KSKSK.', '.KSKSK.', '.KSKSK.', '.KSSSK.', '.KKKKK.'],
+    bowl: ['...WWW...', '..WWWWW..', 'KKKKKKKKK', 'KRRRRRRRK', '.KRRRRRK.', '..KKKKK..'],
+    coffee: ['...S.S...', '....S.S..', 'KKKKKKK..', 'KNNNNNKKK', 'KNNNNNK.K', 'KNNNNNK.K', 'KNNNNNKKK', '.KNNNNK..', '..KKKK...'],
+    cart: ['KK.........', '.KKKKKKKKK.', '..KRRRRRK..', '..KRRRRRK..', '...KKKKK...', '...K...K...', '..KKK.KKK..'],
+    phone: ['.KKKKK.', 'KSSSSSK', 'KSCCCSK', 'KSCCCSK', 'KSCCCSK', 'KSCCCSK', 'KSSSSSK', 'KSKSKSK', 'KSSSSSK', '.KKKKK.'],
+    cross: ['...RRR...', '...RRR...', '...RRR...', 'RRRRRRRRR', 'RRRRRRRRR', 'RRRRRRRRR', '...RRR...', '...RRR...', '...RRR...'],
+    book: ['.KKKK.KKKK.', 'KWWWWKWWWWK', 'KWBBWKWBBWK', 'KWWWWKWWWWK', 'KWBBWKWBBWK', 'KWWWWKWWWWK', '.KKKK.KKKK.'],
+    coin: ['..KKKKK..', '.KYYYYYK.', 'KYWYYYYYK', 'KYWYOOYYK', 'KYYYOOYYK', 'KYYYYYYYK', '.KYYYYYK.', '..KKKKK..'],
+    briefcase: ['...KKK...', '...K.K...', 'KKKKKKKKK', 'KNNNNNNNK', 'KNNNYNNNK', 'KNNNNNNNK', 'KNNNNNNNK', 'KKKKKKKKK'],
+    mail: ['KKKKKKKKK', 'KKWWWWWKK', 'KWKWWWKWK', 'KWWKWKWWK', 'KWWWKWWWK', 'KWWWWWWWK', 'KKKKKKKKK'],
+    plane: ['....K....', '...KSK...', '...KSK...', 'KKKKSKKKK', 'KSSSSSSSK', '.KKKSKKK.', '...KSK...', '..KKSKK..', '..KKKKK..'],
+    gift: ['..RR.RR..', '...RRR...', 'PPPPRPPPP', 'PPPPRPPPP', 'RRRRRRRRR', 'PPPPRPPPP', 'PPPPRPPPP', 'PPPPRPPPP'],
+    moon: ['...YYYY..', '..YYY...Y', '.YYY.....', '.YYY.....', '.YYY.....', '..YYY....', '...YYYY..'],
+    car: ['...KKKKK...', '..KCCKCCK..', '.KKKKKKKKK.', 'KRRRRRRRRRK', 'KRRRRRRRRRK', '.KKK...KKK.', '.KKK...KKK.'],
+    heart: ['..RR.RR..', '.RRRRRRR.', 'RRWRRRRRR', 'RRRRRRRRR', '.RRRRRRR.', '..RRRRR..', '...RRR...', '....R....']
+  };
+  // first match wins (order matters)
+  const ICON_RULES = [
+    ['dumbbell', /운동|헬스|러닝|런닝|조깅|달리기|요가|필라테스|\bpt\b|gym|스쿼트|수영|등산|산책|스트레칭/i],
+    ['shower', /샤워|목욕|세수|씻|양치|머리\s?감/],
+    ['tv', /넷플|netflix|영화|드라마|애니|티비|\btv\b|시청|유튜브|youtube|웹툰|왓챠|디즈니/i],
+    ['flower', /꽃|화분|식물|물\s?주기|정원|화초/],
+    ['trash', /쓰레기|분리수거|버리/],
+    ['broom', /청소|먼지|걸레|정리|치우|쓸기/],
+    ['shirt', /빨래|세탁|옷|다림질/],
+    ['bowl', /설거지|밥|식사|점심|저녁|아침|요리|배달|먹/],
+    ['coffee', /커피|카페|라떼|아메리카노|음료/],
+    ['cart', /장보기|마트|쇼핑|구매|주문|택배|사기/],
+    ['phone', /전화|통화|연락|문자|카톡/],
+    ['cross', /병원|치과|약국|복용|진료|검진|주사|건강/],
+    ['book', /공부|독서|책|시험|과제|숙제|강의|수업|도서관|읽/],
+    ['coin', /은행|돈|결제|송금|월세|입금|대출|세금|카드|환전/],
+    ['briefcase', /회의|미팅|출근|업무|보고|발표|면접|프로젝트|회사|퇴근/],
+    ['mail', /메일|편지|이메일|우편/],
+    ['plane', /여행|비행기|공항|항공|출국|휴가/],
+    ['gift', /선물|생일|파티|기념일|축하/],
+    ['moon', /잠|수면|취침|낮잠|일찍\s?자/],
+    ['car', /운전|주유|세차|자동차|차량|정비/]
   ];
-  const SHIP_COL = { D: '#9fd8ff', H: '#e8f7ff', W: '#f5f7fc', S: '#c3cade', L: '#ffd44d', B: '#fff0a0' };
-  function shipSvg() {
+  function pickIcon(text) {
+    for (const [name, re] of ICON_RULES) if (re.test(text)) return name;
+    return 'heart';
+  }
+  function shipSvg(text) {
+    const map = ICONS[pickIcon(text)];
+    const rows = map.length, cols = Math.max(...map.map(r => r.length));
     let r = '';
-    SHIP_MAP.forEach((row, y) => [...row].forEach((ch, x) => {
-      if (ch === '.') return;
-      const cls = ch === 'L' ? ' class="ufo-light"' : ch === 'B' ? ' class="ufo-beam"' : '';
-      r += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${SHIP_COL[ch]}"${cls}/>`;
+    map.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (ch !== '.') r += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${ICON_COL[ch]}"/>`;
     }));
-    return `<svg class="note-ship" viewBox="0 0 13 8" width="30" height="18.5" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+    return `<svg class="note-ship" viewBox="0 0 ${cols} ${rows}" width="${cols * 2.6}" height="${rows * 2.6}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
   }
 
   function placeNote(n) { n.el.style.transform = `translate(${n.x}px, ${n.y}px)`; }
@@ -1939,7 +2008,7 @@
     const tag = COLOR_TAGS[COLOR_KEYS[(i * 3 + text.length) % COLOR_KEYS.length]];
     const el = document.createElement('div');
     el.className = 'float-note';
-    el.innerHTML = shipSvg();
+    el.innerHTML = shipSvg(text);
     const label = document.createElement('span');
     label.className = 'note-text';
     label.textContent = wrapNote(text);
@@ -2687,7 +2756,7 @@
 
   function resetScroll() { window.scrollTo(0, 0); setTimeout(() => window.scrollTo(0, 0), 250); }
   window.addEventListener('pageshow', resetScroll);
-  if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { if (!overlay.classList.contains('open')) resetScroll(); });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { if (!overlay.classList.contains('open') && !document.body.classList.contains('memo-editing')) resetScroll(); });
 
   function closeModal() {
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
