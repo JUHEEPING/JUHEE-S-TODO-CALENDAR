@@ -1631,6 +1631,48 @@
     .hover-preview.sheet { left: 10px !important; right: 10px; }
     body.popup-open .memo-card { opacity: 0; pointer-events: none; }
   }
+
+  /* ====== v24: memo half-width + hourly time donut (phones) ====== */
+  :root { --h0: 200; --h1: 335; --tcs: 82%; --tcl: 72%; }
+  html.dark { --h0: 182; --h1: 292; --tcs: 92%; --tcl: 62%; }
+  .bottom-row { display: none; }
+  @media (max-width: 640px) {
+    .bottom-row { display: flex; gap: 10px; flex: 1; min-height: 0; margin-top: 10px; transition: opacity .25s ease; }
+    .bottom-row .memo-card { flex: 0 0 calc(50% - 5px); min-width: 0; margin-top: 0; }
+    body.popup-open .bottom-row { opacity: 0; pointer-events: none; }
+    #memoPad { width: 133.4%; height: 133.4%; transform: scale(0.75); }
+    .time-card {
+      flex: 0 0 calc(50% - 5px); min-width: 0; display: flex; flex-direction: column; align-items: center;
+      padding: 14px 10px 12px; border-radius: var(--m-radius);
+      background: rgba(255,255,255,0.5); backdrop-filter: blur(18px) saturate(170%); -webkit-backdrop-filter: blur(18px) saturate(170%);
+      border: 1px solid rgba(255,255,255,0.9); box-shadow: var(--shadow-lg);
+    }
+    html.dark .time-card { background: rgba(6,8,16,0.74); border-color: rgba(255,255,255,0.08); }
+    body.memo-editing .time-card { display: none; }
+    .tc-head { align-self: flex-start; padding-left: 8px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; color: var(--text-tertiary); }
+    .tc-ring { position: relative; width: 100%; max-width: 134px; aspect-ratio: 1; margin: auto 0; }
+    .tc-glow {
+      position: absolute; inset: -12%; border-radius: 50%; opacity: 0.34; filter: blur(15px);
+      background: conic-gradient(from 0deg, hsl(var(--h0) 90% 72%), hsl(calc((var(--h0) + var(--h1)) / 2) 90% 74%), hsl(var(--h1) 90% 72%), hsl(var(--h0) 90% 72%));
+      -webkit-mask: radial-gradient(circle, transparent 36%, #000 40%); mask: radial-gradient(circle, transparent 36%, #000 40%);
+      animation: tcSpin 28s linear infinite, tcBreath 7s ease-in-out infinite alternate;
+    }
+    html.dark .tc-glow { opacity: 0.42; }
+    .tc-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 6px hsla(var(--h0), 80%, 70%, 0.35)); }
+    html.dark .tc-svg { filter: drop-shadow(0 0 6px hsla(var(--h1), 90%, 65%, 0.45)); }
+    .tc-seg {
+      fill: none; stroke-width: 9; stroke-linecap: round; transition: opacity .9s ease;
+      stroke: hsl(calc(var(--h0) + (var(--h1) - var(--h0)) * var(--t)) var(--tcs) var(--tcl));
+    }
+    .tc-seg.gone { opacity: 0.07; }
+    .tc-seg.now { animation: tcNow 2.6s ease-in-out infinite; }
+    .tc-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; }
+    .tc-center b { font-size: 12.5px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+    .tc-center span { font-size: 9.5px; color: var(--text-tertiary); }
+  }
+  @keyframes tcSpin { to { transform: rotate(360deg); } }
+  @keyframes tcBreath { from { opacity: 0.22; } to { opacity: 0.45; } }
+  @keyframes tcNow { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -1682,9 +1724,19 @@
     <div class="grid" id="grid"></div>
   </div>
 
+  <div class="bottom-row">
   <div class="memo-card" id="memoCard">
     <div class="memo-head"><span>MEMO</span><span class="memo-right"><span class="memo-state" id="memoState">저장됨</span><button class="memo-done" id="memoDone" type="button">완료</button></span></div>
     <div class="memo-box"><textarea id="memoPad" placeholder="떠오르는 할 일을 바로 적어두세요" spellcheck="false"></textarea></div>
+  </div>
+  <div class="time-card" id="timeCard" aria-label="오늘 남은 시간">
+    <div class="tc-head">TODAY</div>
+    <div class="tc-ring">
+      <div class="tc-glow"></div>
+      <svg class="tc-svg" id="tcSvg" viewBox="0 0 100 100" aria-hidden="true"></svg>
+      <div class="tc-center"><b id="tcMain">--</b><span>남은 시간</span></div>
+    </div>
+  </div>
   </div>
 </div>
 
@@ -2013,9 +2065,24 @@
       }
     } catch (e) {}
     // iOS only lets audio start on touchend/click, so unlock on those too (and re-unlock if iOS interrupts)
-    const unlock = () => { if (ctx && ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} } };
+    const unlock = () => { if (ctx && ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} } else keepAwake(); };
     ['pointerdown', 'touchstart', 'touchend', 'pointerup', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { capture: true, passive: true }));
     document.addEventListener('visibilitychange', () => { if (!document.hidden) unlock(); });
+
+    // inaudible (-74 dB) loop: keeps the output stream running so taps never wait for it to wake up
+    let awake = false;
+    function keepAwake() {
+      if (awake || !ctx || ctx.state !== 'running' || !window.matchMedia('(hover: none)').matches) return;
+      awake = true;
+      try {
+        const n = Math.floor(ctx.sampleRate * 0.5), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * 0.0002;
+        const src = ctx.createBufferSource();
+        src.buffer = b; src.loop = true;
+        src.connect(ctx.destination); src.start(0);
+      } catch (e) { awake = false; }
+    }
+    if (ctx) ctx.onstatechange = () => { if (ctx.state === 'running') keepAwake(); else awake = false; };
 
     function fire(rate, vol) {
       const src = ctx.createBufferSource();
@@ -3489,6 +3556,32 @@
     }
 
     mount.addEventListener('click', spawnFlash);
+  })();
+
+  /* remaining hours of today as a donut: one arc per hour, erased as each hour passes */
+  (function initTimeLeft() {
+    const svg = document.getElementById('tcSvg');
+    const main = document.getElementById('tcMain');
+    if (!svg || !main) return;
+    const NS = 'http://www.w3.org/2000/svg', R = 40, C = 50, segs = [];
+    for (let i = 0; i < 24; i++) {
+      const a0 = (i * 15 + 1.8 - 90) * Math.PI / 180, a1 = ((i + 1) * 15 - 1.8 - 90) * Math.PI / 180;
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', `M${(C + R * Math.cos(a0)).toFixed(2)} ${(C + R * Math.sin(a0)).toFixed(2)} A${R} ${R} 0 0 1 ${(C + R * Math.cos(a1)).toFixed(2)} ${(C + R * Math.sin(a1)).toFixed(2)}`);
+      p.setAttribute('class', 'tc-seg');
+      p.style.setProperty('--t', (i / 23).toFixed(3));
+      svg.appendChild(p);
+      segs.push(p);
+    }
+    function update() {
+      const now = new Date(), h = now.getHours(), m = now.getMinutes();
+      segs.forEach((p, i) => { p.classList.toggle('gone', i < h); p.classList.toggle('now', i === h); });
+      const left = 24 * 60 - (h * 60 + m), H = Math.floor(left / 60), M = left % 60;
+      main.textContent = H > 0 ? `${H}시간 ${M}분` : `${M}분`;
+    }
+    update();
+    setInterval(update, 15000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) update(); });
   })();
 
   /* hold the Mars icon for 5 seconds to sign out (with confirmation) */
