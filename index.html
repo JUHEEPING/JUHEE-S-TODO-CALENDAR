@@ -1571,6 +1571,17 @@
       font-size: 16px; line-height: 1.55; transform: scale(0.8438); transform-origin: 0 0;
     }
   }
+
+  /* ====== v18: phone header, slimmer weekday row, thinner chips ====== */
+  .auth-bar:empty { display: none; }
+  @media (max-width: 640px) {
+    .weekdays div { padding: 3px 0; font-size: 10px; }
+    .cell { aspect-ratio: 1 / 1.1; }
+    .date-num { width: 18px; height: 18px; font-size: 10.5px; }
+    .pill { height: 12px; font-size: 8.5px; padding: 0 3px; letter-spacing: -0.04em; }
+    .auth-bar .login { padding: 0 11px; }
+    .hover-preview.sheet { transform-origin: 50% 100%; }
+  }
 </style>
 </head>
 <body>
@@ -1604,7 +1615,7 @@
 
   <div class="header">
     <div class="title-group">
-      <div class="title-row"><h1>JUHEE'S TODO CALENDAR</h1><button id="soundBtn" class="sound-btn" title="효과음" aria-label="효과음"></button></div>
+      <div class="title-row"><h1>JUHEE'S TODO CALENDAR</h1></div>
       <p>중요하지 않은 일에 대해 깊게 생각하는 것은<br class="m-br"> 삐뚤어진 못을 망치질하는 것과 같습니다.</p>
     </div>
     <div class="nav liquid">
@@ -1864,9 +1875,9 @@
   function makeAuthBar() {
     const bar = document.createElement('div');
     bar.className = 'auth-bar';
-    bar.appendChild(themeBtn);
     const row = document.querySelector('.title-row');
-    if (row) row.insertBefore(bar, row.firstChild); else document.body.appendChild(bar);
+    if (row) { row.insertBefore(bar, row.firstChild); row.appendChild(themeBtn); }
+    else { document.body.appendChild(bar); document.body.appendChild(themeBtn); }
     return bar;
   }
 
@@ -1896,7 +1907,7 @@
         cloudDoc = null;
         loginBtn.remove();
         if (!user) {
-          bar.insertBefore(loginBtn, themeBtn);
+          bar.appendChild(loginBtn);
           setSync('off');
           return;
         }
@@ -2010,11 +2021,6 @@
     if (sw) return snd.down(0.9 + (COLOR_KEYS.indexOf(sw.dataset.c) % 8) * 0.05);
     if (t.closest('button, .cell, .hp-item, .todo-check, .mc-day, .pill, .icon-btn, .day-bar, .suggest-item')) snd.down(1);
   }, true);
-  const soundBtn = document.getElementById('soundBtn');
-  const BELL_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/>';
-  const syncSoundBtn = () => { soundBtn.innerHTML = BELL_SVG + (snd.on ? '' : '<path d="M3 3l18 18"/>') + '</svg>'; };
-  syncSoundBtn();
-  soundBtn.addEventListener('click', () => { snd.toggle(); syncSoundBtn(); });
 
   function tagText(t) {
     const tag = COLOR_TAGS[t && t.color] || COLOR_TAGS[DEFAULT_COLOR];
@@ -2344,7 +2350,7 @@
   // Short label for narrow calendar cells (CJK chars count double).
   function shortLabel(str) {
     if (!isPhone()) return str;
-    const LIMIT = 9;
+    const LIMIT = 10;
     let w = 0, out = '';
     for (const ch of str) {
       w += ch.charCodeAt(0) > 0x2e80 ? 2 : 1;
@@ -2625,7 +2631,7 @@
 
   function barMetrics() {
     const mobile = window.innerWidth <= 640;
-    return mobile ? { base: 24, h: 14, gap: 3 } : { base: 32, h: 18, gap: 4 };
+    return mobile ? { base: 24, h: 12, gap: 2 } : { base: 32, h: 18, gap: 4 };
   }
 
   function drawBars(segments) {
@@ -2669,7 +2675,7 @@
       bar.style.border = 'none';
       bar.style.backdropFilter = 'blur(6px)';
       bar.style.color = tagText(seg.event);
-      bar.style.fontSize = (mobile ? 9 : 10.5) + 'px';
+      bar.style.fontSize = (mobile ? 8.5 : 10.5) + 'px';
       bar.style.fontWeight = '700';
       bar.style.padding = '0 8px';
       bar.style.whiteSpace = 'nowrap';
@@ -2950,18 +2956,10 @@
       hoverPreview.style.bottom = 'auto';
       listEl.style.maxHeight = '';
     } else {
-      // phone: sit below the calendar so it never covers the dates
-      const calBottom = document.querySelector('.calendar').getBoundingClientRect().bottom;
-      const avail = window.innerHeight - calBottom - 22;
-      if (avail >= 170) {
-        hoverPreview.style.top = Math.round(calBottom + 10) + 'px';
-        hoverPreview.style.bottom = 'auto';
-        listEl.style.maxHeight = Math.max(60, avail - 108) + 'px';
-      } else {
-        hoverPreview.style.top = 'auto';
-        hoverPreview.style.bottom = 'calc(env(safe-area-inset-bottom) + 12px)';
-        listEl.style.maxHeight = '30vh';
-      }
+      // phone: dock at the very bottom of the screen
+      hoverPreview.style.top = 'auto';
+      hoverPreview.style.bottom = 'calc(env(safe-area-inset-bottom) + 12px)';
+      listEl.style.maxHeight = '36vh';
     }
     hoverPreview.classList.add('show');
   }
@@ -2970,6 +2968,22 @@
     hoverPreview.classList.remove('show');
     grid.querySelectorAll('.cell.sel').forEach(el => el.classList.remove('sel'));
   }
+
+  let swallowTap = false, swallowTimer = null;
+  document.addEventListener('pointerdown', e => {
+    if (isTouch() && hoverPreview.classList.contains('show') &&
+        !e.target.closest('.hover-preview, .cell, .overlay, .confirm-overlay, .paste-bar')) {
+      swallowTap = true;
+      clearTimeout(swallowTimer);
+      swallowTimer = setTimeout(() => { swallowTap = false; }, 700);
+      hideHoverPreview();
+    }
+  }, true);
+  ['touchend', 'mousedown', 'mouseup', 'click'].forEach(ev => document.addEventListener(ev, e => {
+    if (!swallowTap) return;
+    e.preventDefault(); e.stopPropagation();
+    if (ev === 'click') { swallowTap = false; clearTimeout(swallowTimer); }
+  }, { capture: true, passive: false }));
 
   hoverPreview.addEventListener('mouseenter', cancelHide);
   hoverPreview.addEventListener('mouseleave', () => { if (!isTouch()) scheduleHide(); });
