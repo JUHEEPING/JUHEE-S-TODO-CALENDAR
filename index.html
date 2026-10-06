@@ -1941,11 +1941,11 @@
   // tiny pixel-art icons chosen from the memo's meaning (keyword match)
   const ICON_COL = { K: '#4b5068', S: '#c9cfe2', W: '#ffffff', R: '#ff5f6d', B: '#5aa2ff', C: '#8fd6ff',
                      G: '#3ecb7a', Y: '#ffcf3d', O: '#ff9f43', P: '#ff9ec7', N: '#b27a44',
-                     T: '#ffc48c', Q: '#6aaeff', L: '#e2f4ff' };
+                     T: '#ffc48c', Q: '#6aaeff', L: '#e2f4ff', D: '#1d2030', H: '#454b6b' };
   const ICONS = {
-    bicep: ['........KKKK', '........KTTK', '........KTTK', '.......KTTK.', '...KKK.KTTK.', '..KTTTKKTTK.', '.KTTTTTTTTK.', 'KTTWTTTTTTK.', 'KTTTTTTTTTK.', 'KKTTTTTTTKK.', '.KKKKKKKKK..'],
+    sneaker: ['KKKK.......', 'KWWK.......', 'KWWKBKB....', 'KWWWWWWKK..', 'KWWBBBBWWK.', 'KRRRRRRRRRK', '.KKKKKKKKK.'],
     bubbles: ['........QQ..', '.......QWLQ.', '..Q....QLLQ.', '.QWQ....QQ..', '..Q.........', '.....QQQQ...', '....QLWLLQ..', '....QWLLLQ..', '....QLLLLQ..', '....QLLLLQ..', '.....QQQQ...'],
-    tv: ['...K...K...', '....K.K....', '.....K.....', 'KKKKKKKKKKK', 'KCCCCCCCCCK', 'KCCWCCCCCCK', 'KCCWWCCCCCK', 'KCCWCCCCCCK', 'KCCCCCCCCCK', 'KKKKKKKKKKK', '.K.......K.'],
+    tv: ['...K...K...', '....K.K....', '.....K.....', 'SSSSSSSSSSS', 'SDDDDDDDDDS', 'SDHHDDDDDDS', 'SDHDDDDDDDS', 'SDDDDDDDDDS', 'SDDDDDDDDDS', 'SSSSSSSSSSS', '.S.......S.'],
     flower: ['...PPP...', '..PPPPP..', '..PPYPP..', '..PPPPP..', '...PPP...', '....G....', '..GG.GG..', '...GGG...', '....G....', '..NNNNN..', '...NNN...'],
     broom: ['.......NN', '......NN.', '.....NN..', '....NN...', '...KKK...', '..YYYYY..', '.YYYYYYY.', '.Y.Y.Y.Y.'],
     shirt: ['..KK.KK..', '.KBBKBBK.', 'KKBBBBBKK', '.KBBBBBK.', '.KBBBBBK.', '.KBBBBBK.', '.KKKKKKK.'],
@@ -1967,7 +1967,7 @@
   };
   // first match wins (order matters)
   const ICON_RULES = [
-    ['bicep', /운동|헬스|러닝|런닝|조깅|달리기|요가|필라테스|\bpt\b|gym|스쿼트|수영|등산|산책|스트레칭/i],
+    ['sneaker', /운동|헬스|러닝|런닝|조깅|달리기|요가|필라테스|\bpt\b|gym|스쿼트|수영|등산|산책|스트레칭/i],
     ['bubbles', /샤워|목욕|세수|씻|양치|머리\s?감/],
     ['tv', /넷플|netflix|영화|드라마|애니|티비|\btv\b|시청|유튜브|youtube|웹툰|왓챠|디즈니/i],
     ['flower', /꽃|화분|식물|물\s?주기|정원|화초/],
@@ -1999,7 +1999,7 @@
     map.forEach((row, y) => [...row].forEach((ch, x) => {
       if (ch !== '.') r += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${ICON_COL[ch]}"/>`;
     }));
-    return `<svg class="note-ship" viewBox="0 0 ${cols} ${rows}" width="${cols * 2.6}" height="${rows * 2.6}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+    return `<svg class="note-ship" viewBox="0 0 ${cols} ${rows}" width="${cols * 2}" height="${rows * 2}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
   }
 
   function placeNote(n) { n.el.style.transform = `translate(${n.x}px, ${n.y}px)`; }
