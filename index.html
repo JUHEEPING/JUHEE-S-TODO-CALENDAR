@@ -1542,6 +1542,33 @@
     .day-bar { font-weight: 500 !important; }
     .float-note { font-weight: 400; }
   }
+
+  /* ====== v16: Mars icon, ripples, squarer mobile chips, smaller memo ====== */
+  .mascot .mascot-ring { animation: none; }
+  .ring-dot { opacity: 0.55; animation: ringGlint 4.5s linear infinite; }
+  @keyframes ringGlint { 0% { opacity: 0.55; } 9% { opacity: 1; } 30% { opacity: 0.55; } 100% { opacity: 0.55; } }
+  .mars-pulse {
+    position: fixed; z-index: 45; pointer-events: none; border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0.7); opacity: 0;
+    border: 1.5px solid rgba(255,150,110,0.5);
+    background: radial-gradient(closest-side, rgba(255,160,120,0.16), rgba(255,160,120,0));
+    animation: marsRipple 1s cubic-bezier(.2,.7,.25,1) forwards;
+  }
+  html.dark .mars-pulse { border-color: rgba(165,175,255,0.5); background: radial-gradient(closest-side, rgba(165,175,255,0.16), rgba(165,175,255,0)); }
+  @keyframes marsRipple { 0% { opacity: 0.85; transform: translate(-50%, -50%) scale(0.7); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(2.3); } }
+
+  .memo-box { display: none; }
+  @media (max-width: 640px) {
+    .pill { border-radius: 6px; height: 16px; }
+    .todo-pills { gap: 2px; }
+    .cell { padding-top: 3px; }
+    .date-num { width: 17px; height: 17px; font-size: 10.5px; }
+    .memo-box { display: block; position: relative; flex: 1; min-height: 0; overflow: hidden; margin-top: 6px; }
+    #memoPad {
+      position: absolute; left: 0; top: 0; flex: none; width: 118.5%; height: 118.5%; padding: 0;
+      font-size: 16px; line-height: 1.55; transform: scale(0.8438); transform-origin: 0 0;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1595,7 +1622,7 @@
 
   <div class="memo-card" id="memoCard">
     <div class="memo-head"><span>MEMO</span><span class="memo-right"><span class="memo-state" id="memoState">저장됨</span><button class="memo-done" id="memoDone" type="button">완료</button></span></div>
-    <textarea id="memoPad" placeholder="떠오르는 할 일을 바로 적어두세요" spellcheck="false"></textarea>
+    <div class="memo-box"><textarea id="memoPad" placeholder="떠오르는 할 일을 바로 적어두세요" spellcheck="false"></textarea></div>
   </div>
 </div>
 
@@ -2593,7 +2620,7 @@
 
   function barMetrics() {
     const mobile = window.innerWidth <= 640;
-    return mobile ? { base: 24, h: 14, gap: 3 } : { base: 32, h: 18, gap: 4 };
+    return mobile ? { base: 24, h: 16, gap: 2 } : { base: 32, h: 18, gap: 4 };
   }
 
   function drawBars(segments) {
@@ -2648,9 +2675,10 @@
       bar.style.boxShadow = 'none';
       bar.classList.add('ice');
       bar.style.textDecoration = seg.event.done ? 'line-through' : 'none';
-      bar.style.borderRadius = seg.isFirstSeg && seg.isLastSeg ? '999px'
-        : seg.isFirstSeg ? '999px 5px 5px 999px'
-        : seg.isLastSeg ? '5px 999px 999px 5px'
+      const RR = mobile ? 6 : 999;
+      bar.style.borderRadius = seg.isFirstSeg && seg.isLastSeg ? `${RR}px`
+        : seg.isFirstSeg ? `${RR}px 5px 5px ${RR}px`
+        : seg.isLastSeg ? `5px ${RR}px ${RR}px 5px`
         : '5px';
       bar.textContent = seg.event.title;
       bar.title = `${seg.event.title} (${seg.event.startKey} ~ ${seg.event.endDate})`;
@@ -3305,17 +3333,24 @@
     const svg = document.createElementNS(svgNS, 'svg');
     svg.setAttribute('viewBox', `0 0 ${CANVAS} ${CANVAS}`);
 
-    // orbit ring (blocky dashed ellipse), drawn first so the planet occludes its far side
-    const ringGroup = document.createElementNS(svgNS, 'g');
-    ringGroup.setAttribute('class', 'mascot-ring');
-    const rx = 32, ry = 12, dashCount = 16;
+    // orbit ring: one tilted ellipse that wraps the planet. The far half sits behind Mars,
+    // the near half in front of it, so it reads as a single connected orbit. The ring itself
+    // stays put; a soft glint travels around it.
+    const MCX = OX + (CX + 0.5) * CELL, MCY = OY + (CY + 0.5) * CELL;
+    const ringBack = document.createElementNS(svgNS, 'g');
+    const ringFront = document.createElementNS(svgNS, 'g');
+    const tilt = `rotate(-16 ${MCX} ${MCY})`;
+    ringBack.setAttribute('transform', tilt);
+    ringFront.setAttribute('transform', tilt);
+    const rx = 33, ry = 11, dashCount = 32, orbitSec = 4.5;
     for (let i = 0; i < dashCount; i++) {
       const angle = (i / dashCount) * Math.PI * 2;
-      const ex = PLANET_CX + rx * Math.cos(angle) - 1.5;
-      const ey = PLANET_CY + ry * Math.sin(angle) - 1.5;
-      rect(ringGroup, ex, ey, 3, 3, '#8fb8ff');
+      const ex = MCX + rx * Math.cos(angle) - 1.5;
+      const ey = MCY + ry * Math.sin(angle) - 1.5;
+      const dot = rect(Math.sin(angle) >= 0 ? ringFront : ringBack, ex, ey, 3, 3, '#8fb8ff', 'ring-dot');
+      dot.style.animationDelay = (-(i / dashCount) * orbitSec) + 's';
     }
-    svg.appendChild(ringGroup);
+    svg.appendChild(ringBack);
 
     // planet body: 4-tone shading, polar ice caps, and hand-placed craters
     // (deliberately irregular positions, not a hash scatter, so the face
@@ -3354,6 +3389,7 @@
       }
     }
     svg.appendChild(planet);
+    svg.appendChild(ringFront);
 
     // small moon
     const moonPixels = [[1, 0], [0, 1], [1, 1], [2, 1], [1, 2]];
@@ -3369,25 +3405,21 @@
 
     mount.appendChild(svg);
 
-    // click: a soft, elegant flash of light that glints near Mars and
-    // fades quickly (smooth gradients, not pixel blocks — deliberately a
-    // different register from the blocky planet art).
+    // click: two quiet ripples that spread from the exact centre of Mars (no white flash)
     function spawnFlash() {
       const mascotSvg = mount.querySelector('svg');
-      const baseSize = (mascotSvg && mascotSvg.getBoundingClientRect().width) || 72;
-
-      const wrap = document.createElement('div');
-      wrap.className = 'mascot-flash';
-
-      const glow = document.createElement('div');
-      glow.className = 'mascot-flash-glow';
-      const glowSize = Math.round(baseSize * 1.6);
-      glow.style.width = glowSize + 'px';
-      glow.style.height = glowSize + 'px';
-
-      wrap.appendChild(glow);
-      mount.insertBefore(wrap, mount.firstChild);
-      glow.addEventListener('animationend', () => wrap.remove());
+      if (!mascotSvg) return;
+      const r = mascotSvg.getBoundingClientRect();
+      const cx = r.left + r.width * MCX / CANVAS;
+      const cy = r.top + r.height * MCY / CANVAS;
+      const d = r.width * (R * CELL * 2) / CANVAS;
+      [0, 160].forEach(delay => {
+        const el = document.createElement('div');
+        el.className = 'mars-pulse';
+        el.style.cssText = `left:${cx}px;top:${cy}px;width:${d}px;height:${d}px;animation-delay:${delay}ms`;
+        document.body.appendChild(el);
+        el.addEventListener('animationend', () => el.remove());
+      });
     }
 
     mount.addEventListener('click', spawnFlash);
