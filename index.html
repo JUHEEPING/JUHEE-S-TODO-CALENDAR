@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script>try{if(localStorage.getItem('todoTheme')==='dark')document.documentElement.classList.add('dark')}catch(e){}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>JUHEE'S Todo Calendar</title>
@@ -1275,7 +1276,7 @@
     .header { gap: 12px; margin-bottom: 14px; }
     .month-label .yr { display: inline; font-size: inherit; margin: 0; color: var(--text-tertiary); font-weight: 700; }
     .month-label .mo { font-size: inherit; }
-    .nav .month-label { font-size: 25px; font-weight: 800; letter-spacing: -0.045em; white-space: nowrap; }
+    .nav .month-label { font-size: 22px; font-weight: 800; letter-spacing: -0.045em; white-space: nowrap; }
     .auth-bar { right: 62px; padding: 9px; }
     .auth-bar:has(.login) { padding: 3px; }
     .auth-bar .logout, .auth-short { display: none !important; }
@@ -1390,10 +1391,131 @@
       background: rgba(255,255,255,0.92) !important;
     }
   }
+
+  /* ====== v12: theme toggle, confirm, dark ====== */
+  .auth-bar { background: none !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; padding: 0 !important; gap: 8px; align-items: center; }
+  .theme-btn {
+    position: relative; flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; padding: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: rgba(29,29,31,0.5);
+    background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.95);
+    box-shadow: 0 2px 8px rgba(60,70,140,0.08); transition: transform .15s ease, color .3s ease, background .3s ease;
+  }
+  .theme-btn:active { transform: scale(0.88); }
+  .theme-btn svg { display: block; }
+  .theme-btn .sync-dot { position: absolute; top: -1px; right: -1px; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #fff; box-shadow: none; }
+  .sync-dot[data-s="wait"] { background: #ff9f0a; }
+  .sync-dot[data-s="err"] { background: #ff453a; }
+  .sync-dot[data-s="ok"], .sync-dot[data-s="off"] { display: none; }
+  .auth-bar .login { height: 30px; padding: 0 14px; font-size: 12px; }
+  @media (max-width: 640px) {
+    .auth-bar { position: static !important; width: auto !important; height: 30px; }
+    .auth-bar:has(.login) .theme-btn { display: none; }
+  }
+  .nav .month-label { min-width: 132px; }
+  .month-label .mo { font-weight: inherit; }
+
+  .confirm-overlay {
+    position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center;
+    background: rgba(20,22,40,0.32); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  }
+  .confirm-overlay.open { opacity: 1; pointer-events: auto; }
+  .confirm-card {
+    width: min(320px, 86vw); padding: 24px 22px 18px; border-radius: 26px; text-align: center;
+    background: rgba(255,255,255,0.88); border: 1px solid rgba(255,255,255,0.95);
+    box-shadow: 0 30px 80px rgba(60,70,140,0.3);
+    transform: translateY(36px) scale(0.95); transition: transform .42s cubic-bezier(.18,.95,.3,1.18);
+  }
+  .confirm-overlay.open .confirm-card { transform: none; }
+  .cc-title { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+  .cc-sub { font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); margin-top: 8px; }
+  .cc-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .cc-actions button { flex: 1; height: 44px; border: none; border-radius: 14px; font-size: 14.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: transform .12s ease; }
+  .cc-actions button:active { transform: scale(0.95); }
+  .cc-cancel { background: rgba(120,120,140,0.14); color: var(--text); }
+  .cc-ok { background: #ff453a; color: #fff; }
+  .mascot { -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+
+  .stars {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .6s ease;
+    background-image:
+      radial-gradient(1.2px 1.2px at 8% 12%, #cfd6ff 50%, transparent 52%), radial-gradient(1px 1px at 22% 38%, #cfd6ff 50%, transparent 52%),
+      radial-gradient(1.4px 1.4px at 35% 8%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 47% 62%, #cfd6ff 50%, transparent 52%),
+      radial-gradient(1.2px 1.2px at 58% 24%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 69% 82%, #cfd6ff 50%, transparent 52%),
+      radial-gradient(1.4px 1.4px at 78% 46%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 88% 16%, #cfd6ff 50%, transparent 52%),
+      radial-gradient(1.2px 1.2px at 93% 70%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 14% 78%, #cfd6ff 50%, transparent 52%),
+      radial-gradient(1px 1px at 63% 94%, #fff 50%, transparent 52%), radial-gradient(1.2px 1.2px at 29% 90%, #cfd6ff 50%, transparent 52%);
+    animation: starTwinkle 6s ease-in-out infinite alternate;
+  }
+  @keyframes starTwinkle { from { filter: brightness(0.7); } to { filter: brightness(1.25); } }
+
+  html.dark { color-scheme: dark; --text: #e9ecfa; --text-secondary: rgba(233,236,250,0.62); --text-tertiary: rgba(233,236,250,0.38);
+    --border: rgba(255,255,255,0.12); --border-soft: rgba(255,255,255,0.07);
+    --glass: rgba(18,22,43,0.5); --glass-strong: rgba(18,22,43,0.72);
+    --shadow-lg: 0 14px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07);
+    --shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06); }
+  html.dark body { background: #090c18; color: var(--text); transition: background .5s ease; }
+  html.dark .stars { opacity: 1; }
+  html.dark .blob { opacity: 0.3; }
+  html.dark .blob.b3 { opacity: 0.2; }
+  html.dark .calendar, html.dark .memo-card {
+    background: rgba(16,20,40,0.5) !important; border-color: rgba(255,255,255,0.08) !important;
+    backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
+  }
+  html.dark .liquid::after { background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.02) 40%, rgba(120,140,255,0.18) 100%); }
+  html.dark .cell.other-month { background: rgba(255,255,255,0.015); }
+  html.dark .cell.other-month .date-num { color: rgba(233,236,250,0.25); }
+  html.dark #soundBtn { color: #b6bdea; }
+  html.dark .cell:nth-child(7n+1) .date-num { color: rgba(255,110,100,0.9); }
+  html.dark .cell:nth-child(7n) .date-num { color: rgba(110,160,255,0.95); }
+  html.dark .cell.other-month:nth-child(7n+1) .date-num, html.dark .cell.other-month:nth-child(7n) .date-num { opacity: 0.4; }
+  html.dark .cell:hover { background: rgba(120,140,255,0.08); }
+  html.dark .cell.today { background: rgba(255,138,76,0.06); }
+  html.dark .title-group h1 { background: linear-gradient(100deg, #ffffff 20%, #b9c0ea 70%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  html.dark .nav { background: rgba(18,22,43,0.5); }
+  html.dark .nav .today-btn { color: #9fb0ff; }
+  html.dark .nav #prevBtn, html.dark .nav #nextBtn { background: rgba(255,255,255,0.08) !important; border-color: rgba(255,255,255,0.14) !important; color: var(--text); }
+  html.dark .today-btn { background: rgba(120,140,255,0.16) !important; }
+  html.dark .sound-btn, html.dark .theme-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); color: #b6bdea; box-shadow: none; }
+  html.dark .theme-btn { color: #9aa4ff; box-shadow: 0 0 14px rgba(120,130,255,0.35); }
+  html.dark .theme-btn .sync-dot { border-color: #11162b; }
+  html.dark .auth-bar .login { background: #e9ecfa; color: #11162b; }
+  html.dark .hover-preview { background: rgba(18,22,43,0.86); border-color: rgba(255,255,255,0.1); box-shadow: 0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06); }
+  html.dark .hp-item:hover { background: rgba(120,140,255,0.14); }
+  html.dark .hp-copy { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+  html.dark .hp-btn { background: rgba(120,140,255,0.16); color: #9fb0ff; }
+  html.dark .hp-holiday { background: rgba(255,90,80,0.14); border-color: rgba(255,90,80,0.3); color: #ff8a80; }
+  html.dark .modal { background: rgba(18,22,43,0.88); border-color: rgba(255,255,255,0.1); box-shadow: 0 30px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06); }
+  html.dark .overlay { background: rgba(4,6,16,0.55); }
+  html.dark input[type="text"], html.dark textarea, html.dark input[type="time"], html.dark input[type="date"], html.dark .date-btn {
+    background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.14); color: var(--text); color-scheme: dark;
+  }
+  html.dark input[type="text"]:focus, html.dark textarea:focus, html.dark input[type="time"]:focus, html.dark .date-btn.open { background: rgba(255,255,255,0.1); }
+  html.dark .todo-item { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); box-shadow: none; }
+  html.dark .todo-check { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.25); }
+  html.dark .icon-btn:hover { background: rgba(255,255,255,0.1); }
+  html.dark .close-btn { background: rgba(255,255,255,0.1); color: var(--text-secondary); }
+  html.dark .suggest-list { background: rgba(22,27,52,0.96); border-color: rgba(255,255,255,0.1); }
+  html.dark .mini-cal { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); box-shadow: none; }
+  html.dark .mc-head button { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+  html.dark .mc-day.start { background: rgba(255,255,255,0.14); }
+  html.dark .mc-day.range { background: rgba(120,140,255,0.18); }
+  html.dark .color-swatch.active { outline-color: rgba(255,255,255,0.35); }
+  html.dark .confirm-card { background: rgba(20,24,46,0.92); border-color: rgba(255,255,255,0.1); box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+  html.dark .cc-cancel { background: rgba(255,255,255,0.1); }
+  html.dark .float-note {
+    background: radial-gradient(closest-side, rgba(88,100,190,0.62) 0%, rgba(88,100,190,0.4) 45%, rgba(88,100,190,0.14) 72%, rgba(88,100,190,0) 100%);
+    color: #eef0ff; filter: drop-shadow(0 0 18px rgba(110,125,255,0.25));
+  }
+  @media (max-width: 640px) {
+    html.dark body.memo-editing .memo-card { background: rgba(12,15,32,0.97) !important; }
+    html.dark .nav .today-btn { background: rgba(120,140,255,0.16); }
+  }
 </style>
 </head>
 <body>
 
+<div class="stars"></div>
 <div class="ambient">
   <div class="blob b1"></div>
   <div class="blob b2"></div>
@@ -1432,6 +1554,13 @@
 <div class="hover-preview liquid" id="hoverPreview"></div>
 <div class="paste-bar" id="pasteBar"><span id="pasteLabel"></span><button id="pasteDone">완료</button></div>
 <div class="toast" id="toast"></div>
+<div class="confirm-overlay" id="logoutConfirm">
+  <div class="confirm-card">
+    <p class="cc-title">로그아웃 하시겠습니까?</p>
+    <p class="cc-sub">이 기기의 동기화가 멈춰요. 다시 로그인하면 이어져요.</p>
+    <div class="cc-actions"><button type="button" class="cc-cancel" id="ccCancel">취소</button><button type="button" class="cc-ok" id="ccOk">로그아웃</button></div>
+  </div>
+</div>
 
 <div class="overlay" id="overlay">
   <div class="modal liquid">
@@ -1480,6 +1609,7 @@
 <script>
 (function () {
   const STORAGE_KEY = 'todoCalendarData';
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const WEEKDAY_NAMES = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
   const MAX_SHOWN_PILLS = 2;
 
@@ -1628,29 +1758,43 @@
     }, 400);
   }
 
+  // ---- dark mode toggle lives in the top-right bar ----
+  const themeBtn = document.createElement('button');
+  themeBtn.type = 'button';
+  themeBtn.className = 'theme-btn';
+  themeBtn.title = '다크 모드';
+  themeBtn.setAttribute('aria-label', '다크 모드');
+  const syncDot = document.createElement('span');
+  syncDot.className = 'sync-dot';
+  syncDot.dataset.s = 'wait';
+  function isDark() { return document.documentElement.classList.contains('dark'); }
+  function paintThemeBtn() {
+    const d = isDark();
+    themeBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="${d ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>`;
+    themeBtn.appendChild(syncDot);
+  }
+  paintThemeBtn();
+  themeBtn.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('todoTheme', isDark() ? 'dark' : 'light'); } catch (e) {}
+    paintThemeBtn();
+    snd.click();
+    renderCalendar();
+  });
+  const setSync = st => { syncDot.dataset.s = st; };
+  let cloudAuth = null;
+
   function makeAuthBar() {
     const bar = document.createElement('div');
     bar.className = 'auth-bar';
+    bar.appendChild(themeBtn);
     const row = document.querySelector('.title-row');
     if (row) row.insertBefore(bar, row.firstChild); else document.body.appendChild(bar);
     return bar;
   }
 
-  function makeStatus() {
-    const wrap = document.createElement('span');
-    wrap.className = 'auth-status';
-    const dot = document.createElement('span'); dot.className = 'sync-dot';
-    const long = document.createElement('span'); long.className = 'auth-long';
-    const short = document.createElement('span'); short.className = 'auth-short';
-    wrap.append(dot, long, short);
-    return { wrap, set(state, l, sh) { dot.dataset.s = state; long.textContent = l; short.textContent = sh; } };
-  }
-
   async function initCloud() {
     const bar = makeAuthBar();
-    const st = makeStatus();
-    st.set('wait', '연결 중…', '연결 중');
-    bar.append(st.wrap);
     try {
       const [{ initializeApp }, auth, fs] = await Promise.all([
         import(FB + 'firebase-app.js'),
@@ -1660,29 +1804,26 @@
       const app = initializeApp(FIREBASE_CONFIG);
       const a = auth.getAuth(app);
       const db = fs.getFirestore(app);
+      cloudAuth = { a, auth };
       let unsub = null;
+      const loginBtn = document.createElement('button');
+      loginBtn.type = 'button';
+      loginBtn.className = 'login';
+      loginBtn.textContent = '로그인';
+      loginBtn.title = 'Google 계정으로 로그인하면 모든 기기에서 동기화돼요';
+      loginBtn.onclick = () => auth.signInWithPopup(a, new auth.GoogleAuthProvider())
+        .catch(e => alert('로그인 실패: ' + e.message));
 
       auth.onAuthStateChanged(a, user => {
         if (unsub) { unsub(); unsub = null; }
         cloudDoc = null;
-        bar.textContent = '';
+        loginBtn.remove();
         if (!user) {
-          const btn = document.createElement('button');
-          btn.className = 'login';
-          btn.textContent = '로그인';
-          btn.title = 'Google 계정으로 로그인하면 모든 기기에서 동기화돼요';
-          btn.onclick = () => auth.signInWithPopup(a, new auth.GoogleAuthProvider())
-            .catch(e => alert('로그인 실패: ' + e.message));
-          bar.appendChild(btn);
+          bar.insertBefore(loginBtn, themeBtn);
+          setSync('off');
           return;
         }
-        st.set('wait', '연결 중…', '연결 중');
-        const out = document.createElement('button');
-        out.textContent = '로그아웃';
-        out.className = 'logout';
-        out.onclick = () => auth.signOut(a);
-        bar.append(st.wrap, out);
-
+        setSync('wait');
         const ref = fs.doc(db, 'users', user.uid);
         let first = true;
         unsub = fs.onSnapshot(ref, snap => {
@@ -1701,19 +1842,17 @@
             try { localStorage.setItem(MEMO_KEY, memoText); } catch (e) {}
             renderFloaters();
           }
-          st.set('ok', '동기화됨 · ' + (user.displayName || user.email), '동기화됨');
+          setSync('ok');
           if (first) {
             first = false;
             cloudApi = fs;
             cloudDoc = ref;
-            if (!snap.exists() || (typeof d.memo !== 'string' && memoText)) cloudSave(); // first login: upload this device's data
+            if (!snap.exists() || (typeof d.memo !== 'string' && memoText)) cloudSave();
           }
-        }, e => { st.set('err', '동기화 오류 (권한/설정 확인)', '오류'); console.warn(e); });
+        }, e => { setSync('err'); console.warn(e); });
       });
     } catch (e) {
-      bar.textContent = '';
-      st.set('err', '클라우드 연결 실패 (로컬 저장만 사용)', '오프라인');
-      bar.append(st.wrap);
+      setSync('err');
       console.warn('Firebase init failed', e);
     }
   }
@@ -1786,7 +1925,10 @@
   syncSoundBtn();
   soundBtn.addEventListener('click', () => { snd.toggle(); syncSoundBtn(); });
 
-  function tagText(t) { return COLOR_TAGS[t && t.color] ? COLOR_TAGS[t.color].text : COLOR_TAGS[DEFAULT_COLOR].text; }
+  function tagText(t) {
+    const tag = COLOR_TAGS[t && t.color] || COLOR_TAGS[DEFAULT_COLOR];
+    return document.documentElement.classList.contains('dark') ? tag.base : tag.text;
+  }
 
   /* ---------- end-date mini calendar (Sun/holiday red, Sat blue) ---------- */
   const endDateBtn = document.getElementById('endDateBtn');
@@ -1941,9 +2083,9 @@
   // tiny pixel-art icons chosen from the memo's meaning (keyword match)
   const ICON_COL = { K: '#4b5068', S: '#c9cfe2', W: '#ffffff', R: '#ff5f6d', B: '#5aa2ff', C: '#8fd6ff',
                      G: '#3ecb7a', Y: '#ffcf3d', O: '#ff9f43', P: '#ff9ec7', N: '#b27a44',
-                     T: '#ffc48c', Q: '#6aaeff', L: '#e2f4ff', D: '#1d2030', H: '#454b6b', M: '#7dff3a' };
+                     T: '#ffc48c', Q: '#6aaeff', L: '#e2f4ff', D: '#3a3f55', H: '#454b6b', M: '#8dff2e' };
   const ICONS = {
-    monster: ['.SSSSS.', 'SDDDDDS', 'DMDMDMD', 'DMDMDMD', 'DMDMDMD', 'DMDMDMD', 'DMDMDMD', 'DMDMDMD', 'DDDDDDD', 'SDDDDDS', '.SSSSS.'],
+    monster: ['..SSSSSS..', '.SSTTTTSS.', '.SSSSSSSS.', '.KKKKKKKK.', 'DKMKKKKMKK', 'DMMKKMKMMK', 'DMMKMMKMMK', 'DMMKMMKMMK', 'DMMKMMKMMK', 'DMMKMMKMMK', 'DGMKMMKGMK', 'DKMKGMKKMK', 'DKGKKGKKGK', 'DKKKKKKKKK', '.KKKKKKKK.', '.SSSSSSSS.', '..SSSSSS..'],
     bubbles: ['........QQ..', '.......QWLQ.', '..Q....QLLQ.', '.QWQ....QQ..', '..Q.........', '.....QQQQ...', '....QLWLLQ..', '....QWLLLQ..', '....QLLLLQ..', '....QLLLLQ..', '.....QQQQ...'],
     tv: ['...K...K...', '....K.K....', '.....K.....', 'SSSSSSSSSSS', 'SDDDDDDDDDS', 'SDHHDDDDDDS', 'SDHDDDDDDDS', 'SDDDDDDDDDS', 'SDDDDDDDDDS', 'SSSSSSSSSSS', '.S.......S.'],
     flower: ['...PPP...', '..PPPPP..', '..PPYPP..', '..PPPPP..', '...PPP...', '....G....', '..GG.GG..', '...GGG...', '....G....', '..NNNNN..', '...NNN...'],
@@ -2428,7 +2570,7 @@
       bar.style.background = seg.event.done ? color + '22' : color + '40';
       bar.style.border = 'none';
       bar.style.backdropFilter = 'blur(6px)';
-      bar.style.color = (COLOR_TAGS[seg.event.color] || COLOR_TAGS[DEFAULT_COLOR]).text;
+      bar.style.color = tagText(seg.event);
       bar.style.fontSize = (mobile ? 9 : 10.5) + 'px';
       bar.style.fontWeight = '700';
       bar.style.padding = '0 8px';
@@ -2466,7 +2608,7 @@
   function renderCalendar() {
     const year = current.getFullYear();
     const month = current.getMonth();
-    monthLabel.innerHTML = `<span class="yr">${year}년</span> <span class="mo">${month + 1}월</span>`;
+    monthLabel.innerHTML = `<span class="yr">${year}</span> <span class="mo">${MONTH_NAMES[month]}</span>`;
 
     grid.innerHTML = '';
     hideHoverPreview();
@@ -3183,6 +3325,30 @@
     }
 
     mount.addEventListener('click', spawnFlash);
+  })();
+
+  /* hold the Mars icon for 5 seconds to sign out (with confirmation) */
+  (function initLogoutHold() {
+    const mascot = document.getElementById('mascotMount');
+    const overlayEl = document.getElementById('logoutConfirm');
+    let timer = null;
+    const open = () => {
+      if (!cloudAuth || !cloudAuth.a.currentUser) { toast('로그인 상태가 아니에요'); return; }
+      if (navigator.vibrate) navigator.vibrate(20);
+      overlayEl.classList.add('open');
+    };
+    const close = () => overlayEl.classList.remove('open');
+    const start = () => { clearTimeout(timer); timer = setTimeout(open, 5000); };
+    const stop = () => clearTimeout(timer);
+    mascot.addEventListener('pointerdown', start);
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => mascot.addEventListener(ev, stop));
+    mascot.addEventListener('contextmenu', e => e.preventDefault());
+    document.getElementById('ccCancel').addEventListener('click', close);
+    overlayEl.addEventListener('click', e => { if (e.target === overlayEl) close(); });
+    document.getElementById('ccOk').addEventListener('click', () => {
+      close();
+      if (cloudAuth) cloudAuth.auth.signOut(cloudAuth.a).then(() => toast('로그아웃했어요')).catch(() => toast('로그아웃에 실패했어요'));
+    });
   })();
 
   renderCalendar();
