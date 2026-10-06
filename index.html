@@ -1634,13 +1634,13 @@
 
   /* ====== v24: memo half-width + hourly time donut (phones) ====== */
   :root { --h0: 200; --h1: 335; --tcs: 82%; --tcl: 72%; }
-  html.dark { --h0: 182; --h1: 292; --tcs: 92%; --tcl: 62%; }
+  html.dark { --h0: 14; --h1: 44; --tcs: 96%; --tcl: 58%; }
   .bottom-row { display: none; }
   @media (max-width: 640px) {
     .bottom-row { display: flex; gap: 10px; flex: 1; min-height: 0; margin-top: 10px; transition: opacity .25s ease; }
     .bottom-row .memo-card { flex: 0 0 calc(50% - 5px); min-width: 0; margin-top: 0; }
     body.popup-open .bottom-row { opacity: 0; pointer-events: none; }
-    #memoPad { width: 133.4%; height: 133.4%; transform: scale(0.75); }
+    #memoPad { width: 152.4%; height: 152.4%; transform: scale(0.656); }
     .time-card {
       flex: 0 0 calc(50% - 5px); min-width: 0; display: flex; flex-direction: column; align-items: center;
       padding: 14px 10px 12px; border-radius: var(--m-radius);
@@ -1668,7 +1668,7 @@
     .tc-seg.now { animation: tcNow 2.6s ease-in-out infinite; }
     .tc-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; }
     .tc-center b { font-size: 12.5px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
-    .tc-center span { font-size: 9.5px; color: var(--text-tertiary); }
+    .tc-center span { font-size: 9.5px; color: var(--text-tertiary); letter-spacing: 0.04em; }
   }
   @keyframes tcSpin { to { transform: rotate(360deg); } }
   @keyframes tcBreath { from { opacity: 0.22; } to { opacity: 0.45; } }
@@ -1730,11 +1730,10 @@
     <div class="memo-box"><textarea id="memoPad" placeholder="떠오르는 할 일을 바로 적어두세요" spellcheck="false"></textarea></div>
   </div>
   <div class="time-card" id="timeCard" aria-label="오늘 남은 시간">
-    <div class="tc-head">TODAY</div>
     <div class="tc-ring">
       <div class="tc-glow"></div>
       <svg class="tc-svg" id="tcSvg" viewBox="0 0 100 100" aria-hidden="true"></svg>
-      <div class="tc-center"><b id="tcMain">--</b><span>남은 시간</span></div>
+      <div class="tc-center"><b id="tcMain">--</b><span>left</span></div>
     </div>
   </div>
   </div>
@@ -3577,7 +3576,7 @@
       const now = new Date(), h = now.getHours(), m = now.getMinutes();
       segs.forEach((p, i) => { p.classList.toggle('gone', i < h); p.classList.toggle('now', i === h); });
       const left = 24 * 60 - (h * 60 + m), H = Math.floor(left / 60), M = left % 60;
-      main.textContent = H > 0 ? `${H}시간 ${M}분` : `${M}분`;
+      main.textContent = H > 0 ? `${H}h ${M}m` : `${M}m`;
     }
     update();
     setInterval(update, 15000);
