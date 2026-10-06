@@ -2963,7 +2963,10 @@
           showHoverPreview(cell, c.key);
         }
       });
-      cell.addEventListener('mouseleave', () => { clearTimeout(switchTimer); if (!isTouch()) scheduleHide(); });
+      cell.addEventListener('mouseleave', e => {
+        clearTimeout(switchTimer);
+        if (!isTouch()) scheduleHide(leftToOutside(e) ? 160 : 1500);
+      });
       grid.appendChild(cell);
     });
 
@@ -2972,9 +2975,15 @@
 
   /* ---------- hover preview (persistent + clickable) ---------- */
 
-  function scheduleHide() {
+  // true when the pointer went somewhere that is neither the calendar nor the popup
+  function leftToOutside(e) {
+    const to = e && e.relatedTarget;
+    return !(to && to.closest && to.closest('.calendar, .hover-preview'));
+  }
+
+  function scheduleHide(ms) {
     cancelHide();
-    hideTimer = setTimeout(hideHoverPreview, 1500);
+    hideTimer = setTimeout(hideHoverPreview, ms || 1500);
   }
 
   function cancelHide() {
@@ -3144,7 +3153,7 @@
   }, { capture: true, passive: false }));
 
   hoverPreview.addEventListener('mouseenter', () => { cancelHide(); clearTimeout(switchTimer); });
-  hoverPreview.addEventListener('mouseleave', () => { if (!isTouch()) scheduleHide(); });
+  hoverPreview.addEventListener('mouseleave', e => { if (!isTouch()) scheduleHide(leftToOutside(e) ? 160 : 1500); });
   document.addEventListener('pointerdown', e => {
     if (isTouch() && !e.target.closest('.hover-preview, .cell, .overlay')) hideHoverPreview();
   });
