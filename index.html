@@ -1634,7 +1634,7 @@
 
   /* ====== v24: memo half-width + hourly time donut (phones) ====== */
   :root { --h0: 200; --h1: 335; --tcs: 82%; --tcl: 72%; }
-  html.dark { --h0: 20; --h1: 30; --tcs: 100%; --tcl: 54%; }
+  html.dark { --h0: 15; --h1: 24; --tcs: 100%; --tcl: 46%; }
   .bottom-row { display: none; }
   @media (max-width: 640px) {
     .bottom-row { display: flex; gap: 10px; flex: 1; min-height: 0; margin-top: 10px; transition: opacity .25s ease; }
@@ -1657,7 +1657,10 @@
       -webkit-mask: radial-gradient(circle, transparent 36%, #000 40%); mask: radial-gradient(circle, transparent 36%, #000 40%);
       animation: tcSpin 28s linear infinite, tcBreath 7s ease-in-out infinite alternate;
     }
-    html.dark .tc-glow { opacity: 0.42; }
+    html.dark .tc-glow {
+      opacity: 0.46;
+      background: conic-gradient(from 0deg, hsl(var(--h0) 100% 52%), hsl(calc((var(--h0) + var(--h1)) / 2) 100% 54%), hsl(var(--h1) 100% 52%), hsl(var(--h0) 100% 52%));
+    }
     .tc-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 6px hsla(var(--h0), 80%, 70%, 0.35)); }
     html.dark .tc-svg { filter: drop-shadow(0 0 6px hsla(var(--h1), 90%, 65%, 0.45)); }
     .tc-seg {
