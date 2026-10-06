@@ -1941,9 +1941,9 @@
   // tiny pixel-art icons chosen from the memo's meaning (keyword match)
   const ICON_COL = { K: '#4b5068', S: '#c9cfe2', W: '#ffffff', R: '#ff5f6d', B: '#5aa2ff', C: '#8fd6ff',
                      G: '#3ecb7a', Y: '#ffcf3d', O: '#ff9f43', P: '#ff9ec7', N: '#b27a44',
-                     T: '#ffc48c', Q: '#6aaeff', L: '#e2f4ff', D: '#1d2030', H: '#454b6b' };
+                     T: '#ffc48c', Q: '#6aaeff', L: '#e2f4ff', D: '#1d2030', H: '#454b6b', M: '#7dff3a' };
   const ICONS = {
-    sneaker: ['KKKK.......', 'KWWK.......', 'KWWKBKB....', 'KWWWWWWKK..', 'KWWBBBBWWK.', 'KRRRRRRRRRK', '.KKKKKKKKK.'],
+    monster: ['.SSSSS.', 'SDDDDDS', 'DMDMDMD', 'DMDMDMD', 'DMDMDMD', 'DMDMDMD', 'DMDMDMD', 'DMDMDMD', 'DDDDDDD', 'SDDDDDS', '.SSSSS.'],
     bubbles: ['........QQ..', '.......QWLQ.', '..Q....QLLQ.', '.QWQ....QQ..', '..Q.........', '.....QQQQ...', '....QLWLLQ..', '....QWLLLQ..', '....QLLLLQ..', '....QLLLLQ..', '.....QQQQ...'],
     tv: ['...K...K...', '....K.K....', '.....K.....', 'SSSSSSSSSSS', 'SDDDDDDDDDS', 'SDHHDDDDDDS', 'SDHDDDDDDDS', 'SDDDDDDDDDS', 'SDDDDDDDDDS', 'SSSSSSSSSSS', '.S.......S.'],
     flower: ['...PPP...', '..PPPPP..', '..PPYPP..', '..PPPPP..', '...PPP...', '....G....', '..GG.GG..', '...GGG...', '....G....', '..NNNNN..', '...NNN...'],
@@ -1967,7 +1967,7 @@
   };
   // first match wins (order matters)
   const ICON_RULES = [
-    ['sneaker', /운동|헬스|러닝|런닝|조깅|달리기|요가|필라테스|\bpt\b|gym|스쿼트|수영|등산|산책|스트레칭/i],
+    ['monster', /운동|헬스|러닝|런닝|조깅|달리기|요가|필라테스|\bpt\b|gym|스쿼트|수영|등산|산책|스트레칭/i],
     ['bubbles', /샤워|목욕|세수|씻|양치|머리\s?감/],
     ['tv', /넷플|netflix|영화|드라마|애니|티비|\btv\b|시청|유튜브|youtube|웹툰|왓챠|디즈니/i],
     ['flower', /꽃|화분|식물|물\s?주기|정원|화초/],
