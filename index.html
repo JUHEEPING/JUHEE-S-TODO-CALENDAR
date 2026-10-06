@@ -59,40 +59,40 @@
     width: 620px; height: 620px;
     background: radial-gradient(circle, #0a84ff, transparent 70%);
     top: -220px; left: -160px;
-    animation: drift1 52s ease-in-out infinite alternate;
+    animation: drift1 38s ease-in-out infinite alternate;
   }
   .blob.b2 {
     width: 560px; height: 560px;
     background: radial-gradient(circle, #bf5af2, transparent 70%);
     top: 20%; right: -220px;
-    animation: drift2 64s ease-in-out infinite alternate;
+    animation: drift2 46s ease-in-out infinite alternate;
   }
   .blob.b3 {
     width: 480px; height: 480px;
     background: radial-gradient(circle, #ff375f, transparent 70%);
     bottom: -220px; left: 18%;
     opacity: 0.32;
-    animation: drift3 76s ease-in-out infinite alternate;
+    animation: drift3 54s ease-in-out infinite alternate;
   }
 
-  /* slow, free-form morphing: each blob stretches, rotates and drifts on its own rhythm */
+  /* free-form morphing: each blob stretches, rotates and travels on its own rhythm */
   @keyframes drift1 {
     0%   { transform: translate(0,0) rotate(0deg) scale(1,1); }
-    33%  { transform: translate(90px,40px) rotate(40deg) scale(1.4,0.75); }
-    66%  { transform: translate(30px,100px) rotate(105deg) scale(0.8,1.3); }
-    100% { transform: translate(-40px,30px) rotate(170deg) scale(1.2,0.9); }
+    33%  { transform: translate(170px,80px) rotate(50deg) scale(1.5,0.7); }
+    66%  { transform: translate(60px,190px) rotate(120deg) scale(0.75,1.4); }
+    100% { transform: translate(-80px,60px) rotate(190deg) scale(1.25,0.85); }
   }
   @keyframes drift2 {
     0%   { transform: translate(0,0) rotate(0deg) scale(1,1); }
-    30%  { transform: translate(-70px,50px) rotate(-35deg) scale(0.75,1.35); }
-    65%  { transform: translate(-30px,-60px) rotate(-90deg) scale(1.35,0.8); }
-    100% { transform: translate(40px,40px) rotate(-160deg) scale(0.9,1.15); }
+    30%  { transform: translate(-150px,100px) rotate(-45deg) scale(0.7,1.45); }
+    65%  { transform: translate(-60px,-120px) rotate(-100deg) scale(1.45,0.75); }
+    100% { transform: translate(80px,80px) rotate(-170deg) scale(0.9,1.2); }
   }
   @keyframes drift3 {
     0%   { transform: translate(0,0) rotate(0deg) scale(1,1); }
-    35%  { transform: translate(60px,-50px) rotate(55deg) scale(1.3,0.8); }
-    70%  { transform: translate(-50px,-20px) rotate(120deg) scale(0.85,1.25); }
-    100% { transform: translate(30px,30px) rotate(200deg) scale(1.15,0.95); }
+    35%  { transform: translate(130px,-110px) rotate(60deg) scale(1.4,0.75); }
+    70%  { transform: translate(-110px,-40px) rotate(130deg) scale(0.8,1.35); }
+    100% { transform: translate(60px,60px) rotate(210deg) scale(1.2,0.9); }
   }
 
   /* Liquid-glass gradient rim */
@@ -1133,10 +1133,10 @@
 
   @media (max-width: 640px) {
     body { background: #f6f8fc; }
-    .blob { opacity: 0.2; filter: blur(90px); }
-    .blob.b1 { width: 380px; height: 380px; top: -160px; left: -120px; }
-    .blob.b2 { width: 300px; height: 300px; opacity: 0.12; }
-    .blob.b3 { display: none; }
+    .blob { opacity: 0.5; filter: blur(80px); }
+    .blob.b1 { width: 460px; height: 460px; top: -150px; left: -150px; }
+    .blob.b2 { width: 420px; height: 420px; top: 28%; right: -190px; }
+    .blob.b3 { width: 400px; height: 400px; bottom: -170px; left: 8%; opacity: 0.36; }
     .weekdays div { padding: 7px 0; }
     .more-label.inrow { margin-left: auto; padding: 0 2px 0 0; font-size: 9px; line-height: 1; flex-shrink: 0; }
     input[type="text"], textarea, input[type="time"], input[type="date"], .date-btn { font-size: 16px; }
@@ -1323,7 +1323,7 @@
     .grid { flex: 1; min-height: 0; grid-auto-rows: auto; grid-template-rows: repeat(var(--weeks, 6), minmax(0, 1fr)); }
     .memo-card { display: none !important; }
     .calendar {
-      background: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.5);
       backdrop-filter: blur(18px) saturate(170%); -webkit-backdrop-filter: blur(18px) saturate(170%);
     }
     .cell.other-month { background: rgba(140,140,160,0.02); }
@@ -1357,10 +1357,28 @@
   }
   .float-note.held { scale: none; }
   .note-text { white-space: pre-line; word-break: keep-all; text-align: center; }
-  .note-ship { display: block; transform: rotate(-12deg); animation: shipBob 3.2s ease-in-out infinite; filter: drop-shadow(0 1px 1px rgba(60,70,140,0.25)); }
-  .ship-flame { animation: flameFlicker .5s steps(2) infinite; }
+  .note-ship { display: block; transform: rotate(-6deg); animation: shipBob 3.2s ease-in-out infinite; filter: drop-shadow(0 1px 1px rgba(60,70,140,0.25)); }
+  .ufo-light { animation: ufoBlink 1.2s steps(2) infinite; }
+  .ufo-beam { opacity: 0.55; animation: beamPulse 2.4s ease-in-out infinite; }
+  @keyframes ufoBlink { 0% { fill: #ffd44d; } 100% { fill: #ff8fb1; } }
+  @keyframes beamPulse { 0%,100% { opacity: 0.25; } 50% { opacity: 0.7; } }
   @keyframes shipBob { 0%,100% { translate: 0 0; } 50% { translate: 0 -2px; } }
   @keyframes flameFlicker { 0% { opacity: 1; } 100% { opacity: 0.55; } }
+
+  /* ====== v11 ====== */
+  @media (max-width: 640px) {
+    .calendar, .memo-card {
+      background: rgba(255,255,255,0.5) !important;
+      backdrop-filter: blur(18px) saturate(170%); -webkit-backdrop-filter: blur(18px) saturate(170%);
+    }
+    /* soft see-through controls: 10% white */
+    .nav #prevBtn, .nav #nextBtn {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); box-shadow: none;
+    }
+    .auth-bar:not(:has(.login)) {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); box-shadow: none;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1602,7 +1620,8 @@
   function makeAuthBar() {
     const bar = document.createElement('div');
     bar.className = 'auth-bar';
-    (document.querySelector('.title-row') || document.body).appendChild(bar);
+    const row = document.querySelector('.title-row');
+    if (row) row.insertBefore(bar, row.firstChild); else document.body.appendChild(bar);
     return bar;
   }
 
@@ -1891,18 +1910,26 @@
     return lines.join('\n');
   }
 
-  // tiny pixel-art spaceship (same crisp style as the Mars icon)
+  // tiny pixel-art UFO (same crisp style as the Mars icon)
   const SHIP_MAP = [
-    '....R....', '...RRR...', '..WWWWS..', '..WBBBS..', '..WBBBS..', '..WWWWS..',
-    '.RWWWWSR.', 'RRWWWWSRR', 'R.WWWWS.R', '...FFF...', '....Y....'
+    '....DHDDD....',
+    '...DHDDDDD...',
+    '.WWWWWWWWWWW.',
+    'WWWLWWLWWLWWW',
+    '.SSSSSSSSSSS.',
+    '.....BBB.....',
+    '....BBBBB....',
+    '...BBBBBBB...'
   ];
-  const SHIP_COL = { R: '#ff6b5e', W: '#f5f7fc', S: '#cdd3e6', B: '#4da3ff', F: '#ffb020', Y: '#ffe27a' };
+  const SHIP_COL = { D: '#9fd8ff', H: '#e8f7ff', W: '#f5f7fc', S: '#c3cade', L: '#ffd44d', B: '#fff0a0' };
   function shipSvg() {
     let r = '';
     SHIP_MAP.forEach((row, y) => [...row].forEach((ch, x) => {
-      if (ch !== '.') r += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${SHIP_COL[ch]}"${ch === 'F' || ch === 'Y' ? ' class="ship-flame"' : ''}/>`;
+      if (ch === '.') return;
+      const cls = ch === 'L' ? ' class="ufo-light"' : ch === 'B' ? ' class="ufo-beam"' : '';
+      r += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${SHIP_COL[ch]}"${cls}/>`;
     }));
-    return `<svg class="note-ship" viewBox="0 0 9 11" width="18" height="22" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+    return `<svg class="note-ship" viewBox="0 0 13 8" width="30" height="18.5" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
   }
 
   function placeNote(n) { n.el.style.transform = `translate(${n.x}px, ${n.y}px)`; }
@@ -2328,8 +2355,8 @@
       bar.style.height = barH + 'px';
       bar.style.boxSizing = 'border-box';
       bar.style.lineHeight = (barH - 2) + 'px';
-      bar.style.background = seg.event.done ? color + '1f' : color + '33';
-      bar.style.border = `1px solid ${color}66`;
+      bar.style.background = seg.event.done ? color + '22' : color + '40';
+      bar.style.border = 'none';
       bar.style.backdropFilter = 'blur(6px)';
       bar.style.color = (COLOR_TAGS[seg.event.color] || COLOR_TAGS[DEFAULT_COLOR]).text;
       bar.style.fontSize = (mobile ? 9 : 10.5) + 'px';
@@ -2436,8 +2463,8 @@
           const pill = document.createElement('div');
           pill.className = 'pill' + (t.done ? ' done' : '');
           pill.style.height = barH + 'px';
-          pill.style.background = t.done ? color + '1f' : color + '33';
-          pill.style.border = `1px solid ${color}66`;
+          pill.style.background = t.done ? color + '22' : color + '40';
+          pill.style.border = 'none';
           pill.style.color = tagText(t);
           pill.innerHTML = `<span class="dot"></span><span>${escapeHtml(shortLabel(t.title))}</span>`;
           attachDrag(pill, t);
