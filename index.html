@@ -1535,6 +1535,13 @@
   @media (max-width: 640px) {
     html.dark body.memo-editing .memo-card { background: rgba(10,18,48,0.97) !important; }
   }
+
+  /* ====== PC: lighter type for events and floating notes ====== */
+  @media (min-width: 641px) {
+    .pill { font-weight: 500; }
+    .day-bar { font-weight: 500 !important; }
+    .float-note { font-weight: 400; }
+  }
 </style>
 </head>
 <body>
@@ -1900,66 +1907,69 @@
 
   function pad(n) { return String(n).padStart(2, '0'); }
 
-  /* ---------- glass-tap sound (Web Audio; iOS silent switch mutes it) ---------- */
+  /* ---------- tap sound: a real keyboard click, pre-decoded for instant playback ---------- */
   const snd = (() => {
-    let ctx = null;
-    let on = true;
+    const CLICK_B64 = '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7v/m//T//P8FAA8AAwD1////DgAPAAwABADz//H/AgAGAP3/AQADAO//6/8FABMADAARABQA/P/j/+j/+v8GAAwACAAEAAUA+//x////DQACAPj/AQACAPD/6//5//7///8LAA4A///3//7/CgAWABYABwD6//X/8f/z////CgALAAgAAgD6//7/CQAIAAMAAwD2/+v//f8RAAkA/P/9//r/8//8/w4ADwAFAAEA///8//X/7v/2/wsAEQAAAPn/AAD8//n/DAAYAAkA+f/x/+r/8/8MABkADgD///T/7//7/xEAEwAHAAUA///w//D/+v/7//3/BwAMAAYA+//4//z/AgAHAAUAAAACAAMA+//z/+z/7v8EABkAGAAJAPj/7v/w//j/AgAIAAYABAACAPj/7//v//r/BwAMAAkABAD7//n/AAAAAPT/8P8BABUAEgD8/+//8f/4/wQADQAMAAgAAwD4//D/8//+/wcADAAHAPz/+f///wIA/f/6//v/AAAIAA4ACQAAAPv/9//3//v/+v/5/wAADgASAAcA9//r/+v/+f8NABgAEQADAPT/6v/v//3/CQAOAA4ABwD7//L/9P8AAAoADQAJAAEA+//5//j//f8FAAsADQAHAP///f8AAAUABAD//wAABAD///b/8//4/wUAEQASAAcA/P/z//H/+P8EAA8AEAADAPP/6//v//j/BAALAAkAAAD2/+//7//5/wgAFgAYAAwA+v/u//H///8PABUAEAABAPH/6//u//f/BQAQAA4ACAAFAP//+P/5/wIACQAJAAQA/v/4//b//f8EAAUAAQD7//j/+////wEAAAD+//z/AAAGAAcAAQD5//X/+/8EAAQA+//1//v/CQAQAAgA/f/4//v/BAALAAkABQAEAAEA+//3//j/AgANAAsAAQD7//r///8FAAMA/v/+/wAAAgABAPz/+v/7////BQAKAAkAAQD5//b/+/8EAAsACQABAPf/8//2////CQAOAA0ABAD7//f/9////wkADAAHAAAA+//4//b/+P8AAAkADAAJAP//8//v//f/BAAOAA0AAgD3//X/9//7/wAAAgABAAEA///7//z/AAAEAAYAAwAAAAAAAAAAAAAA//8BAAMAAgAAAPz/+f/8/wAA/////wAAAAAAAP3/+f/+/wgAEAAQAAQA9P/w//j/AQAHAAgABAAAAP3/+P/0//n/BAALAAwABAD3//H/9v8CAAwADAAEAPz/9//4////BQAIAAgAAAD4//f//P8EAAsACAABAPv/+f/7/wAABAAIAAgAAgD7//n//P8DAAkACAABAPj/9//8/wUADAALAAMA+v/y//T/AAAIAAgABAD9//f/+f///wUACAAFAP//+P/z//j/BAANAAwABQD7//X/9////wUACAAIAAYAAAD7//j/+/8EAAkABwABAPv/+P/8/wAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAQAAAAAAAQD///z/+//9/wAABAAFAAAA/P/8/wAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAQAAAAAAAQAAAAAAAAAAAAAAAAAAAAIABAABAP//AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAP////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///z//P8AAAEAAAAAAAAA//8AAAAAAQABAAAAAAAAAP//AAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAD//wEABAAEAAAA+//4//z/AQAFAAcABQAAAPz/+f/7/wEABwAJAAQA///9//v//f8AAAAAAAAAAP//AAAAAAAABQAIAAQA/v/4//j/AAAFAAYABQD///v//P///wEABAAEAAEA/v/9//7/AgADAAEA//8AAAAAAAAAAAAAAAABAP///f/+/wEABAAEAAEA//8AAAAAAAABAAMABQAEAP//+P/3//z/BAAIAAUA///9////AAAAAAAAAAD//wAA///8//v//f8AAAQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD8//z///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==';
+    let ctx = null, buf = null, on = true, downAt = 0, consumed = true;
     try { on = localStorage.getItem('todoSound') !== 'off'; } catch (e) {}
-    function ac() {
-      if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); }
+    try {
+      const C = window.AudioContext || window.webkitAudioContext;
+      if (C) {
+        ctx = new C({ latencyHint: 'interactive' });
+        const bin = atob(CLICK_B64), u = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+        const done = b => { buf = b; };
+        const p = ctx.decodeAudioData(u.buffer, done, () => {});
+        if (p && p.then) p.then(done).catch(() => {});
+      }
+    } catch (e) {}
+    const unlock = () => { if (ctx && ctx.state === 'suspended') ctx.resume(); };
+    ['pointerdown', 'touchstart', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { capture: true, passive: true }));
+
+    // fromDown: played on press (instant). A later click handler call for the same tap is skipped.
+    function play(rate, vol, fromDown) {
+      if (!on || !buf || !ctx) return;
+      const now = performance.now();
+      if (fromDown) { downAt = now; consumed = false; }
+      else if (!consumed && now - downAt < 800) { consumed = true; return; }
       if (ctx.state === 'suspended') ctx.resume();
-      return ctx;
-    }
-    // iPhone passcode keypad: very short, low, slightly dull "thock"
-    let noiseBuf = null;
-    function thock(freq, o) {
-      if (!on) return;
-      o = o || {};
-      try {
-        const c = ac(); if (!c) return;
-        const t = c.currentTime + (o.delay || 0), vol = o.vol || 0.55, dur = o.dur || 0.055;
-        const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400;
-        lp.connect(c.destination);
-        const osc = c.createOscillator(); osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, t);
-        osc.frequency.exponentialRampToValueAtTime(freq * 0.55, t + dur);
-        const g = c.createGain();
-        g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(vol, t + 0.004);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-        osc.connect(g); g.connect(lp);
-        osc.start(t); osc.stop(t + dur + 0.03);
-        // soft contact texture
-        if (!noiseBuf) {
-          noiseBuf = c.createBuffer(1, Math.floor(c.sampleRate * 0.03), c.sampleRate);
-          const d = noiseBuf.getChannelData(0);
-          for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-        }
-        const src = c.createBufferSource(); src.buffer = noiseBuf;
-        const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 700; bp.Q.value = 0.9;
-        const ng = c.createGain();
-        ng.gain.setValueAtTime(vol * 0.5, t);
-        ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.02);
-        src.connect(bp); bp.connect(ng); ng.connect(lp);
-        src.start(t); src.stop(t + 0.03);
-      } catch (e) {}
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.playbackRate.value = rate;
+      const g = ctx.createGain();
+      g.gain.value = vol;
+      src.connect(g); g.connect(ctx.destination);
+      src.start(0);
     }
     return {
       get on() { return on; },
       toggle() {
         on = !on;
         try { localStorage.setItem('todoSound', on ? 'on' : 'off'); } catch (e) {}
-        if (on) thock(260);
+        if (on) { consumed = true; play(1, 0.8); }
         return on;
       },
-      click() { thock(260); },
-      color(i) { thock(215 + i * 16); },
-      save() { thock(230, { dur: 0.07 }); },
-      next() { thock(300); },
-      prev() { thock(215); },
-      drop() { thock(240, { dur: 0.065 }); }
+      down(rate, vol) { play(rate || 1, vol || 0.8, true); },
+      click() { play(1, 0.8); },
+      color(i) { play(0.9 + (i % 8) * 0.05, 0.8); },
+      save() { play(0.85, 0.9); },
+      next() { play(1.12, 0.8); },
+      prev() { play(0.9, 0.8); },
+      drop() { play(0.8, 0.8); }
     };
   })();
+
+  // sound on press (not on release) so it never feels late
+  document.addEventListener('pointerdown', e => {
+    const t = e.target;
+    if (!t || !t.closest || t.closest('#soundBtn')) return;
+    if (t.closest('#nextBtn')) return snd.down(1.12);
+    if (t.closest('#prevBtn')) return snd.down(0.9);
+    if (t.closest('#submitBtn')) return snd.down(0.85, 0.9);
+    const sw = t.closest('.color-swatch');
+    if (sw) return snd.down(0.9 + (COLOR_KEYS.indexOf(sw.dataset.c) % 8) * 0.05);
+    if (t.closest('button, .cell, .hp-item, .todo-check, .mc-day, .pill, .icon-btn, .day-bar, .suggest-item')) snd.down(1);
+  }, true);
   const soundBtn = document.getElementById('soundBtn');
   const BELL_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/>';
   const syncSoundBtn = () => { soundBtn.innerHTML = BELL_SVG + (snd.on ? '' : '<path d="M3 3l18 18"/>') + '</svg>'; };
