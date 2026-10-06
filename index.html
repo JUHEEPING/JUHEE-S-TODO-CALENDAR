@@ -1511,11 +1511,83 @@
     html.dark body.memo-editing .memo-card { background: rgba(12,15,32,0.97) !important; }
     html.dark .nav .today-btn { background: rgba(120,140,255,0.16); }
   }
+
+  /* ====== dark mode: deep space ====== */
+  .constellations { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .8s ease; animation: constTwinkle 9s ease-in-out infinite alternate; }
+  @keyframes constTwinkle { from { opacity: var(--cmin, 0.55); } to { opacity: 1; } }
+  .planets { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity .8s ease; }
+  .planet { position: absolute; border-radius: 50%; will-change: transform; }
+  .p-mars {
+    width: clamp(260px, 38vw, 460px); aspect-ratio: 1; right: -9vw; bottom: -14vh;
+    background: radial-gradient(circle at 30% 28%, #ffb089 0%, #e0602f 30%, #8c2a10 62%, #330e06 100%);
+    box-shadow: inset -26px -22px 60px rgba(0,0,0,0.55), 0 0 90px rgba(224,96,47,0.18);
+    animation: planetA 75s ease-in-out infinite alternate;
+  }
+  .p-blue {
+    width: clamp(180px, 26vw, 320px); aspect-ratio: 1; left: -6vw; top: 14vh;
+    background: radial-gradient(circle at 32% 28%, #a9c4ff 0%, #4f74e0 34%, #1f2f8c 66%, #090d2e 100%);
+    box-shadow: inset -22px -18px 50px rgba(0,0,8,0.6), 0 0 80px rgba(79,116,224,0.2);
+    animation: planetB 90s ease-in-out infinite alternate;
+  }
+  .p-ring {
+    width: clamp(70px, 9vw, 120px); aspect-ratio: 1; right: 22vw; top: 5vh;
+    background: radial-gradient(circle at 32% 30%, #f5e6d3 0%, #c9a58e 42%, #6b4f66 80%, #1b1228 100%);
+    box-shadow: inset -10px -8px 22px rgba(0,0,0,0.5);
+    animation: planetC 110s ease-in-out infinite alternate;
+  }
+  .p-ring::after {
+    content: ""; position: absolute; left: -62%; top: 36%; width: 224%; height: 28%; border-radius: 50%;
+    border: 5px solid rgba(232,214,255,0.5); transform: rotate(-18deg); box-shadow: 0 0 14px rgba(200,180,255,0.25);
+  }
+  @keyframes planetA { 0% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-60px,-40px) rotate(25deg); } 100% { transform: translate(-130px,10px) rotate(50deg); } }
+  @keyframes planetB { 0% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(70px,50px) rotate(-20deg); } 100% { transform: translate(110px,-30px) rotate(-45deg); } }
+  @keyframes planetC { 0% { transform: translate(0,0); } 50% { transform: translate(-70px,50px); } 100% { transform: translate(-150px,20px); } }
+  html.dark .constellations, html.dark .planets { opacity: 1; }
+  html.dark .blob { display: none; }
+  html.dark body { background: #000; }
+  html.dark .calendar, html.dark .memo-card { background: rgba(4,6,14,0.42) !important; border-color: rgba(255,255,255,0.09) !important; }
+  html.dark .nav { background: rgba(4,6,14,0.42); }
+  html.dark .hover-preview { background: rgba(8,10,20,0.88); }
+  html.dark .modal { background: rgba(8,10,20,0.9); }
+  html.dark .confirm-card { background: rgba(10,12,24,0.94); }
+  html.dark .suggest-list { background: rgba(12,14,28,0.97); }
+  html.dark .theme-btn .sync-dot { border-color: #05060c; }
+  html.dark .float-note {
+    background: radial-gradient(closest-side, rgba(150,160,220,0.34) 0%, rgba(150,160,220,0.22) 45%, rgba(150,160,220,0.08) 72%, rgba(150,160,220,0) 100%);
+    filter: drop-shadow(0 0 16px rgba(170,180,255,0.18));
+  }
+  @media (max-width: 640px) {
+    .p-mars { right: -22vw; bottom: -8vh; width: 62vw; }
+    .p-blue { left: -18vw; top: 26vh; width: 46vw; }
+    .p-ring { right: auto; left: 12vw; top: auto; bottom: 5vh; width: 17vw; }
+    html.dark body.memo-editing .memo-card { background: rgba(4,6,14,0.97) !important; }
+  }
 </style>
 </head>
 <body>
 
 <div class="stars"></div>
+<svg class="constellations" aria-hidden="true">
+  <g stroke="rgba(190,200,255,0.2)" stroke-width="1" fill="none">
+    <polyline points="6%,14% 11%,20% 17%,18% 22%,26% 29%,24% 33%,31% 40%,29%"/>
+    <polyline points="62%,8% 68%,13% 75%,11% 80%,17% 87%,14%"/>
+    <polyline points="72%,62% 78%,70% 85%,66% 90%,74% 82%,80% 78%,70%"/>
+    <polyline points="14%,70% 20%,76% 27%,72% 33%,80% 24%,88% 20%,76%"/>
+    <polyline points="46%,42% 52%,47% 58%,43% 63%,50%"/>
+  </g>
+  <g fill="rgba(225,230,255,0.75)">
+    <circle cx="6%" cy="14%" r="1.6"/><circle cx="11%" cy="20%" r="1.2"/><circle cx="17%" cy="18%" r="1.8"/><circle cx="22%" cy="26%" r="1.2"/><circle cx="29%" cy="24%" r="1.6"/><circle cx="33%" cy="31%" r="1.2"/><circle cx="40%" cy="29%" r="1.8"/>
+    <circle cx="62%" cy="8%" r="1.6"/><circle cx="68%" cy="13%" r="1.2"/><circle cx="75%" cy="11%" r="1.8"/><circle cx="80%" cy="17%" r="1.2"/><circle cx="87%" cy="14%" r="1.6"/>
+    <circle cx="72%" cy="62%" r="1.4"/><circle cx="78%" cy="70%" r="1.8"/><circle cx="85%" cy="66%" r="1.2"/><circle cx="90%" cy="74%" r="1.6"/><circle cx="82%" cy="80%" r="1.2"/>
+    <circle cx="14%" cy="70%" r="1.4"/><circle cx="20%" cy="76%" r="1.8"/><circle cx="27%" cy="72%" r="1.2"/><circle cx="33%" cy="80%" r="1.6"/><circle cx="24%" cy="88%" r="1.2"/>
+    <circle cx="46%" cy="42%" r="1.4"/><circle cx="52%" cy="47%" r="1.8"/><circle cx="58%" cy="43%" r="1.2"/><circle cx="63%" cy="50%" r="1.6"/>
+  </g>
+</svg>
+<div class="planets" aria-hidden="true">
+  <div class="planet p-mars"></div>
+  <div class="planet p-blue"></div>
+  <div class="planet p-ring"></div>
+</div>
 <div class="ambient">
   <div class="blob b1"></div>
   <div class="blob b2"></div>
@@ -2083,9 +2155,11 @@
   // tiny pixel-art icons chosen from the memo's meaning (keyword match)
   const ICON_COL = { K: '#4b5068', S: '#c9cfe2', W: '#ffffff', R: '#ff5f6d', B: '#5aa2ff', C: '#8fd6ff',
                      G: '#3ecb7a', Y: '#ffcf3d', O: '#ff9f43', P: '#ff9ec7', N: '#b27a44',
-                     T: '#ffc48c', Q: '#6aaeff', L: '#e2f4ff', D: '#3a3f55', H: '#454b6b', M: '#8dff2e' };
+                     T: '#ffc48c', Q: '#6aaeff', L: '#e2f4ff', D: '#3a3f55', H: '#454b6b', M: '#6bff2a' };
+  const ICON_BG = { monster: '#0b0b0b' };
+  const ICON_SCALE = { monster: 1.3 };
   const ICONS = {
-    monster: ['..SSSSSS..', '.SSTTTTSS.', '.SSSSSSSS.', '.KKKKKKKK.', 'DKMKKKKMKK', 'DMMKKMKMMK', 'DMMKMMKMMK', 'DMMKMMKMMK', 'DMMKMMKMMK', 'DMMKMMKMMK', 'DGMKMMKGMK', 'DKMKGMKKMK', 'DKGKKGKKGK', 'DKKKKKKKKK', '.KKKKKKKK.', '.SSSSSSSS.', '..SSSSSS..'],
+    monster: ['...MMM..MMMM..MM.', 'MMMMMMM.MMMMMMMMM', '...MMMM.MMMM.MMMM', '...MMMM.MMMM..MMM', '...MMM..MMMM..MMM', '....MMM.MMMM..MMM', '....MMM.MMMM..MM.', '....MMM.MMMM..MM.', '....MMM.MMMM..MM.', '....MMM.MMMM..MM.', '....MMM.MMMM..MM.', '....MMM.MMMM..MM.', '....MM..MMMM..MM.', '....MM..MMMM..MM.', '....MM..MMM...MM.', '.....MM.MMM...MM.', '.....MM..MM...M..', '......M..MM......', '......M..M.......', '.........M.......'],
     bubbles: ['........QQ..', '.......QWLQ.', '..Q....QLLQ.', '.QWQ....QQ..', '..Q.........', '.....QQQQ...', '....QLWLLQ..', '....QWLLLQ..', '....QLLLLQ..', '....QLLLLQ..', '.....QQQQ...'],
     tv: ['...K...K...', '....K.K....', '.....K.....', 'SSSSSSSSSSS', 'SDDDDDDDDDS', 'SDHHDDDDDDS', 'SDHDDDDDDDS', 'SDDDDDDDDDS', 'SDDDDDDDDDS', 'SSSSSSSSSSS', '.S.......S.'],
     flower: ['...PPP...', '..PPPPP..', '..PPYPP..', '..PPPPP..', '...PPP...', '....G....', '..GG.GG..', '...GGG...', '....G....', '..NNNNN..', '...NNN...'],
@@ -2135,13 +2209,15 @@
     return 'heart';
   }
   function shipSvg(text) {
-    const map = ICONS[pickIcon(text)];
+    const name = pickIcon(text);
+    const map = ICONS[name];
     const rows = map.length, cols = Math.max(...map.map(r => r.length));
-    let r = '';
+    const sc = ICON_SCALE[name] || 2, pad = ICON_BG[name] ? 1.5 : 0;
+    let r = ICON_BG[name] ? `<rect x="${-pad}" y="${-pad}" width="${cols + pad * 2}" height="${rows + pad * 2}" rx="2" fill="${ICON_BG[name]}"/>` : '';
     map.forEach((row, y) => [...row].forEach((ch, x) => {
       if (ch !== '.') r += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${ICON_COL[ch]}"/>`;
     }));
-    return `<svg class="note-ship" viewBox="0 0 ${cols} ${rows}" width="${cols * 2}" height="${rows * 2}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+    return `<svg class="note-ship" viewBox="${-pad} ${-pad} ${cols + pad * 2} ${rows + pad * 2}" width="${(cols + pad * 2) * sc}" height="${(rows + pad * 2) * sc}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
   }
 
   function placeNote(n) { n.el.style.transform = `translate(${n.x}px, ${n.y}px)`; }
