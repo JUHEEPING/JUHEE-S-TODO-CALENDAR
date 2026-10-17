@@ -1698,6 +1698,98 @@
   .hover-preview.sheet::before { display: none; }
 
   .hp-shield { position: fixed; z-index: 59; display: none; background: transparent; }
+
+  /* ====== lock mode ====== */
+  .lock-btn {
+    position: relative; flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; padding: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: rgba(29,29,31,0.5);
+    background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.95);
+    box-shadow: 0 2px 8px rgba(60,70,140,0.08); transition: transform .15s ease, color .3s ease, background .3s ease;
+  }
+  .lock-btn:active { transform: scale(0.88); }
+  .lock-btn svg { display: block; }
+  .lock-btn.is-locked { color: #5e5ce6; background: rgba(94,92,230,0.16); }
+  html.dark .lock-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); color: #b6bdea; box-shadow: none; }
+  html.dark .lock-btn.is-locked { color: #9aa4ff; background: rgba(120,130,255,0.2); box-shadow: 0 0 14px rgba(120,130,255,0.35); }
+  /* the lock is a PC feature: hidden on phones, and on any touch-only device */
+  @media (max-width: 640px), (hover: none), (pointer: coarse) { .lock-btn { display: none !important; } }
+
+  /* chips keep their size (never squeezed); overflow is summed up as "+N" in the date row */
+  @media (min-width: 641px) {
+    .pill { flex: 0 0 auto; }
+    .more-label.inrow {
+      margin-left: auto; flex-shrink: 0; padding: 2px 7px; border-radius: 999px;
+      font-size: 10px; font-weight: 700; line-height: 1.2; letter-spacing: 0;
+      color: var(--text-secondary); background: rgba(120,120,140,0.14);
+    }
+  }
+
+  .pin-card { width: min(320px, 88vw); padding: 26px 22px 16px; }
+  .pin-icon {
+    width: 44px; height: 44px; margin: 0 auto 12px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(94,92,230,0.12); color: #5e5ce6;
+  }
+  html.dark .pin-icon { background: rgba(120,130,255,0.18); color: #9aa4ff; }
+  .pin-card .cc-sub { min-height: 18px; margin-top: 6px; transition: color .15s ease; }
+  .pin-card .cc-sub.err { color: #ff453a; }
+  .pin-dots { display: flex; justify-content: center; gap: 16px; margin: 20px 0 22px; }
+  .pin-dot {
+    width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid rgba(60,60,80,0.35);
+    transition: background .12s ease, border-color .12s ease, transform .12s ease;
+  }
+  html.dark .pin-dot { border-color: rgba(233,236,250,0.4); }
+  .pin-dot.on { background: var(--text); border-color: var(--text); transform: scale(1.06); }
+  .pin-dots.err { animation: pinShake .42s ease; }
+  .pin-dots.err .pin-dot.on { background: #ff453a; border-color: #ff453a; }
+  @keyframes pinShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-9px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(4px); }
+  }
+  .pin-pad { display: grid; grid-template-columns: repeat(3, 64px); gap: 12px 16px; justify-content: center; }
+  .pin-key {
+    width: 64px; height: 64px; border-radius: 50%; border: none; cursor: pointer; font-family: inherit;
+    font-size: 22px; font-weight: 500; color: var(--text); padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.65); box-shadow: 0 2px 8px rgba(60,70,140,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
+    transition: transform .1s ease, background .12s ease;
+  }
+  .pin-key:hover { background: rgba(255,255,255,0.92); }
+  .pin-key:active { transform: scale(0.92); background: rgba(10,132,255,0.14); }
+  .pin-key.blank { visibility: hidden; pointer-events: none; }
+  .pin-key.back { background: transparent; box-shadow: none; font-size: 18px; color: var(--text-secondary); }
+  html.dark .pin-key { background: rgba(255,255,255,0.08); box-shadow: none; }
+  html.dark .pin-key:hover { background: rgba(255,255,255,0.14); }
+  html.dark .pin-key.back { background: transparent; }
+  .pin-cancel {
+    border: none; background: transparent; color: var(--text-secondary);
+    font-size: 13px; font-weight: 600; padding: 8px 12px; cursor: pointer; font-family: inherit;
+  }
+  .pin-links { margin-top: 10px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+
+  .pin-view { display: none; }
+  .pin-card[data-view="pad"] .pin-view-pad,
+  .pin-card[data-view="rec"] .pin-view-rec,
+  .pin-card[data-view="forgot"] .pin-view-forgot { display: block; }
+
+  .rec-code {
+    margin: 20px 0 4px; padding: 16px 10px; border-radius: 14px; text-align: center; user-select: all; -webkit-user-select: all;
+    font: 700 26px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 0.12em;
+    color: var(--text); background: rgba(94,92,230,0.1);
+  }
+  html.dark .rec-code { background: rgba(120,130,255,0.16); }
+  .pin-card .rec-input {
+    display: block; width: 100%; height: 48px; margin: 20px 0 4px; padding: 0 12px; border-radius: 14px; text-align: center;
+    border: 1px solid rgba(120,120,140,0.25); background: rgba(255,255,255,0.7); color: var(--text); outline: none;
+    font: 700 20px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .pin-card .rec-input:focus { border-color: rgba(10,132,255,0.6); box-shadow: 0 0 0 4px rgba(10,132,255,0.14); }
+  .pin-card .rec-input.err { border-color: #ff453a; animation: pinShake .42s ease; }
+  html.dark .pin-card .rec-input { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.16); }
+  .pin-primary { background: #0a84ff; color: #fff; }
 </style>
 </head>
 <body>
@@ -1775,6 +1867,36 @@
   </div>
 </div>
 
+<div class="confirm-overlay" id="pinOverlay">
+  <div class="confirm-card pin-card" id="pinCard" data-view="pad">
+    <div class="pin-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+    <p class="cc-title" id="pinTitle">비밀번호 입력</p>
+    <p class="cc-sub" id="pinSub">4자리 숫자를 입력하세요</p>
+    <div class="pin-view pin-view-pad">
+      <div class="pin-dots" id="pinDots"><i class="pin-dot"></i><i class="pin-dot"></i><i class="pin-dot"></i><i class="pin-dot"></i></div>
+      <div class="pin-pad" id="pinPad"></div>
+      <div class="pin-links">
+        <button type="button" class="pin-cancel" id="pinCancel">취소</button>
+        <button type="button" class="pin-cancel" id="pinForgot">비밀번호를 잊으셨나요?</button>
+      </div>
+    </div>
+    <div class="pin-view pin-view-rec">
+      <div class="rec-code" id="recCode">----</div>
+      <div class="cc-actions">
+        <button type="button" class="cc-cancel" id="recCopy">복사</button>
+        <button type="button" class="pin-primary" id="recDone">저장했어요</button>
+      </div>
+    </div>
+    <div class="pin-view pin-view-forgot">
+      <input type="text" class="rec-input" id="recInput" placeholder="XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="9">
+      <div class="cc-actions">
+        <button type="button" class="cc-cancel" id="recBack">뒤로</button>
+        <button type="button" class="cc-ok" id="recReset">초기화</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="overlay">
   <div class="modal liquid">
     <div class="modal-header">
@@ -1824,7 +1946,7 @@
   const STORAGE_KEY = 'todoCalendarData';
   const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const WEEKDAY_NAMES = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
-  const MAX_SHOWN_PILLS = 2;
+  const MAX_BUILT_PILLS = 12;
 
   // Korean public holidays (2025-2027), verified against official sources.
   const HOLIDAYS = {
@@ -1917,6 +2039,22 @@
   let hideTimer = null, switchTimer = null, hoverKey = null;
   let activeSuggestIndex = -1;
 
+  // ---- lock mode (per device; schedules stay hidden until the 4-digit PIN is entered) ----
+  const LOCK_KEY = 'todoCalendarLocked', PIN_KEY = 'todoCalendarPin', REC_KEY = 'todoCalendarPinRecovery';
+  const memStore = {};
+  function readStore(k) {
+    try { const v = localStorage.getItem(k); return v === null ? (memStore[k] ?? null) : v; }
+    catch (e) { return memStore[k] ?? null; }
+  }
+  function writeStore(k, v) { memStore[k] = v; try { localStorage.setItem(k, v); } catch (e) {} }
+  // the lock only exists on PCs (mouse-type devices); phones and tablets never lock
+  function lockCapable() { return window.matchMedia('(hover: hover) and (pointer: fine)').matches; }
+  let pinHash = readStore(PIN_KEY) || null;
+  let recHash = readStore(REC_KEY) || null;
+  // a PIN made before recovery codes existed could only be reset unsafely, so it is dropped
+  if (pinHash && !recHash) { pinHash = null; writeStore(PIN_KEY, ''); writeStore(LOCK_KEY, '0'); }
+  let locked = lockCapable() && !!pinHash && readStore(LOCK_KEY) === '1';
+
   const grid = document.getElementById('grid');
   const monthLabel = document.getElementById('monthLabel');
   const overlay = document.getElementById('overlay');
@@ -2005,8 +2143,8 @@
     const bar = document.createElement('div');
     bar.className = 'auth-bar';
     const row = document.querySelector('.title-row');
-    if (row) { row.insertBefore(bar, row.firstChild); row.appendChild(themeBtn); }
-    else { document.body.appendChild(bar); document.body.appendChild(themeBtn); }
+    if (row) { row.insertBefore(bar, row.firstChild); row.appendChild(themeBtn); row.appendChild(lockBtn); }
+    else { document.body.appendChild(bar); document.body.appendChild(themeBtn); document.body.appendChild(lockBtn); }
     return bar;
   }
 
@@ -2304,6 +2442,36 @@
   const FLOAT_BASE = 11;       // px/s drift speed (slow)
   let floatLast = 0, heldNote = null;
 
+  // The calendar (plus the title row above it) acts like a wall:
+  // floating notes drift around it, never across it.
+  const calEl = document.querySelector('.calendar');
+  const hdrEl = document.querySelector('.header');
+  function calendarWall() {
+    if (!calEl) return null;
+    const r = calEl.getBoundingClientRect();
+    if (!r.width || !r.height) return null;
+    const h = hdrEl ? hdrEl.getBoundingClientRect() : null;
+    const top = h && h.height ? Math.min(r.top, h.top) : r.top;
+    const m = 10;
+    return { l: r.left - m, t: top - m, r: r.right + m, b: r.bottom + m };
+  }
+  function overlapsWall(n, c) {
+    return !!c && n.x < c.r && n.x + n.w > c.l && n.y < c.b && n.y + n.h > c.t;
+  }
+  function pushOutOfWall(n, c, bounce) {
+    if (!overlapsWall(n, c)) return;
+    const pl = n.x + n.w - c.l, pr = c.r - n.x, pt = n.y + n.h - c.t, pb = c.b - n.y;
+    const m = Math.min(pl, pr, pt, pb);
+    if (m === pl) { n.x = c.l - n.w; if (bounce) n.vx = -Math.abs(n.vx); }
+    else if (m === pr) { n.x = c.r; if (bounce) n.vx = Math.abs(n.vx); }
+    else if (m === pt) { n.y = c.t - n.h; if (bounce) n.vy = -Math.abs(n.vy); }
+    else { n.y = c.b; if (bounce) n.vy = Math.abs(n.vy); }
+  }
+  function clampToViewport(n) {
+    n.x = Math.max(0, Math.min(window.innerWidth - n.w, n.x));
+    n.y = Math.max(0, Math.min(window.innerHeight - n.h, n.y));
+  }
+
   // wrap long lines (15+ chars) at word boundaries into 2-3 lines
   function wrapNote(text) {
     const t = text.trim();
@@ -2389,8 +2557,23 @@
     return `<svg class="note-ship" viewBox="${-pad} ${-pad} ${cols + pad * 2} ${rows + pad * 2}" width="${(cols + pad * 2) * sc}" height="${(rows + pad * 2) * sc}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
   }
 
-  function placeNote(n) { n.el.style.transform = `translate(${n.x}px, ${n.y}px)`; }
-  function measureNote(n) { n.w = n.el.offsetWidth; n.h = n.el.offsetHeight; }
+  // n.w / n.h are the on-screen (scaled) size; n.bw / n.bh the unscaled layout size
+  function placeNote(n) {
+    const s = n.s || 1;
+    const ox = ((n.bw || n.w) - n.w) / 2, oy = ((n.bh || n.h) - n.h) / 2;
+    n.el.style.transform = `translate(${n.x - ox}px, ${n.y - oy}px) scale(${s})`;
+  }
+  function measureNote(n) {
+    n.bw = n.el.offsetWidth; n.bh = n.el.offsetHeight;
+    // on narrower screens shrink a note a little so it still fits beside the calendar
+    const wall = calendarWall();
+    let s = 1;
+    if (wall && n.bw) {
+      const free = Math.max(wall.l, window.innerWidth - wall.r) - 4;
+      s = Math.max(0.6, Math.min(1, free / n.bw));
+    }
+    n.s = s; n.w = n.bw * s; n.h = n.bh * s;
+  }
 
   function createNote(key, text, i) {
     const tag = COLOR_TAGS[COLOR_KEYS[(i * 3 + text.length) % COLOR_KEYS.length]];
@@ -2404,8 +2587,14 @@
     floatLayer.appendChild(el);
     const n = { el, x: 0, y: 0, vx: 0, vy: 0, w: 0, h: 0 };
     measureNote(n);
-    n.x = Math.random() * Math.max(1, window.innerWidth - n.w);
-    n.y = Math.random() * Math.max(1, window.innerHeight - n.h);
+    const wall = calendarWall();
+    for (let tries = 0; tries < 40; tries++) {
+      n.x = Math.random() * Math.max(1, window.innerWidth - n.w);
+      n.y = Math.random() * Math.max(1, window.innerHeight - n.h);
+      if (!overlapsWall(n, wall)) break;
+    }
+    pushOutOfWall(n, wall, false);
+    clampToViewport(n);
     const ang = Math.random() * Math.PI * 2, sp = FLOAT_BASE * (0.7 + Math.random() * 0.7);
     n.vx = Math.cos(ang) * sp; n.vy = Math.sin(ang) * sp;
     placeNote(n);
@@ -2418,8 +2607,11 @@
       const ox = e.clientX - n.x, oy = e.clientY - n.y;
       let samples = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
       const move = ev => {
-        n.x = Math.max(0, Math.min(window.innerWidth - n.w, ev.clientX - ox));
-        n.y = Math.max(0, Math.min(window.innerHeight - n.h, ev.clientY - oy));
+        n.x = ev.clientX - ox;
+        n.y = ev.clientY - oy;
+        clampToViewport(n);
+        pushOutOfWall(n, calendarWall(), false);
+        clampToViewport(n);
         placeNote(n);
         const now = performance.now();
         samples.push({ x: ev.clientX, y: ev.clientY, t: now });
@@ -2467,6 +2659,7 @@
     floatLast = ts;
     if (isPhone() || document.hidden) return;
     const W = window.innerWidth, H = window.innerHeight;
+    const wall = calendarWall();
     floaters.forEach(n => {
       if (n === heldNote) return;
       let sp = Math.hypot(n.vx, n.vy);
@@ -2478,6 +2671,7 @@
         n.vx = Math.cos(ang) * FLOAT_BASE; n.vy = Math.sin(ang) * FLOAT_BASE;
       }
       n.x += n.vx * dt; n.y += n.vy * dt;
+      pushOutOfWall(n, wall, true);
       if (n.x < 0) { n.x = 0; n.vx = Math.abs(n.vx); }
       else if (n.x > W - n.w) { n.x = Math.max(0, W - n.w); n.vx = -Math.abs(n.vx); }
       if (n.y < 0) { n.y = 0; n.vy = Math.abs(n.vy); }
@@ -2677,6 +2871,7 @@
   // All todos relevant to a given date: its own single-day items plus any
   // multi-day items (stored under their start date) whose range covers it.
   function getEffectiveTodos(key) {
+    if (locked) return [];
     const merged = [];
     Object.keys(data).forEach(startKey => {
       (data[startKey] || []).forEach(t => {
@@ -2697,6 +2892,7 @@
   }
 
   function getAllTitles() {
+    if (locked) return [];
     const seen = new Map();
     Object.keys(data).forEach(k => {
       (data[k] || []).forEach(t => {
@@ -2714,7 +2910,7 @@
     const firstKey = cells[0].key, lastKey = cells[cells.length - 1].key;
 
     const events = [];
-    Object.keys(data).forEach(startKey => {
+    if (!locked) Object.keys(data).forEach(startKey => {
       (data[startKey] || []).forEach(t => {
         if (t.endDate && t.endDate > startKey) {
           if (t.endDate < firstKey || startKey > lastKey) return;
@@ -2913,8 +3109,10 @@
         const laneCount = dateLaneCount[c.key] || 0;
         if (laneCount) pillWrap.style.marginTop = (laneCount * (barH + barGap)) + 'px';
 
-        const maxPills = isPhone() ? Math.max(1, 3 - laneCount) : MAX_SHOWN_PILLS;
+        // phone: fixed slots; desktop: build every chip, fitPills() later keeps only those that truly fit
+        const maxPills = isPhone() ? Math.max(1, 3 - laneCount) : MAX_BUILT_PILLS;
         const shown = singleDay.slice(0, maxPills);
+        pillWrap.dataset.extra = Math.max(0, singleDay.length - shown.length);
         shown.forEach(t => {
           const color = tagColor(t);
           const pill = document.createElement('div');
@@ -2929,16 +3127,11 @@
         });
         cell.appendChild(pillWrap);
 
-        if (singleDay.length > maxPills && isPhone()) {
+        if (singleDay.length > maxPills) {
           const more = document.createElement('span');
           more.className = 'more-label inrow';
           more.textContent = `+${singleDay.length - maxPills}`;
           dateRow.appendChild(more);
-        } else if (singleDay.length > maxPills) {
-          const more = document.createElement('div');
-          more.className = 'more-label';
-          more.textContent = `+${singleDay.length - maxPills}개 더보기`;
-          cell.appendChild(more);
         }
       }
 
@@ -2972,6 +3165,41 @@
     });
 
     drawBars(segments);
+    fitPills();
+  }
+
+  // Desktop: every chip keeps its full, uniform size. Only as many as truly fit in the
+  // cell are shown (the rest are never squeezed or half-cut) and the remainder is
+  // summed up as a small "+N" in the date row.
+  function fitPills() {
+    if (isPhone()) return;
+    grid.querySelectorAll('.cell').forEach(cell => {
+      const wrap = cell.querySelector('.todo-pills');
+      if (!wrap) return;
+      const pills = [...wrap.children];
+      if (!pills.length) return;
+      pills.forEach(p => { p.style.display = ''; });
+      const cs = getComputedStyle(cell);
+      const bottom = cell.getBoundingClientRect().bottom - (parseFloat(cs.paddingBottom) || 0) - 1;
+      const avail = bottom - wrap.getBoundingClientRect().top;
+      const h = pills[0].getBoundingClientRect().height || 18;
+      const gap = parseFloat(getComputedStyle(wrap).rowGap) || 4;
+      const fit = Math.max(0, Math.min(pills.length, Math.floor((avail + gap) / (h + gap))));
+      pills.forEach((p, i) => { p.style.display = i < fit ? '' : 'none'; });
+      const hidden = pills.length - fit + (parseInt(wrap.dataset.extra, 10) || 0);
+      const dateRow = cell.querySelector('.date-row');
+      let chip = dateRow.querySelector('.more-label.inrow');
+      if (hidden > 0) {
+        if (!chip) {
+          chip = document.createElement('span');
+          chip.className = 'more-label inrow';
+          dateRow.appendChild(chip);
+        }
+        chip.textContent = `+${hidden}`;
+      } else if (chip) {
+        chip.remove();
+      }
+    });
   }
 
   /* ---------- hover preview (persistent + clickable) ---------- */
@@ -3013,7 +3241,7 @@
     dateEl.className = 'hp-date';
     dateEl.textContent = todos.length
       ? `${m}월 ${d}일 · ${todos.length}개`
-      : `${m}월 ${d}일 · 등록된 일정 없음`;
+      : (locked ? `${m}월 ${d}일 · 잠금 중` : `${m}월 ${d}일 · 등록된 일정 없음`);
     if (hol) dateEl.style.color = '#d92d20';
     hoverPreview.appendChild(dateEl);
     if (hol) {
@@ -3182,6 +3410,7 @@
   /* ---------- modal ---------- */
 
   function openModal(key) {
+    if (locked) { hideHoverPreview(); openPin('unlock'); return; }
     hideHoverPreview();
     selectedDateKey = key;
     resetForm();
@@ -3678,6 +3907,245 @@
       if (cloudAuth) cloudAuth.auth.signOut(cloudAuth.a).then(() => toast('로그아웃했어요')).catch(() => toast('로그아웃에 실패했어요'));
     });
   })();
+
+  /* ---------- lock mode UI: 4-digit PIN ---------- */
+  // This is a privacy screen (hides schedules from onlookers), not encryption:
+  // the PIN is stored only as a hash in this browser.
+  function cyrb53(str) {
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  }
+  const hashPin = pin => cyrb53('juhee-todo-calendar:' + pin);
+  const hashRec = code => cyrb53('juhee-todo-calendar-recovery:' + code);
+  const normRec = s => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+  // 8 characters without look-alikes (no 0/O/1/I), shown as XXXX-XXXX
+  function makeRecoveryCode() {
+    const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const bytes = new Uint8Array(8);
+    if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+    else for (let i = 0; i < 8; i++) bytes[i] = Math.floor(Math.random() * 256);
+    const s = Array.from(bytes, b => abc[b % abc.length]).join('');
+    return s.slice(0, 4) + '-' + s.slice(4);
+  }
+
+  const pinOverlay = document.getElementById('pinOverlay');
+  const pinCard = document.getElementById('pinCard');
+  const pinTitle = document.getElementById('pinTitle');
+  const pinSub = document.getElementById('pinSub');
+  const pinDots = document.getElementById('pinDots');
+  const pinPad = document.getElementById('pinPad');
+  const recCodeEl = document.getElementById('recCode');
+  const recInput = document.getElementById('recInput');
+
+  const lockBtn = document.createElement('button');
+  lockBtn.type = 'button';
+  lockBtn.className = 'lock-btn';
+  function paintLockBtn() {
+    lockBtn.classList.toggle('is-locked', locked);
+    const label = locked ? '잠금 해제' : '잠금 모드';
+    lockBtn.title = label;
+    lockBtn.setAttribute('aria-label', label);
+    lockBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5" fill="${locked ? 'currentColor' : 'none'}"/><path d="${locked ? 'M8 11V8a4 4 0 0 1 8 0v3' : 'M8 11V8a4 4 0 0 1 7.6-1.7'}"/></svg>`;
+  }
+  paintLockBtn();
+
+  function setLocked(v) {
+    locked = v;
+    writeStore(LOCK_KEY, v ? '1' : '0');
+    if (v) {
+      if (overlay.classList.contains('open')) closeModal();
+      endPasteMode();
+    }
+    hideHoverPreview();
+    paintLockBtn();
+    renderCalendar();
+  }
+
+  const PIN_TEXT = {
+    unlock: ['잠금 해제', '비밀번호 4자리를 입력하세요'],
+    set1: ['비밀번호 설정', '잠금에 쓸 숫자 4자리를 입력하세요'],
+    set2: ['비밀번호 확인', '한 번 더 입력하세요']
+  };
+  let pinMode = 'unlock', pinBuf = '', pinFirst = '', pinBusy = false;
+  let pinView = 'pad', pendingPin = null, pendingRec = null;   // pending = chosen but not yet confirmed saved
+
+  function setPinView(view) {
+    pinView = view;
+    pinCard.dataset.view = view;
+    if (view === 'rec') {
+      pinTitle.textContent = '복구 코드를 저장하세요';
+      pinSub.textContent = '비밀번호를 잊었을 때 이 코드로만 초기화할 수 있어요. 메모장이나 휴대폰에 꼭 적어두세요.';
+      pinSub.classList.remove('err');
+    } else if (view === 'forgot') {
+      pinTitle.textContent = '비밀번호 초기화';
+      pinSub.textContent = '비밀번호를 만들 때 받은 복구 코드를 입력하세요';
+      pinSub.classList.remove('err');
+      recInput.value = '';
+      recInput.classList.remove('err');
+      setTimeout(() => recInput.focus(), 60);
+    } else {
+      paintPin();
+    }
+  }
+  function paintPin() {
+    const [t, s] = PIN_TEXT[pinMode];
+    pinTitle.textContent = t;
+    pinSub.textContent = s;
+    pinSub.classList.remove('err');
+    [...pinDots.children].forEach((d, i) => d.classList.toggle('on', i < pinBuf.length));
+  }
+  function openPin(mode) {
+    if (!lockCapable()) return;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    pinMode = mode; pinBuf = ''; pinFirst = ''; pinBusy = false;
+    pendingPin = null; pendingRec = null;
+    pinDots.classList.remove('err');
+    setPinView('pad');
+    document.getElementById('pinForgot').style.display = mode === 'unlock' ? '' : 'none';
+    pinOverlay.classList.add('open');
+  }
+  function closePin() {
+    pinOverlay.classList.remove('open');
+    pinBuf = ''; pinBusy = false;
+    pendingPin = null; pendingRec = null;
+    setPinView('pad');
+  }
+  function pinPress(d) {
+    if (pinBusy || pinBuf.length >= 4) return;
+    pinBuf += d;
+    paintPin();
+    if (pinBuf.length === 4) { pinBusy = true; setTimeout(pinSubmit, 140); }
+  }
+  function pinBack() {
+    if (pinBusy) return;
+    pinBuf = pinBuf.slice(0, -1);
+    paintPin();
+  }
+  function pinFail(msg, nextMode) {
+    pinDots.classList.add('err');
+    pinSub.textContent = msg;
+    pinSub.classList.add('err');
+    setTimeout(() => {
+      pinDots.classList.remove('err');
+      pinBuf = '';
+      if (nextMode) { pinMode = nextMode; pinFirst = ''; }
+      pinBusy = false;
+      paintPin();
+    }, 650);
+  }
+  function pinSubmit() {
+    const entered = pinBuf;
+    if (pinMode === 'unlock') {
+      if (hashPin(entered) === pinHash) { closePin(); setLocked(false); toast('잠금을 풀었어요'); }
+      else pinFail('비밀번호가 맞지 않아요');
+    } else if (pinMode === 'set1') {
+      pinFirst = entered; pinBuf = ''; pinMode = 'set2'; pinBusy = false;
+      paintPin();
+    } else if (entered === pinFirst) {
+      // nothing is saved until the user confirms they stored the recovery code
+      const code = makeRecoveryCode();
+      pendingPin = hashPin(entered);
+      pendingRec = hashRec(normRec(code));
+      recCodeEl.textContent = code;
+      pinBusy = false;
+      setPinView('rec');
+    } else {
+      pinFail('일치하지 않아요. 처음부터 다시 입력하세요', 'set1');
+    }
+  }
+
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].forEach(k => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pin-key' + (k === '' ? ' blank' : k === '⌫' ? ' back' : '');
+    b.textContent = k;
+    if (k === '⌫') b.setAttribute('aria-label', '지우기');
+    if (k) b.addEventListener('click', () => { snd.click(); if (k === '⌫') pinBack(); else pinPress(k); });
+    pinPad.appendChild(b);
+  });
+  document.getElementById('pinCancel').addEventListener('click', closePin);
+  pinOverlay.addEventListener('click', e => { if (e.target === pinOverlay && pinView === 'pad') closePin(); });
+
+  // recovery code screen: only after the user says they saved it do the PIN + lock take effect
+  document.getElementById('recCopy').addEventListener('click', async () => {
+    const code = recCodeEl.textContent;
+    let ok = false;
+    try { await navigator.clipboard.writeText(code); ok = true; } catch (e) {}
+    if (!ok) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = code; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        ok = document.execCommand('copy');
+        ta.remove();
+      } catch (e) {}
+    }
+    toast(ok ? '복구 코드를 복사했어요' : '복사하지 못했어요. 직접 적어두세요');
+  });
+  document.getElementById('recDone').addEventListener('click', () => {
+    if (!pendingPin || !pendingRec) { closePin(); return; }
+    pinHash = pendingPin; recHash = pendingRec;
+    writeStore(PIN_KEY, pinHash);
+    writeStore(REC_KEY, recHash);
+    closePin();
+    setLocked(true);
+    toast('잠금 모드를 켰어요');
+  });
+
+  // forgot the PIN: only the recovery code (a second secret) can remove it, so nobody else can reset it
+  document.getElementById('pinForgot').addEventListener('click', () => setPinView('forgot'));
+  document.getElementById('recBack').addEventListener('click', () => setPinView('pad'));
+  function tryReset() {
+    if (recHash && hashRec(normRec(recInput.value)) === recHash) {
+      pinHash = null; recHash = null;
+      writeStore(PIN_KEY, ''); writeStore(REC_KEY, '');
+      closePin();
+      setLocked(false);
+      toast('비밀번호를 초기화했어요. 다시 쓰려면 자물쇠를 눌러 새로 설정하세요');
+    } else {
+      recInput.classList.remove('err');
+      void recInput.offsetWidth;
+      recInput.classList.add('err');
+      pinSub.textContent = '복구 코드가 맞지 않아요';
+      pinSub.classList.add('err');
+    }
+  }
+  document.getElementById('recReset').addEventListener('click', tryReset);
+  recInput.addEventListener('input', () => {
+    // keep it as XXXX-XXXX while typing
+    const s = normRec(recInput.value).slice(0, 8);
+    recInput.value = s.length > 4 ? s.slice(0, 4) + '-' + s.slice(4) : s;
+    recInput.classList.remove('err');
+  });
+
+  document.addEventListener('keydown', e => {
+    if (!pinOverlay.classList.contains('open')) return;
+    if (pinView === 'forgot') {
+      if (e.key === 'Enter') { e.preventDefault(); tryReset(); }
+      else if (e.key === 'Escape') setPinView('pad');
+      return;
+    }
+    if (pinView === 'rec') return;      // must be confirmed with the button
+    if (/^[0-9]$/.test(e.key)) { e.preventDefault(); pinPress(e.key); }
+    else if (e.key === 'Backspace') { e.preventDefault(); pinBack(); }
+    else if (e.key === 'Escape') closePin();
+  });
+
+  lockBtn.addEventListener('click', () => {
+    if (!lockCapable()) return;
+    snd.click();
+    if (locked) openPin('unlock');
+    else if (!pinHash) openPin('set1');
+    else setLocked(true);
+  });
 
   renderCalendar();
   renderFloaters();
