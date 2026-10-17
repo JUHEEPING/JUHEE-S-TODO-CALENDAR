@@ -1715,8 +1715,12 @@
   @media (max-width: 640px), (hover: none), (pointer: coarse) { .lock-btn { display: none !important; } }
 
   /* chips keep their size (never squeezed); overflow is summed up as "+N" in the date row */
+  .pill { flex: 0 0 auto; }
+  @media (max-width: 640px) {
+    .more-dots { display: flex; gap: 2px; height: 4px; overflow: hidden; flex: 0 0 auto; padding: 0 1px; }
+    .more-dots i { flex: 0 0 10px; height: 4px; border-radius: 999px; opacity: 0.8; }
+  }
   @media (min-width: 641px) {
-    .pill { flex: 0 0 auto; }
     .more-dots { display: flex; gap: 3px; height: 6px; overflow: hidden; flex: 0 0 auto; padding: 0 2px; }
     .more-dots i { flex: 0 0 18px; height: 6px; border-radius: 999px; opacity: 0.8; }
   }
@@ -3102,7 +3106,8 @@
         if (laneCount) pillWrap.style.marginTop = (laneCount * (barH + barGap)) + 'px';
 
         // phone: fixed slots; desktop: build every chip, fitPills() later keeps only those that truly fit
-        const maxPills = isPhone() ? Math.max(1, 3 - laneCount) : MAX_BUILT_PILLS;
+        const maxPills = MAX_BUILT_PILLS;
+        pillWrap.dataset.cap = isPhone() ? Math.max(1, 3 - laneCount) : 99;
         const shown = singleDay.slice(0, maxPills);
         pillWrap.dataset.extra = Math.max(0, singleDay.length - shown.length);
         shown.forEach(t => {
@@ -3120,12 +3125,6 @@
         });
         cell.appendChild(pillWrap);
 
-        if (singleDay.length > maxPills && isPhone()) {
-          const more = document.createElement('span');
-          more.className = 'more-label inrow';
-          more.textContent = `+${singleDay.length - maxPills}`;
-          dateRow.appendChild(more);
-        }
       }
 
       cell.addEventListener('dblclick', () => openModal(c.key));
@@ -3165,7 +3164,6 @@
   // cell are shown (never squeezed or half-cut); the schedules that don't fit appear as a
   // row of small colored capsules under the last chip, so they are still visible at a glance.
   function fitPills() {
-    if (isPhone()) return;
     grid.querySelectorAll('.cell').forEach(cell => {
       const wrap = cell.querySelector('.todo-pills');
       if (!wrap) return;
@@ -3179,10 +3177,11 @@
       const avail = bottom - wrap.getBoundingClientRect().top;
       const h = pills[0].getBoundingClientRect().height || 18;
       const gap = parseFloat(getComputedStyle(wrap).rowGap) || 4;
-      const DOT = 6;
+      const DOT = isPhone() ? 4 : 6;
       const slots = n => Math.floor((n + gap) / (h + gap));
-      let fit = Math.min(pills.length, slots(avail));
-      if (pills.length + extra > fit) fit = Math.min(pills.length, slots(avail - DOT - gap));
+      const cap = parseInt(wrap.dataset.cap, 10) || 99;
+      let fit = Math.min(pills.length, cap, slots(avail));
+      if (pills.length + extra > fit) fit = Math.min(pills.length, cap, slots(avail - DOT - gap));
       fit = Math.max(0, fit);
       pills.forEach((p, i) => { p.style.display = i < fit ? '' : 'none'; });
       const hidden = pills.slice(fit);
