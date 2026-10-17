@@ -1793,8 +1793,8 @@
   .pin-primary { background: #0a84ff; color: #fff; }
 
   /* rotating quote: one line, fades gently between sentences */
-  .title-group .quote { overflow: hidden; text-overflow: clip; transition: opacity .7s ease, transform .7s ease; }
-  .title-group .quote.swap { opacity: 0; transform: translateY(3px); }
+  .title-group .quote { overflow: hidden; text-overflow: clip; transition: opacity 1.2s cubic-bezier(.45,0,.25,1), transform 1.2s cubic-bezier(.45,0,.25,1), filter 1.2s cubic-bezier(.45,0,.25,1); }
+  .title-group .quote.swap { opacity: 0; transform: translateY(4px); filter: blur(1.5px); }
   @media (max-width: 640px) { .title-group h1 { font-size: 15px; } }
 </style>
 </head>
@@ -3952,7 +3952,7 @@
         }
         if (cur) fits(cur);
         el.classList.remove('swap');
-      }, 700);
+      }, 1250);
     }
     show(baseText);
     setInterval(() => { if (!document.hidden) next(); }, EVERY);
