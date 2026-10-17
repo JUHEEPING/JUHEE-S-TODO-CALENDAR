@@ -1794,7 +1794,26 @@
 
   /* rotating quote: one line, fades gently between sentences */
   .title-group .quote { overflow: hidden; text-overflow: clip; transition: opacity .7s ease, transform .7s ease; }
-  .title-group .quote.swap { opacity: 0; transform: translateY(3px); }
+  .title-group .quote { white-space: nowrap; }
+  .q-ch { display: inline-block; will-change: transform, opacity, filter; animation-delay: var(--d, 0s); }
+  /* 1: letters fade one by one, left to right */
+  .q-ch.a-out { animation: qFadeOut .38s ease forwards; animation-delay: var(--d, 0s); }
+  .q-ch.a-in { animation: qFadeIn .45s ease backwards; animation-delay: var(--d, 0s); }
+  @keyframes qFadeOut { to { opacity: 0; } }
+  @keyframes qFadeIn { from { opacity: 0; } }
+  /* 2: letters drift up and vanish like stardust, new ones twinkle into place */
+  .q-ch.b-out { animation: qDustOut .75s ease-in forwards; animation-delay: var(--d, 0s); }
+  .q-ch.b-in { animation: qDustIn .85s ease-out backwards; animation-delay: var(--d, 0s); }
+  @keyframes qDustOut {
+    0% { opacity: 1; }
+    30% { opacity: 1; text-shadow: 0 0 6px rgba(255,214,110,.95); }
+    100% { opacity: 0; transform: translateY(-9px) scale(.45); filter: blur(2px); text-shadow: 0 0 8px rgba(255,214,110,.9); }
+  }
+  @keyframes qDustIn {
+    0% { opacity: 0; transform: translateY(9px) scale(.45); filter: blur(2px); text-shadow: 0 0 8px rgba(255,214,110,.9); }
+    60% { opacity: 1; text-shadow: 0 0 6px rgba(255,214,110,.9); }
+    100% { opacity: 1; transform: none; filter: none; text-shadow: 0 0 0 rgba(255,214,110,0); }
+  }
   @media (max-width: 640px) { .title-group h1 { font-size: 15px; } }
 </style>
 </head>
@@ -3942,17 +3961,45 @@
       if (fits(text)) { cur = text; return true; }
       return false;
     }
+    // wrap every letter in a span so each one can animate on its own
+    function split() {
+      const text = el.textContent;
+      el.textContent = '';
+      const spans = [];
+      for (const ch of text) {
+        if (ch === ' ') { el.appendChild(document.createTextNode(' ')); continue; }
+        const sp = document.createElement('span');
+        sp.className = 'q-ch';
+        sp.textContent = ch;
+        el.appendChild(sp);
+        spans.push(sp);
+      }
+      return spans;
+    }
+    // trial: the two effects alternate so both can be compared
+    let effect = 0;
     function next() {
-      el.classList.add('swap');
+      const kind = effect++ % 2 === 0 ? 'a' : 'b';
+      const out = split();
+      out.forEach((sp, i) => {
+        const d = kind === 'a' ? i * Math.min(0.02, 0.7 / out.length) : Math.random() * 0.45;
+        sp.style.setProperty('--d', d + 's');
+        sp.classList.add(kind + '-out');
+      });
       setTimeout(() => {
-        // fade is complete: pick the next sentence that reads well on one line
         for (let i = 0; i < QUOTES.length; i++) {
           idx = (idx + 1 + (i === 0 ? Math.floor(Math.random() * 3) : 0)) % QUOTES.length;
           if (QUOTES[idx] !== cur && show(QUOTES[idx])) break;
         }
         if (cur) fits(cur);
-        el.classList.remove('swap');
-      }, 700);
+        const inn = split();
+        inn.forEach((sp, i) => {
+          const d = kind === 'a' ? i * Math.min(0.02, 0.7 / inn.length) : Math.random() * 0.5;
+          sp.style.setProperty('--d', d + 's');
+          sp.classList.add(kind + '-in');
+        });
+        setTimeout(() => { if (cur) el.textContent = cur; }, 1500);
+      }, 1100);
     }
     show(baseText);
     setInterval(() => { if (!document.hidden) next(); }, EVERY);
