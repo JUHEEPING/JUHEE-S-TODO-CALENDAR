@@ -1798,32 +1798,42 @@
   @media (max-width: 640px) { .title-group h1 { font-size: 15px; } }
 
   /* ====== company / personal ====== */
-  .header-right { display: flex; align-items: center; gap: 10px; }
-  .view-switch {
-    display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 18px;
-    background: var(--glass); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%);
-    box-shadow: var(--shadow);
+  /* top-right: three-bar toggle (transparent) + side drawer; login moves to the top-left */
+  @media (min-width: 641px) { .auth-bar { right: auto; left: 14px; top: 10px; } }
+  .vs-toggle {
+    position: fixed; top: 10px; right: 14px; z-index: 96; width: 40px; height: 40px; padding: 0; border: none; border-radius: 12px;
+    background: transparent; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .2s ease, transform .15s ease;
   }
-  html.dark .view-switch { background: rgba(18,22,43,0.5); }
-  .vs-options { display: flex; gap: 4px; max-width: 0; opacity: 0; overflow: hidden; transition: max-width .38s cubic-bezier(.4,0,.2,1), opacity .25s ease; }
-  .view-switch.open .vs-options { max-width: 280px; opacity: 1; }
-  .vs-options button {
-    flex: 0 0 auto; height: 36px; padding: 0 13px; border: none; border-radius: 12px; cursor: pointer; white-space: nowrap;
-    background: transparent; color: var(--text-secondary); font: 600 13px/1 inherit; font-family: inherit; transition: background .15s ease, color .15s ease;
+  .vs-toggle:hover { background: rgba(120,120,140,0.12); }
+  .vs-toggle:active { transform: scale(0.92); }
+  .vs-dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; display: none; }
+  .vs-toggle[data-mode="work"] .vs-dot { display: block; background: #0a84ff; }
+  .vs-toggle[data-mode="personal"] .vs-dot { display: block; background: #af52de; }
+  .vs-drawer {
+    position: fixed; top: 58px; right: 0; z-index: 95; width: 210px; padding: 12px 10px 10px;
+    border-radius: 20px 0 0 20px; background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%);
+    box-shadow: -8px 10px 34px rgba(60,70,140,0.16), inset 1px 1px 0 rgba(255,255,255,0.8);
+    transform: translateX(105%); opacity: 0; pointer-events: none;
+    transition: transform .42s cubic-bezier(.22,.9,.3,1), opacity .3s ease;
   }
-  .vs-options button:hover { background: rgba(10,132,255,0.08); }
-  .vs-options button.on { background: rgba(10,132,255,0.16); color: var(--accent); }
-  .vs-options button[data-v="personal"].on { background: rgba(175,82,222,0.16); color: #8a35b8; }
-  .vs-options button[data-v="present"].on { background: rgba(255,149,0,0.18); color: #b86a00; }
-  .vs-toggle { position: relative; width: 36px; height: 36px; border: none; border-radius: 12px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text); }
-  .vs-toggle:hover { background: rgba(10,132,255,0.08); }
-  .vs-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; display: none; border: 1.5px solid #fff; }
-  html.dark .vs-dot { border-color: #11162b; }
-  .view-switch[data-mode="work"] .vs-dot { display: block; background: #0a84ff; }
-  .view-switch[data-mode="personal"] .vs-dot { display: block; background: #af52de; }
-  .view-switch[data-mode="present"] .vs-dot { display: block; background: #ff9500; }
-  @media (max-width: 640px), (hover: none), (pointer: coarse) { .view-switch { display: none; } }
-  @media (max-width: 640px) { .header-right { display: contents; } }
+  html.dark .vs-drawer { background: rgba(14,18,38,0.82); box-shadow: -8px 10px 34px rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,255,255,0.06); }
+  .vs-drawer.open { transform: none; opacity: 1; pointer-events: auto; }
+  .vs-title { margin: 2px 8px 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-tertiary); }
+  .vs-item {
+    display: flex; align-items: center; gap: 10px; width: 100%; height: 42px; padding: 0 10px; border: none; border-radius: 12px;
+    background: transparent; color: var(--text); font: 600 14.5px/1 inherit; font-family: inherit; text-align: left; cursor: pointer;
+    transition: background .15s ease;
+  }
+  .vs-item:hover { background: rgba(120,120,140,0.12); }
+  .vs-check { width: 18px; height: 18px; flex: 0 0 18px; position: relative; }
+  .vs-item.on .vs-check::after {
+    content: ""; position: absolute; left: 4px; top: 1px; width: 6px; height: 11px; border: solid var(--accent); border-width: 0 2px 2px 0;
+    border-radius: 1px; transform: rotate(45deg);
+  }
+  .vs-item[data-v="personal"].on .vs-check::after { border-color: #8a35b8; }
+  @media (max-width: 640px), (hover: none), (pointer: coarse) { .vs-toggle, .vs-drawer { display: none; } }
 
   .kind-select { display: flex; gap: 6px; }
   .kind-select button {
@@ -1838,7 +1848,6 @@
   .badge.kind { text-transform: none; letter-spacing: 0; }
   .badge.kind.work { background: rgba(10,132,255,0.13); color: #0a64c8; border-color: rgba(10,132,255,0.3); }
   .badge.kind.personal { background: rgba(175,82,222,0.13); color: #8a35b8; border-color: rgba(175,82,222,0.3); }
-  body.presenting #floatLayer, body.presenting .memo-card { display: none !important; }
 </style>
 </head>
 <body>
@@ -1870,22 +1879,11 @@
       <div class="title-row"><h1>JUHEE'S TODO CALENDAR</h1></div>
       <p id="quote" class="quote">중요하지 않은 일에 대해 깊게 생각하는 것은 삐뚤어진 못을 망치질하는 것과 같습니다.</p>
     </div>
-    <div class="header-right">
-    <div class="view-switch" id="viewSwitch">
-      <div class="vs-options" id="vsOptions">
-        <button type="button" data-v="all">전체</button>
-        <button type="button" data-v="work">회사</button>
-        <button type="button" data-v="personal">개인</button>
-        <button type="button" data-v="present" title="발표 모드: 회사 일정만 + 메모 숨김">발표</button>
-      </div>
-      <button type="button" class="vs-toggle" id="vsToggle" aria-label="보기 전환" title="회사/개인 보기"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><i class="vs-dot" id="vsDot"></i></button>
-    </div>
     <div class="nav liquid">
       <button id="prevBtn">‹</button>
       <div class="month-label" id="monthLabel"></div>
       <button id="nextBtn">›</button>
       <button class="today-btn" id="todayBtn">TODAY</button>
-    </div>
     </div>
   </div>
 
@@ -1911,6 +1909,13 @@
   </div>
 </div>
 
+<button type="button" class="vs-toggle" id="vsToggle" aria-label="보기 전환" aria-expanded="false" title="보기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg><i class="vs-dot" id="vsDot"></i></button>
+<aside class="vs-drawer" id="vsDrawer" aria-hidden="true" data-mode="all">
+  <p class="vs-title">보기</p>
+  <button type="button" class="vs-item" data-v="all"><span class="vs-check"></span>전체</button>
+  <button type="button" class="vs-item" data-v="work"><span class="vs-check"></span>회사</button>
+  <button type="button" class="vs-item" data-v="personal"><span class="vs-check"></span>개인</button>
+</aside>
 <div class="hover-preview liquid" id="hoverPreview"></div>
 <div class="paste-bar" id="pasteBar"><span id="pasteLabel"></span><button id="pasteDone">완료</button></div>
 <div class="toast" id="toast"></div>
@@ -2096,7 +2101,7 @@
   let editingOwnerKey = null;
   let selectedColor = DEFAULT_COLOR;
   let selectedKind = 'personal';
-  let viewMode = 'all', presenting = false;   // 'all' | 'work' | 'personal'
+  let viewMode = 'all';   // 'all' | 'work' | 'personal'
   let hideTimer = null, switchTimer = null, hoverKey = null;
   let activeSuggestIndex = -1;
 
@@ -4279,31 +4284,35 @@
     else setLocked(true);
   });
 
-  /* ---------- company / personal view switch (PC) ---------- */
-  const viewSwitch = document.getElementById('viewSwitch');
-  const vsOptions = document.getElementById('vsOptions');
+  /* ---------- company / personal view switch (PC): side drawer that stays open ---------- */
+  const vsToggle = document.getElementById('vsToggle');
+  const vsDrawer = document.getElementById('vsDrawer');
   function paintView() {
-    const mode = presenting ? 'present' : viewMode;
-    viewSwitch.dataset.mode = mode === 'all' ? '' : mode;
-    vsOptions.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === mode));
-    document.body.classList.toggle('presenting', presenting);
+    vsToggle.dataset.mode = viewMode === 'all' ? '' : viewMode;
+    vsDrawer.querySelectorAll('.vs-item').forEach(b => b.classList.toggle('on', b.dataset.v === viewMode));
+  }
+  function setVsOpen(open) {
+    vsDrawer.classList.toggle('open', open);
+    vsDrawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+    vsToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
   function setView(v) {
-    if (v === 'present') { presenting = true; viewMode = 'work'; }
-    else { presenting = false; viewMode = v; writeStore('todoViewMode', v); }
+    viewMode = v;
+    writeStore('todoViewMode', v);
     hideHoverPreview();
     paintView();
     renderCalendar();
   }
-  document.getElementById('vsToggle').addEventListener('click', () => { snd.click(); viewSwitch.classList.toggle('open'); });
-  vsOptions.addEventListener('click', e => {
-    const b = e.target.closest('button');
+  vsToggle.addEventListener('click', () => { snd.click(); setVsOpen(!vsDrawer.classList.contains('open')); });
+  vsDrawer.addEventListener('click', e => {
+    const b = e.target.closest('.vs-item');
     if (!b) return;
     snd.click();
-    setView(b.dataset.v);
-    setTimeout(() => viewSwitch.classList.remove('open'), 260);
+    setView(b.dataset.v);       // the drawer stays open until another part of the screen is pressed
   });
-  document.addEventListener('pointerdown', e => { if (!e.target.closest('#viewSwitch')) viewSwitch.classList.remove('open'); });
+  document.addEventListener('pointerdown', e => {
+    if (vsDrawer.classList.contains('open') && !e.target.closest('#vsDrawer, #vsToggle')) setVsOpen(false);
+  });
   paintView();
 
   renderCalendar();
