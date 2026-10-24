@@ -1933,6 +1933,17 @@
   .vs-add .vs-input { height: 25px; }
   .vs-add button { height: 25px; padding: 0 8px; font-size: 10px; border-radius: 8px; }
   @media (min-width: 641px) { .app { left: var(--shift, 0px); transition: left .42s cubic-bezier(.22,.9,.3,1); } }
+  /* each group reads as its own block */
+  .vs-drawer { padding: 8px 8px 10px; }
+  .vs-sec { margin: 0 0 12px; padding: 9px 8px 10px; border-radius: 13px; background: rgba(120,120,140,0.08); box-shadow: inset 0 0 0 1px rgba(120,120,140,0.1); }
+  .vs-sec:last-child { margin-bottom: 0; }
+  .vs-drawer { width: 200px; }
+  html.dark .vs-sec { background: rgba(255,255,255,0.05); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.07); }
+  .vs-sec > .vs-title { margin: 0 2px 6px; }
+  .vs-req, .vs-viewer { background: rgba(255,255,255,0.55); }
+  html.dark .vs-req, html.dark .vs-viewer { background: rgba(255,255,255,0.07); }
+  .vs-drawer .vs-input { background: rgba(255,255,255,0.7); }
+  html.dark .vs-drawer .vs-input { background: rgba(255,255,255,0.08); }
 </style>
 </head>
 <body>
@@ -1996,17 +2007,25 @@
 
 <button type="button" class="vs-toggle" id="vsToggle" aria-label="보기 전환" aria-expanded="false" title="보기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg><i class="vs-dot" id="vsDot"></i></button>
 <aside class="vs-drawer" id="vsDrawer" aria-hidden="true" data-mode="all">
+  <section class="vs-sec">
   <p class="vs-title">보기</p>
   <button type="button" class="vs-item" data-v="all"><span class="vs-check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.4 8.4l2.6 2.6 4.6-5.4"/></svg></span>전체</button>
   <button type="button" class="vs-item" data-v="work"><span class="vs-check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.4 8.4l2.6 2.6 4.6-5.4"/></svg></span>회사</button>
   <button type="button" class="vs-item" data-v="personal"><span class="vs-check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.4 8.4l2.6 2.6 4.6-5.4"/></svg></span>개인</button>
+  </section>
+  <section class="vs-sec">
   <p class="vs-title">검색</p>
   <input type="text" class="vs-input" id="vsSearch" placeholder="일정 제목·메모 검색" autocomplete="off" spellcheck="false">
   <div class="vs-results" id="vsResults"></div>
+  </section>
+  <section class="vs-sec">
   <p class="vs-title">요청함 <span class="vs-count" id="reqCount"></span></p>
   <div class="vs-reqs" id="reqList"></div>
+  </section>
+  <section class="vs-sec">
   <p class="vs-title">공유</p>
   <div class="vs-share" id="shareBox"></div>
+  </section>
 </aside>
 <div class="confirm-overlay" id="reqOverlay">
   <div class="confirm-card req-card">
