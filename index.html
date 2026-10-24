@@ -1958,7 +1958,8 @@
   /* blocks keep their spacing but have no frame of their own */
   .vs-sec, html.dark .vs-sec { background: transparent; box-shadow: none; }
   /* view items: 20px rows, 4px between title and items and between items */
-  .vs-item { height: 20px; margin-bottom: 3px; padding: 0 5px; }
+  .vs-item { height: 13px; margin-bottom: 3px; padding: 0 5px; position: relative; }
+  .vs-item::after { content: ""; position: absolute; left: 0; right: 0; top: -1px; bottom: -1px; }   /* keeps the click area comfortable */
   .vs-sec:first-child > .vs-title { margin-bottom: 3px; }
   .vs-item:last-of-type { margin-bottom: 0; }
 </style>
