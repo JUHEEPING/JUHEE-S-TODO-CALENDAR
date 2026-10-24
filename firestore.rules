@@ -1,8 +1,43 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // private data: only the owner
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // shared company calendar: the owner writes it, only listed viewers can read it
+    match /shares/{ownerId} {
+      allow write: if request.auth != null && request.auth.uid == ownerId;
+      allow read: if request.auth != null && (
+        request.auth.uid == ownerId ||
+        (request.auth.token.email_verified == true && request.auth.token.email in resource.data.viewers)
+      );
+
+      // viewers may only ADD requests; only the owner can read/handle them
+      match /requests/{reqId} {
+        allow read, update, delete: if request.auth != null && request.auth.uid == ownerId;
+        allow create: if request.auth != null
+          && request.auth.token.email_verified == true
+          && request.auth.token.email in get(/databases/$(database)/documents/shares/$(ownerId)).data.viewers
+          && request.resource.data.keys().hasOnly(['title', 'date', 'time', 'note', 'fromEmail', 'fromName', 'createdAt'])
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 80
+          && request.resource.data.date is string && request.resource.data.date.size() == 10
+          && request.resource.data.time is string && request.resource.data.time.size() <= 5
+          && request.resource.data.note is string && request.resource.data.note.size() <= 300
+          && request.resource.data.fromEmail == request.auth.token.email;
+      }
+
+      // "last viewed" marks: a viewer writes only their own, the owner reads them
+      match /seen/{viewerUid} {
+        allow read: if request.auth != null && request.auth.uid == ownerId;
+        allow create, update: if request.auth != null
+          && request.auth.uid == viewerUid
+          && request.auth.token.email_verified == true
+          && request.auth.token.email in get(/databases/$(database)/documents/shares/$(ownerId)).data.viewers;
+      }
     }
   }
 }

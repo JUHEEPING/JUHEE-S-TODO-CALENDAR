@@ -1810,7 +1810,7 @@
   .vs-toggle[data-mode="work"] .vs-dot { display: block; background: #0a84ff; }
   .vs-toggle[data-mode="personal"] .vs-dot { display: block; background: #af52de; }
   .vs-drawer {
-    position: fixed; top: 92px; right: 0; z-index: 95; width: 168px; padding: 9px 8px 8px;
+    position: fixed; top: 92px; right: 0; z-index: 95; width: 232px; padding: 9px 8px 10px; max-height: calc(100vh - 108px); overflow-y: auto; scrollbar-width: none;
     border-radius: 16px 0 0 16px; background: rgba(255,255,255,0.46);
     backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%);
     box-shadow: -6px 8px 28px rgba(60,70,140,0.14), inset 1px 1px 0 rgba(255,255,255,0.8);
@@ -1855,6 +1855,59 @@
   .badge.kind { text-transform: none; letter-spacing: 0; }
   .badge.kind.work { background: rgba(10,132,255,0.13); color: #0a64c8; border-color: rgba(10,132,255,0.3); }
   .badge.kind.personal { background: rgba(175,82,222,0.13); color: #8a35b8; border-color: rgba(175,82,222,0.3); }
+
+  .vs-drawer::-webkit-scrollbar { display: none; }
+  .vs-title { margin-top: 10px; }
+  .vs-title:first-child { margin-top: 1px; }
+  .vs-count { display: inline-block; min-width: 14px; padding: 0 4px; margin-left: 4px; border-radius: 999px; background: #ff3b30; color: #fff; font-size: 9px; line-height: 14px; text-align: center; letter-spacing: 0; }
+  .vs-count:empty { display: none; }
+  .vs-toggle[data-req="1"]::after { content: ""; position: absolute; top: 6px; left: 6px; width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; }
+  .vs-drawer .vs-input {
+    display: block; width: calc(100% - 8px); height: 30px; margin: 0 4px; padding: 0 10px; border-radius: 9px; font-size: 12px;
+    border: 1px solid rgba(120,120,140,0.22); background: rgba(255,255,255,0.5); color: var(--text); outline: none;
+  }
+  html.dark .vs-drawer .vs-input { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.14); }
+  .vs-drawer .vs-input:focus { border-color: rgba(10,132,255,0.55); box-shadow: 0 0 0 3px rgba(10,132,255,0.12); }
+  .vs-results, .vs-reqs, .vs-share { margin: 4px 4px 0; font-size: 11.5px; }
+  .vs-res { display: flex; align-items: center; gap: 7px; width: 100%; height: 28px; padding: 0 6px; border: none; border-radius: 8px; background: transparent; color: var(--text); font-family: inherit; font-size: 11.5px; text-align: left; cursor: pointer; }
+  .vs-res:hover { background: rgba(120,120,140,0.1); }
+  .vs-res i { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 7px; }
+  .vs-res span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vs-res em { font-style: normal; color: var(--text-tertiary); font-size: 10.5px; flex: 0 0 auto; }
+  .vs-empty { margin: 4px 6px; font-size: 11px; color: var(--text-tertiary); }
+  .vs-req { padding: 7px 8px; margin-bottom: 5px; border-radius: 10px; background: rgba(120,120,140,0.09); }
+  .vs-req b { display: block; font-size: 12px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vs-req small { display: block; margin-top: 2px; font-size: 10.5px; color: var(--text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vs-req .vs-acts { display: flex; gap: 5px; margin-top: 6px; }
+  .vs-req .vs-acts button { flex: 1; height: 24px; border: none; border-radius: 8px; font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .vs-req .ok { background: linear-gradient(135deg, #0a84ff, #5ac8fa); color: #fff; }
+  .vs-req .no { background: rgba(120,120,140,0.16); color: var(--text-secondary); }
+  .vs-viewer { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 8px; margin-bottom: 4px; border-radius: 9px; background: rgba(120,120,140,0.09); }
+  .vs-viewer span { flex: 1; min-width: 0; font-size: 11px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vs-viewer small { display: block; font-size: 9.5px; color: var(--text-tertiary); }
+  .vs-viewer button { width: 20px; height: 20px; border: none; border-radius: 50%; background: transparent; color: var(--text-tertiary); cursor: pointer; font-size: 12px; }
+  .vs-viewer button:hover { background: rgba(255,59,48,0.14); color: #ff3b30; }
+  .vs-add { display: flex; gap: 4px; margin-top: 6px; }
+  .vs-add .vs-input { margin: 0; flex: 1; width: auto; min-width: 0; height: 28px; }
+  .vs-add button { flex: 0 0 auto; height: 28px; padding: 0 10px; border: none; border-radius: 9px; background: linear-gradient(135deg, #0a84ff, #bf5af2); color: #fff; font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .vs-seg { display: flex; gap: 3px; margin-top: 7px; padding: 2px; border-radius: 9px; background: rgba(120,120,140,0.1); }
+  .vs-seg button { flex: 1; height: 24px; border: none; border-radius: 7px; background: transparent; color: var(--text-secondary); font-family: inherit; font-size: 10.5px; font-weight: 600; cursor: pointer; transition: background .15s ease, color .15s ease; }
+  .vs-seg button.on { background: rgba(255,255,255,0.9); color: var(--text); box-shadow: 0 1px 4px rgba(60,70,140,0.14); }
+  html.dark .vs-seg button.on { background: rgba(255,255,255,0.16); }
+
+  /* viewer (read-only shared calendar) */
+  body.viewer .vs-toggle, body.viewer .vs-drawer, body.viewer .lock-btn, body.viewer .memo-card, body.viewer #floatLayer, body.viewer .hp-hint, body.viewer .hp-copy { display: none !important; }
+  .viewer-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-shrink: 0; margin: 0 0 10px; padding: 8px 8px 8px 14px; border-radius: 14px;
+    background: var(--glass); backdrop-filter: blur(20px) saturate(170%); -webkit-backdrop-filter: blur(20px) saturate(170%); box-shadow: var(--shadow);
+    font-size: 12.5px; color: var(--text-secondary);
+  }
+  .viewer-bar b { color: var(--text); font-weight: 700; }
+  .viewer-bar .vb-btn { flex: 0 0 auto; height: 30px; padding: 0 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, #0a84ff, #bf5af2); color: #fff; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .req-card { width: min(340px, 88vw); }
+  .req-card .req-in { display: block; width: 100%; height: 42px; margin-top: 10px; padding: 0 12px; border-radius: 12px; font-size: 14px; }
+  .req-row { display: flex; gap: 8px; }
+  .req-row .req-in { flex: 1; min-width: 0; }
 </style>
 </head>
 <body>
@@ -1922,7 +1975,24 @@
   <button type="button" class="vs-item" data-v="all"><span class="vs-check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.4 8.4l2.6 2.6 4.6-5.4"/></svg></span>전체</button>
   <button type="button" class="vs-item" data-v="work"><span class="vs-check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.4 8.4l2.6 2.6 4.6-5.4"/></svg></span>회사</button>
   <button type="button" class="vs-item" data-v="personal"><span class="vs-check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.4 8.4l2.6 2.6 4.6-5.4"/></svg></span>개인</button>
+  <p class="vs-title">검색</p>
+  <input type="text" class="vs-input" id="vsSearch" placeholder="일정 제목·메모 검색" autocomplete="off" spellcheck="false">
+  <div class="vs-results" id="vsResults"></div>
+  <p class="vs-title">요청함 <span class="vs-count" id="reqCount"></span></p>
+  <div class="vs-reqs" id="reqList"></div>
+  <p class="vs-title">공유</p>
+  <div class="vs-share" id="shareBox"></div>
 </aside>
+<div class="confirm-overlay" id="reqOverlay">
+  <div class="confirm-card req-card">
+    <p class="cc-title">일정 요청</p>
+    <p class="cc-sub">보내면 일정 주인이 확인한 뒤 추가해요</p>
+    <input type="text" id="reqTitle" class="req-in" placeholder="요청할 일정 제목" maxlength="80" autocomplete="off">
+    <div class="req-row"><input type="date" id="reqDate" class="req-in"><input type="time" id="reqTime" class="req-in"></div>
+    <input type="text" id="reqNote" class="req-in" placeholder="한 줄 메모 (선택)" maxlength="300" autocomplete="off">
+    <div class="cc-actions"><button type="button" class="cc-cancel" id="reqCancel">취소</button><button type="button" class="pin-primary" id="reqSend">보내기</button></div>
+  </div>
+</div>
 <div class="hover-preview liquid" id="hoverPreview"></div>
 <div class="paste-bar" id="pasteBar"><span id="pasteLabel"></span><button id="pasteDone">완료</button></div>
 <div class="toast" id="toast"></div>
@@ -2109,6 +2179,7 @@
   let selectedColor = DEFAULT_COLOR;
   let selectedKind = 'personal';
   let viewMode = 'all';   // 'all' | 'work' | 'personal'
+  let viewerMode = false;  // true when a shared (read-only) company calendar is shown
   let hideTimer = null, switchTimer = null, hoverKey = null;
   let activeSuggestIndex = -1;
 
@@ -2162,6 +2233,7 @@
   }
 
   function saveData() {
+    if (viewerMode) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {}
@@ -2177,15 +2249,19 @@
   };
   const FB = 'https://www.gstatic.com/firebasejs/10.14.1/';
   let cloudDoc = null, cloudApi = null, cloudTimer = null, lastCloudJson = null;
+  let fsApi = null, dbRef = null, shareUnsubs = [], masterUser = null, reqLoaded = false;
+  let shareCfg = { viewers: [], detail: 'title' }, requestsList = [], seenMap = {};
+  let viewerUnsub = null, viewerOwnerUid = null, viewerUser = null, pubTimer = null;
 
   function cloudSave() {
-    if (!cloudDoc) return;
+    if (!cloudDoc || viewerMode) return;
     clearTimeout(cloudTimer);
     cloudTimer = setTimeout(() => {
       const json = JSON.stringify(data);
       lastCloudJson = json;
       cloudApi.setDoc(cloudDoc, { data: json, memo: memoText, updatedAt: Date.now() })
         .catch(e => console.warn('Firestore save failed', e));
+      publishShare();
     }, 400);
   }
 
@@ -2245,16 +2321,31 @@
       loginBtn.onclick = () => auth.signInWithPopup(a, new auth.GoogleAuthProvider())
         .catch(e => alert('로그인 실패: ' + e.message));
 
-      auth.onAuthStateChanged(a, user => {
+      fsApi = fs; dbRef = db;
+      let authSeq = 0;
+      auth.onAuthStateChanged(a, async user => {
+        const seq = ++authSeq;
         if (unsub) { unsub(); unsub = null; }
+        stopShareListeners();
         cloudDoc = null;
         loginBtn.remove();
         if (!user) {
           bar.appendChild(loginBtn);
           setSync('off');
+          leaveViewer();
           return;
         }
         setSync('wait');
+        // is this person a viewer of someone else's shared company calendar?
+        let shareSnap = null;
+        try {
+          const email = (user.email || '').toLowerCase();
+          const res = await fs.getDocs(fs.query(fs.collection(db, 'shares'), fs.where('viewers', 'array-contains', email)));
+          res.forEach(d => { if (d.id !== user.uid && !shareSnap) shareSnap = d; });
+        } catch (e) { console.warn('share lookup failed', e); }
+        if (seq !== authSeq) return;
+        if (shareSnap) { startViewer(user, shareSnap); return; }
+        leaveViewer();
         const ref = fs.doc(db, 'users', user.uid);
         let first = true;
         unsub = fs.onSnapshot(ref, snap => {
@@ -2281,6 +2372,7 @@
             if (!snap.exists() || (typeof d.memo !== 'string' && memoText)) cloudSave();
           }
         }, e => { setSync('err'); console.warn(e); });
+        startMasterShare(user);
       });
     } catch (e) {
       setSync('err');
@@ -2851,7 +2943,7 @@
   function attachDrag(el, t) {
     el.addEventListener('contextmenu', e => e.preventDefault());
     el.addEventListener('pointerdown', e => {
-      if (clip || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      if (viewerMode || clip || (e.pointerType === 'mouse' && e.button !== 0)) return;
       const touch = e.pointerType !== 'mouse';
       const sx = e.clientX, sy = e.clientY;
       let dragging = false, ghost = null, target = null, timer = null, gw = 0, gh = 0;
@@ -3490,6 +3582,7 @@
   /* ---------- modal ---------- */
 
   function openModal(key) {
+    if (viewerMode) return;
     if (locked) { hideHoverPreview(); openPin('unlock'); return; }
     hideHoverPreview();
     selectedDateKey = key;
@@ -4290,6 +4383,269 @@
     else if (!pinHash) openPin('set1');
     else setLocked(true);
   });
+
+  /* ---------- sharing: publish company items, viewers, requests, search ---------- */
+  const reqListEl = document.getElementById('reqList');
+  const reqCountEl = document.getElementById('reqCount');
+  const shareBoxEl = document.getElementById('shareBox');
+  const DETAIL_LABEL = { busy: '바쁨만', title: '제목+시간', memo: '메모 포함' };
+
+  // only company items go out; what leaves depends on the detail level
+  function buildPublic(detail) {
+    const out = {};
+    Object.keys(data).forEach(k => {
+      const arr = (data[k] || []).filter(t => t.kind === 'work').map(t => {
+        const o = { id: t.id, title: detail === 'busy' ? '일정 있음' : t.title, time: detail === 'busy' ? '' : (t.time || ''), color: t.color, kind: 'work', done: !!t.done };
+        if (t.endDate) o.endDate = t.endDate;
+        if (detail === 'memo' && t.memo) o.memo = t.memo;
+        return o;
+      });
+      if (arr.length) out[k] = arr;
+    });
+    return JSON.stringify(out);
+  }
+  function shareRef() { return fsApi.doc(dbRef, 'shares', masterUser.uid); }
+  function publishShare() {
+    if (!masterUser || !fsApi || viewerMode) return;
+    clearTimeout(pubTimer);
+    pubTimer = setTimeout(() => {
+      if (!shareCfg.viewers.length) return;
+      fsApi.setDoc(shareRef(), { work: buildPublic(shareCfg.detail), updatedAt: Date.now(), ownerName: masterUser.displayName || '' }, { merge: true })
+        .catch(e => console.warn('publish failed', e));
+    }, 500);
+  }
+  function saveShareCfg(patch) {
+    if (!masterUser || !fsApi) { toast('로그인하면 공유할 수 있어요'); return; }
+    const next = Object.assign({}, shareCfg, patch);
+    fsApi.setDoc(shareRef(), { viewers: next.viewers, detail: next.detail, work: buildPublic(next.detail), updatedAt: Date.now(), ownerName: masterUser.displayName || '' }, { merge: true })
+      .catch(e => { console.warn(e); toast('공유 설정을 저장하지 못했어요'); });
+  }
+  function stopShareListeners() {
+    shareUnsubs.forEach(u => { try { u(); } catch (e) {} });
+    shareUnsubs = []; masterUser = null; reqLoaded = false;
+    requestsList = []; seenMap = {}; shareCfg = { viewers: [], detail: 'title' };
+    paintShare(); paintRequests();
+  }
+  function startMasterShare(user) {
+    masterUser = user;
+    shareUnsubs.push(fsApi.onSnapshot(shareRef(), snap => {
+      const d = snap.exists() ? snap.data() : {};
+      const hadViewers = shareCfg.viewers.length;
+      shareCfg = { viewers: Array.isArray(d.viewers) ? d.viewers : [], detail: d.detail || 'title' };
+      paintShare();
+      if (!hadViewers && shareCfg.viewers.length && !d.work) publishShare();
+    }, e => console.warn('share cfg', e)));
+    shareUnsubs.push(fsApi.onSnapshot(fsApi.collection(dbRef, 'shares', user.uid, 'requests'), snap => {
+      const first = !reqLoaded; reqLoaded = true;
+      requestsList = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0));
+      if (!first) snap.docChanges().forEach(c => { if (c.type === 'added') toast('새 일정 요청이 왔어요'); });
+      paintRequests();
+    }, e => console.warn('requests', e)));
+    shareUnsubs.push(fsApi.onSnapshot(fsApi.collection(dbRef, 'shares', user.uid, 'seen'), snap => {
+      seenMap = {};
+      snap.forEach(d => { const v = d.data(); seenMap[(v.email || '').toLowerCase()] = v.at; });
+      paintShare();
+    }, e => console.warn('seen', e)));
+  }
+  function ago(ts) {
+    if (!ts) return '아직 열람 기록 없음';
+    const m = Math.round((Date.now() - ts) / 60000);
+    if (m < 1) return '방금 열람';
+    if (m < 60) return `${m}분 전 열람`;
+    if (m < 1440) return `${Math.round(m / 60)}시간 전 열람`;
+    return `${Math.round(m / 1440)}일 전 열람`;
+  }
+  function paintShare() {
+    if (!shareBoxEl) return;
+    shareBoxEl.innerHTML = '';
+    if (!masterUser) { shareBoxEl.innerHTML = '<p class="vs-empty">로그인하면 공유할 수 있어요</p>'; return; }
+    shareCfg.viewers.forEach(email => {
+      const row = document.createElement('div');
+      row.className = 'vs-viewer';
+      row.innerHTML = '<span></span><button type="button" title="접근 차단">✕</button>';
+      row.querySelector('span').innerHTML = '';
+      row.querySelector('span').textContent = email;
+      const sm = document.createElement('small'); sm.textContent = ago(seenMap[email]);
+      row.querySelector('span').appendChild(sm);
+      row.querySelector('button').addEventListener('click', () => saveShareCfg({ viewers: shareCfg.viewers.filter(v => v !== email) }));
+      shareBoxEl.appendChild(row);
+    });
+    const add = document.createElement('div');
+    add.className = 'vs-add';
+    add.innerHTML = '<input type="text" class="vs-input" placeholder="열람자 이메일" autocomplete="off" spellcheck="false"><button type="button">추가</button>';
+    const inp = add.querySelector('input');
+    const doAdd = () => {
+      const email = inp.value.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('이메일 형식을 확인해 주세요'); return; }
+      if (shareCfg.viewers.includes(email)) { toast('이미 추가된 계정이에요'); return; }
+      if (shareCfg.viewers.length >= 5) { toast('열람자는 최대 5명까지예요'); return; }
+      saveShareCfg({ viewers: shareCfg.viewers.concat(email) });
+      inp.value = '';
+    };
+    add.querySelector('button').addEventListener('click', doAdd);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
+    shareBoxEl.appendChild(add);
+    const seg = document.createElement('div');
+    seg.className = 'vs-seg';
+    Object.keys(DETAIL_LABEL).forEach(k => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = DETAIL_LABEL[k];
+      b.classList.toggle('on', shareCfg.detail === k);
+      b.addEventListener('click', () => { if (shareCfg.detail !== k) saveShareCfg({ detail: k }); });
+      seg.appendChild(b);
+    });
+    shareBoxEl.appendChild(seg);
+  }
+  function paintRequests() {
+    if (!reqListEl) return;
+    reqListEl.innerHTML = '';
+    reqCountEl.textContent = requestsList.length ? String(requestsList.length) : '';
+    document.getElementById('vsToggle').dataset.req = requestsList.length ? '1' : '';
+    if (!requestsList.length) { reqListEl.innerHTML = '<p class="vs-empty">받은 요청이 없어요</p>'; return; }
+    requestsList.forEach(r => {
+      const box = document.createElement('div');
+      box.className = 'vs-req';
+      const [, m, d] = String(r.date || '').split('-');
+      const b = document.createElement('b'); b.textContent = r.title || '';
+      const sm = document.createElement('small');
+      sm.textContent = `${Number(m)}/${Number(d)}${r.time ? ' ' + r.time : ''} · ${r.fromName || r.fromEmail || ''}${r.note ? ' · ' + r.note : ''}`;
+      const acts = document.createElement('div'); acts.className = 'vs-acts';
+      acts.innerHTML = '<button type="button" class="ok">추가</button><button type="button" class="no">거절</button>';
+      acts.querySelector('.ok').addEventListener('click', () => acceptRequest(r));
+      acts.querySelector('.no').addEventListener('click', () => dropRequest(r));
+      box.appendChild(b); box.appendChild(sm); box.appendChild(acts);
+      reqListEl.appendChild(box);
+    });
+  }
+  function dropRequest(r) {
+    if (!masterUser) return;
+    fsApi.deleteDoc(fsApi.doc(dbRef, 'shares', masterUser.uid, 'requests', r.id)).catch(e => console.warn(e));
+  }
+  function acceptRequest(r) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date || '')) { dropRequest(r); return; }
+    (data[r.date] = data[r.date] || []).push({
+      id: Date.now() + Math.random().toString(36).slice(2, 7), title: r.title, time: r.time || '',
+      memo: r.note || '', color: 'blue', kind: 'work', done: false
+    });
+    saveData();
+    renderCalendar();
+    dropRequest(r);
+    const [, m, d] = r.date.split('-').map(Number);
+    toast(`${m}월 ${d}일에 추가했어요`);
+  }
+
+  // ---- viewer: read-only company calendar + request form ----
+  function buildViewerBar() {
+    let bar = document.getElementById('viewerBar');
+    if (bar) return bar;
+    bar = document.createElement('div');
+    bar.id = 'viewerBar';
+    bar.className = 'viewer-bar';
+    bar.innerHTML = '<span id="viewerText"></span><button type="button" class="vb-btn" id="viewerReq">일정 요청</button>';
+    const cal = document.querySelector('.calendar');
+    cal.parentNode.insertBefore(bar, cal);
+    bar.querySelector('#viewerReq').addEventListener('click', openReq);
+    return bar;
+  }
+  function paintViewerBar(owner, updatedAt, note) {
+    const t = document.getElementById('viewerText');
+    if (!t) return;
+    if (note) { t.textContent = note; return; }
+    const when = updatedAt ? new Date(updatedAt) : null;
+    const stamp = when ? ` · 업데이트 ${when.getMonth() + 1}/${when.getDate()} ${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}` : '';
+    t.innerHTML = '';
+    const b = document.createElement('b'); b.textContent = (owner ? owner + '님의 ' : '') + '회사 일정';
+    t.appendChild(b); t.appendChild(document.createTextNode(' · 열람 전용' + stamp));
+  }
+  function startViewer(user, shareSnap) {
+    viewerMode = true; viewerUser = user; viewerOwnerUid = shareSnap.id;
+    document.body.classList.add('viewer');
+    locked = false; viewMode = 'all';
+    if (overlay.classList.contains('open')) closeModal();
+    hideHoverPreview();
+    buildViewerBar();
+    paintViewerBar('', null);
+    viewerUnsub = fsApi.onSnapshot(shareSnap.ref, snap => {
+      if (!snap.exists()) { data = {}; renderCalendar(); paintViewerBar('', null, '공유된 일정이 없어요'); return; }
+      const d = snap.data();
+      try { data = JSON.parse(d.work || '{}'); } catch (e) { data = {}; }
+      paintViewerBar(d.ownerName || '', d.updatedAt);
+      renderCalendar();
+      setSync('ok');
+    }, e => { console.warn(e); data = {}; renderCalendar(); paintViewerBar('', null, '이 일정을 볼 수 있는 권한이 없어요'); setSync('err'); });
+    fsApi.setDoc(fsApi.doc(dbRef, 'shares', viewerOwnerUid, 'seen', user.uid), { email: (user.email || '').toLowerCase(), at: Date.now() }).catch(() => {});
+    setSync('ok');
+    renderCalendar();
+  }
+  function leaveViewer() {
+    if (!viewerMode) return;
+    viewerMode = false; viewerOwnerUid = null; viewerUser = null;
+    if (viewerUnsub) { try { viewerUnsub(); } catch (e) {} viewerUnsub = null; }
+    document.body.classList.remove('viewer');
+    const bar = document.getElementById('viewerBar'); if (bar) bar.remove();
+    data = loadData();
+    locked = lockCapable() && !!pinHash && readStore(LOCK_KEY) === '1';
+    renderCalendar();
+  }
+  const reqOverlay = document.getElementById('reqOverlay');
+  function openReq() {
+    const t = new Date();
+    document.getElementById('reqDate').value = dateKey(t.getFullYear(), t.getMonth(), t.getDate());
+    document.getElementById('reqTime').value = '';
+    document.getElementById('reqTitle').value = '';
+    document.getElementById('reqNote').value = '';
+    reqOverlay.classList.add('open');
+    setTimeout(() => document.getElementById('reqTitle').focus(), 80);
+  }
+  function closeReq() { reqOverlay.classList.remove('open'); }
+  document.getElementById('reqCancel').addEventListener('click', closeReq);
+  reqOverlay.addEventListener('click', e => { if (e.target === reqOverlay) closeReq(); });
+  document.getElementById('reqSend').addEventListener('click', () => {
+    const title = document.getElementById('reqTitle').value.trim();
+    const date = document.getElementById('reqDate').value;
+    if (!title) { document.getElementById('reqTitle').focus(); return; }
+    if (!date) { toast('날짜를 선택해 주세요'); return; }
+    if (!viewerUser || !viewerOwnerUid) return;
+    fsApi.addDoc(fsApi.collection(dbRef, 'shares', viewerOwnerUid, 'requests'), {
+      title, date, time: document.getElementById('reqTime').value || '', note: document.getElementById('reqNote').value.trim(),
+      fromEmail: (viewerUser.email || '').toLowerCase(), fromName: viewerUser.displayName || '', createdAt: Date.now()
+    }).then(() => { closeReq(); toast('요청을 보냈어요'); })
+      .catch(e => { console.warn(e); toast('요청을 보내지 못했어요'); });
+  });
+
+  // ---- search ----
+  const vsSearch = document.getElementById('vsSearch');
+  const vsResults = document.getElementById('vsResults');
+  function runSearch() {
+    const q = vsSearch.value.trim().toLowerCase();
+    vsResults.innerHTML = '';
+    if (!q || locked) return;
+    const hits = [];
+    Object.keys(data).sort().forEach(k => (data[k] || []).forEach(t => {
+      if (!shownByView(t)) return;
+      if ((t.title || '').toLowerCase().includes(q) || (t.memo || '').toLowerCase().includes(q)) hits.push({ k, t });
+    }));
+    if (!hits.length) { vsResults.innerHTML = '<p class="vs-empty">검색 결과가 없어요</p>'; return; }
+    hits.slice(0, 8).forEach(({ k, t }) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'vs-res';
+      const dot = document.createElement('i'); dot.style.background = tagColor(t);
+      const sp = document.createElement('span'); sp.textContent = t.title;
+      const em = document.createElement('em'); const [, m, d] = k.split('-').map(Number); em.textContent = `${m}/${d}`;
+      b.appendChild(dot); b.appendChild(sp); b.appendChild(em);
+      b.addEventListener('click', () => jumpTo(k));
+      vsResults.appendChild(b);
+    });
+  }
+  function jumpTo(key) {
+    const [y, m] = key.split('-').map(Number);
+    current = new Date(y, m - 1, 1);
+    renderCalendar();
+    const cell = grid.querySelector(`.cell[data-key="${key}"]`);
+    if (cell) { cell.classList.add('pasted'); setTimeout(() => cell.classList.remove('pasted'), 1800); }
+  }
+  vsSearch.addEventListener('input', runSearch);
+  paintShare(); paintRequests();
 
   /* ---------- company / personal view switch (PC): side drawer that stays open ---------- */
   const vsToggle = document.getElementById('vsToggle');
