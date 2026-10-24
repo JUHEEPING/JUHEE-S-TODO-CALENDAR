@@ -1810,7 +1810,7 @@
   .vs-toggle[data-mode="work"] .vs-dot { display: block; background: #0a84ff; }
   .vs-toggle[data-mode="personal"] .vs-dot { display: block; background: #af52de; }
   .vs-drawer {
-    position: fixed; top: 92px; right: 0; z-index: 95; width: 232px; padding: 9px 8px 10px; max-height: calc(100vh - 108px); overflow-y: auto; scrollbar-width: none;
+    position: fixed; top: 92px; right: 0; z-index: 95; width: 186px; padding: 7px 6px 8px; max-height: calc(100vh - 108px); overflow-y: auto; scrollbar-width: none;
     border-radius: 16px 0 0 16px; background: rgba(255,255,255,0.46);
     backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%);
     box-shadow: -6px 8px 28px rgba(60,70,140,0.14), inset 1px 1px 0 rgba(255,255,255,0.8);
@@ -1822,8 +1822,8 @@
   .vs-title { margin: 1px 8px 4px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em; color: var(--text-tertiary); }
   .vs-item {
     --vg: linear-gradient(135deg, #0a84ff, #bf5af2); --vs: rgba(120,110,255,0.4);
-    display: flex; align-items: center; gap: 9px; width: 100%; height: 32px; padding: 0 8px; border: none; border-radius: 9px;
-    background: transparent; color: var(--text-secondary); font-weight: 500; font-size: 12.5px; line-height: 1; font-family: inherit; letter-spacing: -0.01em; text-align: left; cursor: pointer;
+    display: flex; align-items: center; gap: 9px; width: 100%; height: 27px; padding: 0 7px; border: none; border-radius: 8px;
+    background: transparent; color: var(--text-secondary); font-weight: 500; font-size: 11.5px; line-height: 1; font-family: inherit; letter-spacing: -0.01em; text-align: left; cursor: pointer;
     transition: background .15s ease, color .15s ease;
   }
   .vs-item[data-v="work"] { --vg: linear-gradient(135deg, #0a84ff, #5ac8fa); --vs: rgba(10,132,255,0.4); }
@@ -1851,7 +1851,7 @@
   .kind-select button.active[data-k="work"] { background: rgba(10,132,255,0.14); border-color: rgba(10,132,255,0.55); color: var(--accent); }
   .kind-select button.active[data-k="personal"] { background: rgba(175,82,222,0.14); border-color: rgba(175,82,222,0.5); color: #8a35b8; }
   /* personal items: dashed outline so they read differently from company items */
-  .pill.kind-personal, .day-bar.kind-personal { outline: 1px dashed currentColor; outline-offset: -1.5px; }
+  .pill.kind-personal, .day-bar.kind-personal { outline: 0.5px dashed currentColor; outline-offset: -1px; }
   .badge.kind { text-transform: none; letter-spacing: 0; }
   .badge.kind.work { background: rgba(10,132,255,0.13); color: #0a64c8; border-color: rgba(10,132,255,0.3); }
   .badge.kind.personal { background: rgba(175,82,222,0.13); color: #8a35b8; border-color: rgba(175,82,222,0.3); }
@@ -1908,6 +1908,31 @@
   .req-card .req-in { display: block; width: 100%; height: 42px; margin-top: 10px; padding: 0 12px; border-radius: 12px; font-size: 14px; }
   .req-row { display: flex; gap: 8px; }
   .req-row .req-in { flex: 1; min-width: 0; }
+
+  /* compact drawer; the page slides aside (never covered) when it opens */
+  .vs-drawer { border-radius: 14px 0 0 14px; }
+  .vs-title { margin: 8px 6px 3px; font-size: 9px; }
+  .vs-item { gap: 8px; }
+  .vs-check { width: 13px; height: 13px; flex-basis: 13px; }
+  .vs-check svg { width: 9px; height: 9px; }
+  .vs-drawer .vs-input { height: 26px; font-size: 11px; padding: 0 8px; border-radius: 8px; width: calc(100% - 4px); margin: 0 2px; }
+  .vs-results, .vs-reqs, .vs-share { margin: 3px 2px 0; font-size: 10.5px; }
+  .vs-res { height: 24px; font-size: 10.5px; padding: 0 5px; }
+  .vs-res em { font-size: 9.5px; }
+  .vs-empty { margin: 3px 5px; font-size: 10px; }
+  .vs-req { padding: 5px 7px; margin-bottom: 4px; border-radius: 9px; }
+  .vs-req b { font-size: 11px; }
+  .vs-req small { font-size: 9.5px; }
+  .vs-req .vs-acts { margin-top: 4px; gap: 4px; }
+  .vs-req .vs-acts button { height: 21px; font-size: 10px; border-radius: 7px; }
+  .vs-viewer { padding: 3px 3px 3px 7px; margin-bottom: 3px; border-radius: 8px; }
+  .vs-viewer span { font-size: 10px; }
+  .vs-viewer small { font-size: 9px; }
+  .vs-viewer button { width: 18px; height: 18px; font-size: 11px; }
+  .vs-add { margin-top: 4px; gap: 3px; }
+  .vs-add .vs-input { height: 25px; }
+  .vs-add button { height: 25px; padding: 0 8px; font-size: 10px; border-radius: 8px; }
+  @media (min-width: 641px) { .app { left: var(--shift, 0px); transition: left .42s cubic-bezier(.22,.9,.3,1); } }
 </style>
 </head>
 <body>
@@ -2250,7 +2275,7 @@
   const FB = 'https://www.gstatic.com/firebasejs/10.14.1/';
   let cloudDoc = null, cloudApi = null, cloudTimer = null, lastCloudJson = null;
   let fsApi = null, dbRef = null, shareUnsubs = [], masterUser = null, reqLoaded = false;
-  let shareCfg = { viewers: [], detail: 'title' }, requestsList = [], seenMap = {};
+  let shareCfg = { viewers: [], detail: 'memo' }, requestsList = [], seenMap = {};
   let viewerUnsub = null, viewerOwnerUid = null, viewerUser = null, pubTimer = null;
 
   function cloudSave() {
@@ -3368,7 +3393,7 @@
           const d = document.createElement('i');
           if (p.dataset.kind === 'personal') {      // personal overflow capsules are dashed too
             d.style.background = p.dataset.color + '2e';
-            d.style.border = '1px dashed ' + p.dataset.color;
+            d.style.border = '0.5px dashed ' + p.dataset.color;
             d.style.boxSizing = 'border-box';
             d.style.opacity = '1';
           } else {
@@ -4396,7 +4421,6 @@
   const reqListEl = document.getElementById('reqList');
   const reqCountEl = document.getElementById('reqCount');
   const shareBoxEl = document.getElementById('shareBox');
-  const DETAIL_LABEL = { title: '제목+시간', memo: '메모 포함' };
 
   // only company items go out; what leaves depends on the detail level
   function buildPublic(detail) {
@@ -4431,7 +4455,7 @@
   function stopShareListeners() {
     shareUnsubs.forEach(u => { try { u(); } catch (e) {} });
     shareUnsubs = []; masterUser = null; reqLoaded = false;
-    requestsList = []; seenMap = {}; shareCfg = { viewers: [], detail: 'title' };
+    requestsList = []; seenMap = {}; shareCfg = { viewers: [], detail: 'memo' };
     paintShare(); paintRequests();
   }
   function startMasterShare(user) {
@@ -4439,8 +4463,8 @@
     shareUnsubs.push(fsApi.onSnapshot(shareRef(), snap => {
       const d = snap.exists() ? snap.data() : {};
       const hadViewers = shareCfg.viewers.length;
-      shareCfg = { viewers: Array.isArray(d.viewers) ? d.viewers : [], detail: d.detail === 'memo' ? 'memo' : 'title' };
-      if (d.detail === 'busy') saveShareCfg({ detail: 'title' });   // the removed "busy only" level
+      shareCfg = { viewers: Array.isArray(d.viewers) ? d.viewers : [], detail: 'memo' };
+      if (snap.exists() && d.detail !== 'memo') saveShareCfg({ detail: 'memo' });   // company items are always shared with their memo
       paintShare();
       if (!hadViewers && shareCfg.viewers.length && !d.work) publishShare();
     }, e => console.warn('share cfg', e)));
@@ -4494,16 +4518,6 @@
     add.querySelector('button').addEventListener('click', doAdd);
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
     shareBoxEl.appendChild(add);
-    const seg = document.createElement('div');
-    seg.className = 'vs-seg';
-    Object.keys(DETAIL_LABEL).forEach(k => {
-      const b = document.createElement('button');
-      b.type = 'button'; b.textContent = DETAIL_LABEL[k];
-      b.classList.toggle('on', shareCfg.detail === k);
-      b.addEventListener('click', () => { if (shareCfg.detail !== k) saveShareCfg({ detail: k }); });
-      seg.appendChild(b);
-    });
-    shareBoxEl.appendChild(seg);
   }
   function paintRequests() {
     if (!reqListEl) return;
@@ -4663,8 +4677,25 @@
     vsToggle.dataset.mode = viewMode === 'all' ? '' : viewMode;
     vsDrawer.querySelectorAll('.vs-item').forEach(b => b.classList.toggle('on', b.dataset.v === viewMode));
   }
+  // slide the whole page left just enough that the opened drawer never covers the calendar
+  let curShift = 0;
+  function updateShift() {
+    const app = document.querySelector('.app');
+    if (!app || !calEl || window.innerWidth <= 640) return;
+    let shift = 0;
+    if (vsDrawer.classList.contains('open')) {
+      const r = calEl.getBoundingClientRect();
+      const baseRight = r.right - curShift, baseLeft = r.left - curShift;
+      const need = baseRight + 10 - (window.innerWidth - vsDrawer.offsetWidth);
+      shift = -Math.max(0, Math.min(need, baseLeft - 8));
+    }
+    curShift = shift;
+    app.style.setProperty('--shift', shift + 'px');
+  }
+  window.addEventListener('resize', updateShift);
   function setVsOpen(open) {
     vsDrawer.classList.toggle('open', open);
+    updateShift();
     vsDrawer.setAttribute('aria-hidden', open ? 'false' : 'true');
     vsToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
