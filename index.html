@@ -1811,22 +1811,23 @@
   .vs-toggle[data-mode="personal"] .vs-dot { display: block; background: #af52de; }
   .vs-drawer {
     position: fixed; top: 92px; right: 0; z-index: 95; width: 168px; padding: 9px 8px 8px;
-    border-radius: 16px 0 0 16px; background: rgba(255,255,255,0.72);
+    border-radius: 16px 0 0 16px; background: rgba(255,255,255,0.46);
     backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%);
     box-shadow: -6px 8px 28px rgba(60,70,140,0.14), inset 1px 1px 0 rgba(255,255,255,0.8);
     transform: translateX(105%); opacity: 0; pointer-events: none;
     transition: transform .42s cubic-bezier(.22,.9,.3,1), opacity .3s ease;
   }
-  html.dark .vs-drawer { background: rgba(14,18,38,0.82); box-shadow: -6px 8px 28px rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,255,255,0.06); }
+  html.dark .vs-drawer { background: rgba(14,18,38,0.6); box-shadow: -6px 8px 28px rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,255,255,0.06); }
   .vs-drawer.open { transform: none; opacity: 1; pointer-events: auto; }
   .vs-title { margin: 1px 8px 4px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em; color: var(--text-tertiary); }
   .vs-item {
-    --vc: var(--accent);
+    --vg: linear-gradient(135deg, #0a84ff, #bf5af2); --vs: rgba(120,110,255,0.4);
     display: flex; align-items: center; gap: 9px; width: 100%; height: 32px; padding: 0 8px; border: none; border-radius: 9px;
     background: transparent; color: var(--text-secondary); font-weight: 500; font-size: 12.5px; line-height: 1; font-family: inherit; letter-spacing: -0.01em; text-align: left; cursor: pointer;
     transition: background .15s ease, color .15s ease;
   }
-  .vs-item[data-v="personal"] { --vc: #af52de; }
+  .vs-item[data-v="work"] { --vg: linear-gradient(135deg, #0a84ff, #5ac8fa); --vs: rgba(10,132,255,0.4); }
+  .vs-item[data-v="personal"] { --vg: linear-gradient(135deg, #ff6b9a, #af52de); --vs: rgba(200,80,200,0.4); }
   .vs-item:hover { background: rgba(120,120,140,0.1); }
   .vs-item.on { color: var(--text); font-weight: 600; }
   /* round check: the circle fills in and the tick is drawn */
@@ -1837,7 +1838,7 @@
   }
   .vs-check svg { width: 11px; height: 11px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .vs-check path { stroke-dasharray: 14; stroke-dashoffset: 14; transition: stroke-dashoffset .28s ease .08s; }
-  .vs-item.on .vs-check { background: var(--vc); border-color: var(--vc); transform: scale(1.04); }
+  .vs-item.on .vs-check { background: var(--vg); border-color: transparent; box-shadow: 0 2px 7px var(--vs); transform: scale(1.04); }
   .vs-item.on .vs-check path { stroke-dashoffset: 0; }
   @media (max-width: 640px), (hover: none), (pointer: coarse) { .vs-toggle, .vs-drawer { display: none; } }
 
