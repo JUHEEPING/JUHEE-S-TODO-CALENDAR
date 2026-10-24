@@ -1796,6 +1796,49 @@
   .title-group .quote { overflow: hidden; text-overflow: clip; transition: opacity 1.2s cubic-bezier(.45,0,.25,1), transform 1.2s cubic-bezier(.45,0,.25,1), filter 1.2s cubic-bezier(.45,0,.25,1); }
   .title-group .quote.swap { opacity: 0; transform: translateY(4px); filter: blur(1.5px); }
   @media (max-width: 640px) { .title-group h1 { font-size: 15px; } }
+
+  /* ====== company / personal ====== */
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .view-switch {
+    display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 18px;
+    background: var(--glass); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%);
+    box-shadow: var(--shadow);
+  }
+  html.dark .view-switch { background: rgba(18,22,43,0.5); }
+  .vs-options { display: flex; gap: 4px; max-width: 0; opacity: 0; overflow: hidden; transition: max-width .38s cubic-bezier(.4,0,.2,1), opacity .25s ease; }
+  .view-switch.open .vs-options { max-width: 280px; opacity: 1; }
+  .vs-options button {
+    flex: 0 0 auto; height: 36px; padding: 0 13px; border: none; border-radius: 12px; cursor: pointer; white-space: nowrap;
+    background: transparent; color: var(--text-secondary); font: 600 13px/1 inherit; font-family: inherit; transition: background .15s ease, color .15s ease;
+  }
+  .vs-options button:hover { background: rgba(10,132,255,0.08); }
+  .vs-options button.on { background: rgba(10,132,255,0.16); color: var(--accent); }
+  .vs-options button[data-v="personal"].on { background: rgba(175,82,222,0.16); color: #8a35b8; }
+  .vs-options button[data-v="present"].on { background: rgba(255,149,0,0.18); color: #b86a00; }
+  .vs-toggle { position: relative; width: 36px; height: 36px; border: none; border-radius: 12px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text); }
+  .vs-toggle:hover { background: rgba(10,132,255,0.08); }
+  .vs-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; display: none; border: 1.5px solid #fff; }
+  html.dark .vs-dot { border-color: #11162b; }
+  .view-switch[data-mode="work"] .vs-dot { display: block; background: #0a84ff; }
+  .view-switch[data-mode="personal"] .vs-dot { display: block; background: #af52de; }
+  .view-switch[data-mode="present"] .vs-dot { display: block; background: #ff9500; }
+  @media (max-width: 640px), (hover: none), (pointer: coarse) { .view-switch { display: none; } }
+  @media (max-width: 640px) { .header-right { display: contents; } }
+
+  .kind-select { display: flex; gap: 6px; }
+  .kind-select button {
+    flex: 1; height: 38px; border-radius: 12px; border: 1px solid rgba(120,120,140,0.22); background: rgba(255,255,255,0.5);
+    color: var(--text-secondary); font: 600 13.5px/1 inherit; font-family: inherit; cursor: pointer; transition: all .15s ease;
+  }
+  html.dark .kind-select button { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.14); }
+  .kind-select button.active[data-k="work"] { background: rgba(10,132,255,0.14); border-color: rgba(10,132,255,0.55); color: var(--accent); }
+  .kind-select button.active[data-k="personal"] { background: rgba(175,82,222,0.14); border-color: rgba(175,82,222,0.5); color: #8a35b8; }
+  /* personal items: dashed outline so they read differently from company items */
+  .pill.kind-personal, .day-bar.kind-personal { outline: 1.4px dashed currentColor; outline-offset: -2px; }
+  .badge.kind { text-transform: none; letter-spacing: 0; }
+  .badge.kind.work { background: rgba(10,132,255,0.13); color: #0a64c8; border-color: rgba(10,132,255,0.3); }
+  .badge.kind.personal { background: rgba(175,82,222,0.13); color: #8a35b8; border-color: rgba(175,82,222,0.3); }
+  body.presenting #floatLayer, body.presenting .memo-card { display: none !important; }
 </style>
 </head>
 <body>
@@ -1827,11 +1870,22 @@
       <div class="title-row"><h1>JUHEE'S TODO CALENDAR</h1></div>
       <p id="quote" class="quote">중요하지 않은 일에 대해 깊게 생각하는 것은 삐뚤어진 못을 망치질하는 것과 같습니다.</p>
     </div>
+    <div class="header-right">
+    <div class="view-switch" id="viewSwitch">
+      <div class="vs-options" id="vsOptions">
+        <button type="button" data-v="all">전체</button>
+        <button type="button" data-v="work">회사</button>
+        <button type="button" data-v="personal">개인</button>
+        <button type="button" data-v="present" title="발표 모드: 회사 일정만 + 메모 숨김">발표</button>
+      </div>
+      <button type="button" class="vs-toggle" id="vsToggle" aria-label="보기 전환" title="회사/개인 보기"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><i class="vs-dot" id="vsDot"></i></button>
+    </div>
     <div class="nav liquid">
       <button id="prevBtn">‹</button>
       <div class="month-label" id="monthLabel"></div>
       <button id="nextBtn">›</button>
       <button class="today-btn" id="todayBtn">TODAY</button>
+    </div>
     </div>
   </div>
 
@@ -1928,6 +1982,10 @@
           </div>
         </div>
         <div class="mini-cal" id="miniCal"></div>
+        <div class="field">
+          <label class="mini-label">구분</label>
+          <div class="kind-select" id="kindSelect"><button type="button" data-k="work">회사</button><button type="button" data-k="personal">개인</button></div>
+        </div>
         <div class="field">
           <label class="mini-label">색상</label>
           <div class="color-select" id="colorSelect"></div>
@@ -2037,6 +2095,8 @@
   let editingId = null;
   let editingOwnerKey = null;
   let selectedColor = DEFAULT_COLOR;
+  let selectedKind = 'personal';
+  let viewMode = 'all', presenting = false;   // 'all' | 'work' | 'personal'
   let hideTimer = null, switchTimer = null, hoverKey = null;
   let activeSuggestIndex = -1;
 
@@ -2050,6 +2110,9 @@
   function writeStore(k, v) { memStore[k] = v; try { localStorage.setItem(k, v); } catch (e) {} }
   // the lock only exists on PCs (mouse-type devices); phones and tablets never lock
   function lockCapable() { return window.matchMedia('(hover: hover) and (pointer: fine)').matches; }
+  { const vm = readStore('todoViewMode'); if (vm === 'work' || vm === 'personal') viewMode = vm; }
+  const kindOf = t => (t && t.kind === 'work') ? 'work' : 'personal';
+  const shownByView = t => viewMode === 'all' || kindOf(t) === viewMode;
   let pinHash = readStore(PIN_KEY) || null;
   let recHash = readStore(REC_KEY) || null;
   // a PIN made before recovery codes existed could only be reset unsafely, so it is dropped
@@ -2718,7 +2781,7 @@
   let clip = null;
 
   function startCopy(t) {
-    clip = { title: t.title, time: t.time || '', memo: t.memo || '', color: t.color,
+    clip = { title: t.title, time: t.time || '', memo: t.memo || '', color: t.color, kind: kindOf(t),
              endDate: t.endDate || '', ownerKey: t._ownerKey };
     hideHoverPreview();
     if (overlay.classList.contains('open')) closeModal();
@@ -2740,7 +2803,7 @@
     if (!clip) return;
     const todo = {
       id: Date.now() + Math.random().toString(36).slice(2, 7),
-      title: clip.title, time: clip.time, memo: clip.memo, color: clip.color, done: false
+      title: clip.title, time: clip.time, memo: clip.memo, color: clip.color, kind: clip.kind || 'personal', done: false
     };
     if (clip.endDate) todo.endDate = shiftKey(clip.endDate, diffDays(clip.ownerKey, key));
     (data[key] = data[key] || []).push(todo);
@@ -2876,6 +2939,7 @@
     const merged = [];
     Object.keys(data).forEach(startKey => {
       (data[startKey] || []).forEach(t => {
+        if (!shownByView(t)) return;
         if (!t.endDate) {
           if (startKey === key) merged.push(Object.assign({}, t, { _ownerKey: startKey, _range: false }));
         } else if (key >= startKey && key <= t.endDate) {
@@ -2897,6 +2961,7 @@
     const seen = new Map();
     Object.keys(data).forEach(k => {
       (data[k] || []).forEach(t => {
+        if (!shownByView(t)) return;
         const key = t.title.toLowerCase();
         if (!seen.has(key)) seen.set(key, t.title);
       });
@@ -2913,9 +2978,10 @@
     const events = [];
     if (!locked) Object.keys(data).forEach(startKey => {
       (data[startKey] || []).forEach(t => {
+        if (!shownByView(t)) return;
         if (t.endDate && t.endDate > startKey) {
           if (t.endDate < firstKey || startKey > lastKey) return;
-          events.push({ id: t.id, title: t.title, startKey, endDate: t.endDate, done: t.done, color: t.color });
+          events.push({ id: t.id, title: t.title, startKey, endDate: t.endDate, done: t.done, color: t.color, kind: kindOf(t) });
         }
       });
     });
@@ -2997,7 +3063,7 @@
 
     segments.forEach(seg => {
       const bar = document.createElement('div');
-      bar.className = 'day-bar';
+      bar.className = 'day-bar' + (seg.event.kind === 'personal' ? ' kind-personal' : '');
       const color = tagColor(seg.event);
 
       bar.style.top = (seg.row * rowH + base + seg.lane * (barH + gap)) + 'px';
@@ -3118,7 +3184,7 @@
         shown.forEach(t => {
           const color = tagColor(t);
           const pill = document.createElement('div');
-          pill.className = 'pill' + (t.done ? ' done' : '');
+          pill.className = 'pill' + (t.done ? ' done' : '') + (kindOf(t) === 'personal' ? ' kind-personal' : '');
           pill.style.height = barH + 'px';
           pill.dataset.color = color;
           pill.style.background = t.done ? color + '22' : color + '40';
@@ -3476,6 +3542,10 @@
       badge.style.color = tag.text;
       badge.style.borderColor = tag.base + '55';
       top.appendChild(badge);
+      const kb = document.createElement('span');
+      kb.className = 'badge kind ' + kindOf(t);
+      kb.textContent = kindOf(t) === 'work' ? '회사' : '개인';
+      top.appendChild(kb);
 
       if (t._range) {
         const rangeBadge = document.createElement('span');
@@ -3549,6 +3619,7 @@
     closeMini(); syncEndDateUI();
     memoInput.value = t.memo || '';
     setColor(t.color);
+    setKind(kindOf(t));
     formLabel.textContent = '할 일 수정';
     submitBtn.textContent = '수정 완료';
     cancelEditBtn.style.display = 'block';
@@ -3565,6 +3636,7 @@
     closeMini(); syncEndDateUI();
     memoInput.value = '';
     setColor(DEFAULT_COLOR);
+    setKind(viewMode === 'work' ? 'work' : 'personal');   // safe default: personal
     formLabel.textContent = '새 할 일 추가';
     submitBtn.textContent = '추가하기';
     cancelEditBtn.style.display = 'none';
@@ -3582,6 +3654,13 @@
       colorSelect.appendChild(sw);
     });
   }
+
+  const kindSelect = document.getElementById('kindSelect');
+  function setKind(k) {
+    selectedKind = k === 'work' ? 'work' : 'personal';
+    [...kindSelect.children].forEach(b => b.classList.toggle('active', b.dataset.k === selectedKind));
+  }
+  kindSelect.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setKind(b.dataset.k); });
 
   function setColor(c) {
     if (!COLOR_TAGS[c]) c = DEFAULT_COLOR;
@@ -3606,6 +3685,7 @@
         t.time = timeInput.value;
         t.memo = memoInput.value.trim();
         t.color = selectedColor;
+        t.kind = selectedKind;
         if (endDate) t.endDate = endDate; else delete t.endDate;
       }
     } else {
@@ -3616,6 +3696,7 @@
         time: timeInput.value,
         memo: memoInput.value.trim(),
         color: selectedColor,
+        kind: selectedKind,
         done: false
       };
       if (endDate) newTodo.endDate = endDate;
@@ -3922,7 +4003,7 @@
 
     function room() {
       const header = el.closest('.header');
-      const nav = header && header.querySelector('.nav');
+      const nav = header && (header.querySelector('.header-right') || header.querySelector('.nav'));
       if (!header) return 600;
       const phone = window.innerWidth <= 640;
       return Math.max(120, header.clientWidth - (phone || !nav ? 0 : nav.offsetWidth + 28));
@@ -4197,6 +4278,33 @@
     else if (!pinHash) openPin('set1');
     else setLocked(true);
   });
+
+  /* ---------- company / personal view switch (PC) ---------- */
+  const viewSwitch = document.getElementById('viewSwitch');
+  const vsOptions = document.getElementById('vsOptions');
+  function paintView() {
+    const mode = presenting ? 'present' : viewMode;
+    viewSwitch.dataset.mode = mode === 'all' ? '' : mode;
+    vsOptions.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === mode));
+    document.body.classList.toggle('presenting', presenting);
+  }
+  function setView(v) {
+    if (v === 'present') { presenting = true; viewMode = 'work'; }
+    else { presenting = false; viewMode = v; writeStore('todoViewMode', v); }
+    hideHoverPreview();
+    paintView();
+    renderCalendar();
+  }
+  document.getElementById('vsToggle').addEventListener('click', () => { snd.click(); viewSwitch.classList.toggle('open'); });
+  vsOptions.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    snd.click();
+    setView(b.dataset.v);
+    setTimeout(() => viewSwitch.classList.remove('open'), 260);
+  });
+  document.addEventListener('pointerdown', e => { if (!e.target.closest('#viewSwitch')) viewSwitch.classList.remove('open'); });
+  paintView();
 
   renderCalendar();
   renderFloaters();
