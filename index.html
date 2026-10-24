@@ -1823,7 +1823,7 @@
   .vs-item {
     --vc: var(--accent);
     display: flex; align-items: center; gap: 9px; width: 100%; height: 32px; padding: 0 8px; border: none; border-radius: 9px;
-    background: transparent; color: var(--text-secondary); font: 500 12.5px/1 inherit; font-family: inherit; letter-spacing: -0.01em; text-align: left; cursor: pointer;
+    background: transparent; color: var(--text-secondary); font-weight: 500; font-size: 12.5px; line-height: 1; font-family: inherit; letter-spacing: -0.01em; text-align: left; cursor: pointer;
     transition: background .15s ease, color .15s ease;
   }
   .vs-item[data-v="personal"] { --vc: #af52de; }
@@ -1844,7 +1844,7 @@
   .kind-select { display: flex; gap: 6px; }
   .kind-select button {
     flex: 1; height: 38px; border-radius: 12px; border: 1px solid rgba(120,120,140,0.22); background: rgba(255,255,255,0.5);
-    color: var(--text-secondary); font: 600 13.5px/1 inherit; font-family: inherit; cursor: pointer; transition: all .15s ease;
+    color: var(--text-secondary); font-weight: 600; font-size: 13.5px; line-height: 1; font-family: inherit; cursor: pointer; transition: all .15s ease;
   }
   html.dark .kind-select button { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.14); }
   .kind-select button.active[data-k="work"] { background: rgba(10,132,255,0.14); border-color: rgba(10,132,255,0.55); color: var(--accent); }
