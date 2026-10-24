@@ -1851,7 +1851,7 @@
   .kind-select button.active[data-k="work"] { background: rgba(10,132,255,0.14); border-color: rgba(10,132,255,0.55); color: var(--accent); }
   .kind-select button.active[data-k="personal"] { background: rgba(175,82,222,0.14); border-color: rgba(175,82,222,0.5); color: #8a35b8; }
   /* personal items: dashed outline so they read differently from company items */
-  .pill.kind-personal, .day-bar.kind-personal { outline: 1.4px dashed currentColor; outline-offset: -2px; }
+  .pill.kind-personal, .day-bar.kind-personal { outline: 1px dashed currentColor; outline-offset: -1.5px; }
   .badge.kind { text-transform: none; letter-spacing: 0; }
   .badge.kind.work { background: rgba(10,132,255,0.13); color: #0a64c8; border-color: rgba(10,132,255,0.3); }
   .badge.kind.personal { background: rgba(175,82,222,0.13); color: #8a35b8; border-color: rgba(175,82,222,0.3); }
@@ -3291,6 +3291,7 @@
           pill.className = 'pill' + (t.done ? ' done' : '') + (kindOf(t) === 'personal' ? ' kind-personal' : '');
           pill.style.height = barH + 'px';
           pill.dataset.color = color;
+          pill.dataset.kind = kindOf(t);
           pill.style.background = t.done ? color + '22' : color + '40';
           pill.style.border = 'none';
           pill.style.color = tagText(t);
@@ -3365,7 +3366,14 @@
         row.className = 'more-dots';
         hidden.forEach(p => {
           const d = document.createElement('i');
-          d.style.background = p.dataset.color;
+          if (p.dataset.kind === 'personal') {      // personal overflow capsules are dashed too
+            d.style.background = p.dataset.color + '2e';
+            d.style.border = '1px dashed ' + p.dataset.color;
+            d.style.boxSizing = 'border-box';
+            d.style.opacity = '1';
+          } else {
+            d.style.background = p.dataset.color;
+          }
           if (p.classList.contains('done')) d.style.opacity = '0.4';
           row.appendChild(d);
         });
@@ -4388,14 +4396,14 @@
   const reqListEl = document.getElementById('reqList');
   const reqCountEl = document.getElementById('reqCount');
   const shareBoxEl = document.getElementById('shareBox');
-  const DETAIL_LABEL = { busy: '바쁨만', title: '제목+시간', memo: '메모 포함' };
+  const DETAIL_LABEL = { title: '제목+시간', memo: '메모 포함' };
 
   // only company items go out; what leaves depends on the detail level
   function buildPublic(detail) {
     const out = {};
     Object.keys(data).forEach(k => {
       const arr = (data[k] || []).filter(t => t.kind === 'work').map(t => {
-        const o = { id: t.id, title: detail === 'busy' ? '일정 있음' : t.title, time: detail === 'busy' ? '' : (t.time || ''), color: t.color, kind: 'work', done: !!t.done };
+        const o = { id: t.id, title: t.title, time: t.time || '', color: t.color, kind: 'work', done: !!t.done };
         if (t.endDate) o.endDate = t.endDate;
         if (detail === 'memo' && t.memo) o.memo = t.memo;
         return o;
@@ -4431,7 +4439,8 @@
     shareUnsubs.push(fsApi.onSnapshot(shareRef(), snap => {
       const d = snap.exists() ? snap.data() : {};
       const hadViewers = shareCfg.viewers.length;
-      shareCfg = { viewers: Array.isArray(d.viewers) ? d.viewers : [], detail: d.detail || 'title' };
+      shareCfg = { viewers: Array.isArray(d.viewers) ? d.viewers : [], detail: d.detail === 'memo' ? 'memo' : 'title' };
+      if (d.detail === 'busy') saveShareCfg({ detail: 'title' });   // the removed "busy only" level
       paintShare();
       if (!hadViewers && shareCfg.viewers.length && !d.work) publishShare();
     }, e => console.warn('share cfg', e)));
