@@ -1798,20 +1798,19 @@
   @media (max-width: 640px) { .title-group h1 { font-size: 15px; } }
 
   /* ====== company / personal ====== */
-  /* top-right: three-bar toggle (transparent) + side drawer; login moves to the top-left */
-  @media (min-width: 641px) { .auth-bar { right: auto; left: 14px; top: 10px; } }
+  /* top-right: three-bar toggle (transparent) just under the login + side drawer */
   .vs-toggle {
-    position: fixed; top: 10px; right: 14px; z-index: 96; width: 40px; height: 40px; padding: 0; border: none; border-radius: 12px;
+    position: fixed; top: 46px; right: 10px; z-index: 96; width: 40px; height: 40px; padding: 0; border: none; border-radius: 12px;
     background: transparent; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center;
     transition: background .2s ease, transform .15s ease;
   }
   .vs-toggle:hover { background: rgba(120,120,140,0.12); }
   .vs-toggle:active { transform: scale(0.92); }
-  .vs-dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; display: none; }
+  .vs-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; display: none; }
   .vs-toggle[data-mode="work"] .vs-dot { display: block; background: #0a84ff; }
   .vs-toggle[data-mode="personal"] .vs-dot { display: block; background: #af52de; }
   .vs-drawer {
-    position: fixed; top: 58px; right: 0; z-index: 95; width: 210px; padding: 12px 10px 10px;
+    position: fixed; top: 92px; right: 0; z-index: 95; width: 210px; padding: 12px 10px 10px;
     border-radius: 20px 0 0 20px; background: rgba(255,255,255,0.72);
     backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%);
     box-shadow: -8px 10px 34px rgba(60,70,140,0.16), inset 1px 1px 0 rgba(255,255,255,0.8);
